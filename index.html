@@ -327,3 +327,2036 @@
                 </div>
 
                 <!-- TOP-RIGHT HUD: CAMERA PRESETS & VIEW OPTIONS -->
+                <div class="absolute top-3 right-3 flex flex-col gap-2 z-10">
+                    <div class="bg-[#111520]/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-1.5 flex items-center gap-1 shadow-xl">
+                        <button onclick="Viewport.setCameraMode('orbit')" id="cam-orbit" class="cam-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-500 text-slate-950 font-semibold transition">
+                            Free Orbit
+                        </button>
+                        <button onclick="Viewport.setCameraMode('follow')" id="cam-follow" class="cam-btn px-2.5 py-1 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition">
+                            Follow Turtle
+                        </button>
+                        <button onclick="Viewport.setCameraMode('top')" id="cam-top" class="cam-btn px-2.5 py-1 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition">
+                            Top-Down
+                        </button>
+                        <button onclick="Viewport.setCameraMode('fpv')" id="cam-fpv" class="cam-btn px-2.5 py-1 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition">
+                            Turtle FPV
+                        </button>
+                    </div>
+
+                    <!-- Slice / Cutaway Layer Slider for seeing underground mining -->
+                    <div class="bg-[#111520]/90 backdrop-blur-md border border-slate-700/80 rounded-xl px-3 py-2 flex items-center justify-between gap-3 shadow-xl">
+                        <span class="text-[11px] text-slate-300 font-medium flex items-center gap-1">
+                            <i data-lucide="layers" class="w-3.5 h-3.5 text-sky-400"></i>
+                            Y-Cutaway: <strong id="slice-label" class="font-mono-code text-sky-300">Y &le; 15</strong>
+                        </span>
+                        <input type="range" min="1" max="15" value="15" oninput="World.setSliceY(parseInt(this.value))"
+                            class="w-24 accent-sky-400 h-1.5 bg-slate-700 rounded-lg cursor-pointer" title="Hide upper layers to watch underground quarry/tunneling">
+                    </div>
+                </div>
+
+                <!-- BOTTOM-LEFT HUD: MANUAL TURTLE D-PAD FOR QUICK TESTING -->
+                <div class="absolute bottom-3 left-3 bg-[#111520]/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-2 shadow-xl z-10 hidden sm:flex items-center gap-2">
+                    <div class="grid grid-cols-3 gap-1">
+                        <button onclick="Simulator.manualAction('up')" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-mono-code" title="turtle.up()">UP</button>
+                        <button onclick="Simulator.manualAction('forward')" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs" title="turtle.forward()">▲</button>
+                        <button onclick="Simulator.manualAction('dig')" class="p-1.5 rounded bg-rose-950/80 hover:bg-rose-900 text-rose-300 text-[10px] font-mono-code" title="turtle.dig()">DIG</button>
+
+                        <button onclick="Simulator.manualAction('turnLeft')" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs" title="turtle.turnLeft()">◄</button>
+                        <button onclick="Simulator.manualAction('back')" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs" title="turtle.back()">▼</button>
+                        <button onclick="Simulator.manualAction('turnRight')" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs" title="turtle.turnRight()">►</button>
+
+                        <button onclick="Simulator.manualAction('down')" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-mono-code" title="turtle.down()">DN</button>
+                        <button onclick="Simulator.manualAction('place')" class="p-1.5 rounded bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 text-[10px] font-mono-code col-span-2" title="turtle.place()">PLACE</button>
+                    </div>
+                </div>
+
+                <!-- BOTTOM-RIGHT HUD: VOXEL BUILDER PALETTE -->
+                <div class="absolute bottom-3 right-3 bg-[#111520]/90 backdrop-blur-md border border-slate-700/80 rounded-xl px-3 py-2 shadow-xl z-10 flex items-center gap-2.5">
+                    <div class="text-[11px] text-slate-300">
+                        <span class="font-semibold text-amber-300">Voxel Edit:</span>
+                        <span class="text-slate-400 hidden md:inline">Click = Place &bull; Shift+Click = Break</span>
+                    </div>
+                    <select id="brush-block-select" class="bg-[#1b2234] border border-slate-700 rounded-lg px-2 py-1 text-xs text-white focus:outline-none cursor-pointer">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- API REFERENCE MODAL -->
+    <div id="api-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-[#131722] border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="px-5 py-3.5 bg-[#181d2b] border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="book-open" class="w-4 h-4 text-amber-400"></i>
+                    <h2 class="font-bold text-sm text-white">CC: Tweaked Lua API Reference (Supported in Simulator)</h2>
+                </div>
+                <button onclick="UI.toggleApiModal()" class="text-slate-400 hover:text-white p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-5 overflow-y-auto space-y-4 text-xs leading-relaxed text-slate-300 font-mono-code">
+                <div>
+                    <h3 class="text-amber-400 font-bold mb-1 font-sans text-sm">Movement &amp; Rotation</h3>
+                    <p>turtle.forward() / turtle.back() / turtle.up() / turtle.down() &rarr; <span class="text-emerald-400">boolean, string|nil</span></p>
+                    <p>turtle.turnLeft() / turtle.turnRight() &rarr; <span class="text-emerald-400">boolean</span></p>
+                </div>
+                <div>
+                    <h3 class="text-amber-400 font-bold mb-1 font-sans text-sm">Digging &amp; Placing</h3>
+                    <p>turtle.dig() / turtle.digUp() / turtle.digDown() &rarr; <span class="text-emerald-400">boolean, string|nil</span> (mines block &amp; collects drop in inventory)</p>
+                    <p>turtle.place() / turtle.placeUp() / turtle.placeDown() &rarr; <span class="text-emerald-400">boolean, string|nil</span> (places block from selected slot)</p>
+                </div>
+                <div>
+                    <h3 class="text-amber-400 font-bold mb-1 font-sans text-sm">Block Inspection &amp; Detection</h3>
+                    <p>turtle.detect() / turtle.detectUp() / turtle.detectDown() &rarr; <span class="text-emerald-400">boolean</span> (true if solid block)</p>
+                    <p>turtle.inspect() / turtle.inspectUp() / turtle.inspectDown() &rarr; <span class="text-emerald-400">boolean, table { name = "minecraft:...", tags = {...} }</span></p>
+                    <p>turtle.compare() / turtle.compareUp() / turtle.compareDown() &rarr; <span class="text-emerald-400">boolean</span></p>
+                </div>
+                <div>
+                    <h3 class="text-amber-400 font-bold mb-1 font-sans text-sm">Inventory &amp; Fuel System (16 Slots)</h3>
+                    <p>turtle.select(slotNum) &rarr; <span class="text-emerald-400">boolean</span> (1 to 16)</p>
+                    <p>turtle.getSelectedSlot() &rarr; <span class="text-emerald-400">number</span></p>
+                    <p>turtle.getItemCount([slot]) / turtle.getItemSpace([slot]) &rarr; <span class="text-emerald-400">number</span></p>
+                    <p>turtle.getItemDetail([slot]) &rarr; <span class="text-emerald-400">table { name = "minecraft:...", count = n } | nil</span></p>
+                    <p>turtle.transferTo(slot, [count]) &rarr; <span class="text-emerald-400">boolean</span></p>
+                    <p>turtle.refuel([count]) &rarr; <span class="text-emerald-400">boolean, string|nil</span> (consumes coal, planks, logs, sapling)</p>
+                    <p>turtle.getFuelLevel() / turtle.getFuelLimit() &rarr; <span class="text-emerald-400">number</span></p>
+                    <p>turtle.drop([count]) / turtle.dropUp([count]) / turtle.dropDown([count]) / turtle.suck([count]) &rarr; <span class="text-emerald-400">boolean</span></p>
+                </div>
+                <div>
+                    <h3 class="text-amber-400 font-bold mb-1 font-sans text-sm">CraftOS Globals</h3>
+                    <p>print(...) / write(...) / sleep(seconds) / os.sleep(seconds) / term.clear() / gps.locate() &rarr; <span class="text-emerald-400">x, y, z</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- APPLICATION LOGIC -->
+    <script>
+        /***********************************************************************
+         * 1. BLOCK DEFINITIONS & PROCEDURAL PIXEL-ART TEXTURE GENERATOR
+         ***********************************************************************/
+        const BLOCK_DEFS = {
+            0:  { id: 0,  name: 'minecraft:air',            label: 'Air',            solid: false },
+            1:  { id: 1,  name: 'minecraft:grass_block',    label: 'Grass Block',    solid: true, drop: 2,  fuel: 0 },
+            2:  { id: 2,  name: 'minecraft:dirt',           label: 'Dirt',           solid: true, drop: 2,  fuel: 0 },
+            3:  { id: 3,  name: 'minecraft:stone',          label: 'Stone',          solid: true, drop: 4,  fuel: 0 },
+            4:  { id: 4,  name: 'minecraft:cobblestone',    label: 'Cobblestone',    solid: true, drop: 4,  fuel: 0 },
+            5:  { id: 5,  name: 'minecraft:coal_ore',       label: 'Coal Ore',       solid: true, drop: 13, fuel: 80,  isOre: true },
+            6:  { id: 6,  name: 'minecraft:iron_ore',       label: 'Iron Ore',       solid: true, drop: 6,  fuel: 0,   isOre: true },
+            7:  { id: 7,  name: 'minecraft:diamond_ore',    label: 'Diamond Ore',    solid: true, drop: 7,  fuel: 0,   isOre: true },
+            8:  { id: 8,  name: 'minecraft:oak_log',        label: 'Oak Log',        solid: true, drop: 8,  fuel: 15 },
+            9:  { id: 9,  name: 'minecraft:oak_leaves',     label: 'Oak Leaves',     solid: true, drop: 14, fuel: 5,   transparent: true },
+            10: { id: 10, name: 'minecraft:glass',          label: 'Glass',          solid: true, drop: 10, fuel: 0,   transparent: true },
+            11: { id: 11, name: 'minecraft:chest',          label: 'Chest',          solid: true, drop: 11, fuel: 15 },
+            12: { id: 12, name: 'minecraft:bedrock',        label: 'Bedrock',        solid: true, unbreakable: true },
+            13: { id: 13, name: 'minecraft:coal',           label: 'Coal (Fuel)',    solid: true, drop: 13, fuel: 80 },
+            14: { id: 14, name: 'minecraft:oak_sapling',    label: 'Oak Sapling',    solid: true, drop: 14, fuel: 5,   transparent: true },
+            15: { id: 15, name: 'minecraft:oak_planks',     label: 'Oak Planks',     solid: true, drop: 15, fuel: 15 }
+        };
+
+        const NAME_TO_ID = {};
+        Object.values(BLOCK_DEFS).forEach(b => NAME_TO_ID[b.name] = b.id);
+
+        const TextureFactory = {
+            materials: {},
+            icons: {},
+
+            // Deterministic pseudo-random helper for pixel art
+            hash(x, y, seed) {
+                let n = Math.sin(x * 12.9898 + y * 78.233 + seed * 43.12) * 43758.5453;
+                return n - Math.floor(n);
+            },
+
+            createCanvas(drawFn) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 16;
+                canvas.height = 16;
+                const ctx = canvas.getContext('2d');
+                drawFn(ctx);
+                return canvas;
+            },
+
+            canvasToTexture(canvas) {
+                const tex = new THREE.CanvasTexture(canvas);
+                tex.magFilter = THREE.NearestFilter;
+                tex.minFilter = THREE.NearestFilter;
+                tex.generateMipmaps = false;
+                return tex;
+            },
+
+            fillNoise(ctx, baseHex, variance, seed = 1) {
+                const rBase = parseInt(baseHex.slice(1, 3), 16);
+                const gBase = parseInt(baseHex.slice(3, 5), 16);
+                const bBase = parseInt(baseHex.slice(5, 7), 16);
+                for (let y = 0; y < 16; y++) {
+                    for (let x = 0; x < 16; x++) {
+                        const d = (this.hash(x, y, seed) - 0.5) * variance;
+                        const r = Math.min(255, Math.max(0, Math.round(rBase + d)));
+                        const g = Math.min(255, Math.max(0, Math.round(gBase + d)));
+                        const b = Math.min(255, Math.max(0, Math.round(bBase + d)));
+                        ctx.fillStyle = `rgb(${r},${g},${b})`;
+                        ctx.fillRect(x, y, 1, 1);
+                    }
+                }
+            },
+
+            drawOreSpecks(ctx, colorHex, seed) {
+                this.fillNoise(ctx, '#767676', 24, 3);
+                ctx.fillStyle = colorHex;
+                const coords = [
+                    [3,3],[4,3],[3,4], [10,4],[11,4],[11,5],
+                    [5,9],[6,9],[6,10],[5,10], [11,11],[12,11],[11,12]
+                ];
+                coords.forEach(([x, y], i) => {
+                    const ox = (x + seed) % 14 + 1;
+                    const oy = (y + seed) % 14 + 1;
+                    ctx.fillRect(ox, oy, 1, 1);
+                });
+            },
+
+            init() {
+                // 1. Grass Top, Side, Dirt
+                const dirtCanvas = this.createCanvas(ctx => this.fillNoise(ctx, '#79553a', 28, 2));
+                const grassTopCanvas = this.createCanvas(ctx => this.fillNoise(ctx, '#5ca038', 26, 1));
+                const grassSideCanvas = this.createCanvas(ctx => {
+                    ctx.drawImage(dirtCanvas, 0, 0);
+                    for (let x = 0; x < 16; x++) {
+                        const depth = 2 + Math.floor(this.hash(x, 0, 9) * 3);
+                        for (let y = 0; y < depth; y++) {
+                            ctx.fillStyle = y === 0 ? '#65ad3e' : '#529031';
+                            ctx.fillRect(x, y, 1, 1);
+                        }
+                    }
+                });
+
+                // 3. Stone
+                const stoneCanvas = this.createCanvas(ctx => this.fillNoise(ctx, '#7a7a7a', 24, 3));
+
+                // 4. Cobblestone
+                const cobbleCanvas = this.createCanvas(ctx => {
+                    this.fillNoise(ctx, '#686868', 48, 4);
+                    ctx.fillStyle = '#3f3f3f';
+                    for (let i = 0; i < 16; i += 4) {
+                        ctx.fillRect(i, (i * 3) % 16, 3, 1);
+                        ctx.fillRect((i * 5) % 16, i, 1, 3);
+                    }
+                });
+
+                // 5, 6, 7. Ores
+                const coalOreCanvas = this.createCanvas(ctx => this.drawOreSpecks(ctx, '#1b1b1b', 1));
+                const ironOreCanvas = this.createCanvas(ctx => this.drawOreSpecks(ctx, '#d8af93', 3));
+                const diamondOreCanvas = this.createCanvas(ctx => this.drawOreSpecks(ctx, '#4aedd9', 6));
+
+                // 8. Oak Log
+                const logSideCanvas = this.createCanvas(ctx => {
+                    for (let x = 0; x < 16; x++) {
+                        for (let y = 0; y < 16; y++) {
+                            const stripe = (x % 4 === 0) ? -14 : 0;
+                            const n = (this.hash(x, y, 8) - 0.5) * 18 + stripe;
+                            ctx.fillStyle = `rgb(${102+n},${81+n},${50+n})`;
+                            ctx.fillRect(x, y, 1, 1);
+                        }
+                    }
+                });
+                const logTopCanvas = this.createCanvas(ctx => {
+                    this.fillNoise(ctx, '#a68856', 14, 9);
+                    ctx.strokeStyle = '#665132';
+                    ctx.strokeRect(1.5, 1.5, 13, 13);
+                    ctx.strokeRect(4.5, 4.5, 7, 7);
+                });
+
+                // 9. Leaves
+                const leavesCanvas = this.createCanvas(ctx => {
+                    this.fillNoise(ctx, '#3b7d23', 38, 10);
+                });
+
+                // 10. Glass
+                const glassCanvas = this.createCanvas(ctx => {
+                    ctx.clearRect(0, 0, 16, 16);
+                    ctx.fillStyle = 'rgba(200, 235, 255, 0.18)';
+                    ctx.fillRect(0, 0, 16, 16);
+                    ctx.strokeStyle = '#d8f3ff';
+                    ctx.strokeRect(0.5, 0.5, 15, 15);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(3, 3, 2, 1);
+                    ctx.fillRect(3, 4, 1, 2);
+                    ctx.fillRect(11, 11, 2, 1);
+                });
+
+                // 11. Chest
+                const chestSideCanvas = this.createCanvas(ctx => {
+                    this.fillNoise(ctx, '#9c6b2e', 16, 11);
+                    ctx.fillStyle = '#2a221b';
+                    ctx.fillRect(0, 0, 16, 1);
+                    ctx.fillRect(0, 15, 16, 1);
+                    ctx.fillRect(0, 0, 1, 16);
+                    ctx.fillRect(15, 0, 1, 16);
+                    ctx.fillRect(0, 5, 16, 2);
+                });
+                const chestFrontCanvas = this.createCanvas(ctx => {
+                    ctx.drawImage(chestSideCanvas, 0, 0);
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.fillRect(7, 4, 2, 4);
+                });
+
+                // 12. Bedrock
+                const bedrockCanvas = this.createCanvas(ctx => this.fillNoise(ctx, '#333333', 65, 12));
+
+                // 13. Coal Block / Item
+                const coalCanvas = this.createCanvas(ctx => {
+                    this.fillNoise(ctx, '#1e1e24', 22, 13);
+                    ctx.fillStyle = '#383842';
+                    ctx.fillRect(4, 4, 3, 3);
+                });
+
+                // 14. Sapling
+                const saplingCanvas = this.createCanvas(ctx => {
+                    this.fillNoise(ctx, '#4ea72e', 30, 14);
+                    ctx.fillStyle = '#6b4c2b';
+                    ctx.fillRect(7, 10, 2, 6);
+                });
+
+                // 15. Oak Planks
+                const planksCanvas = this.createCanvas(ctx => {
+                    this.fillNoise(ctx, '#a2824e', 20, 15);
+                    ctx.fillStyle = '#7e6338';
+                    ctx.fillRect(0, 3, 16, 1);
+                    ctx.fillRect(0, 7, 16, 1);
+                    ctx.fillRect(0, 11, 16, 1);
+                    ctx.fillRect(0, 15, 16, 1);
+                });
+
+                // Register Three.js Materials & 2D Icons
+                const makeMat = (canvas, opts = {}) => new THREE.MeshLambertMaterial({
+                    map: this.canvasToTexture(canvas),
+                    transparent: !!opts.transparent,
+                    opacity: opts.opacity || 1.0
+                });
+
+                const grassSideMat = makeMat(grassSideCanvas);
+                const grassTopMat = makeMat(grassTopCanvas);
+                const dirtMat = makeMat(dirtCanvas);
+
+                this.materials[1] = [grassSideMat, grassSideMat, grassTopMat, dirtMat, grassSideMat, grassSideMat];
+                this.materials[2] = dirtMat;
+                this.materials[3] = makeMat(stoneCanvas);
+                this.materials[4] = makeMat(cobbleCanvas);
+                this.materials[5] = makeMat(coalOreCanvas);
+                this.materials[6] = makeMat(ironOreCanvas);
+                this.materials[7] = makeMat(diamondOreCanvas);
+
+                const logSideMat = makeMat(logSideCanvas);
+                const logTopMat = makeMat(logTopCanvas);
+                this.materials[8] = [logSideMat, logSideMat, logTopMat, logTopMat, logSideMat, logSideMat];
+                this.materials[9] = makeMat(leavesCanvas, { transparent: true, opacity: 0.92 });
+                this.materials[10] = makeMat(glassCanvas, { transparent: true, opacity: 0.65 });
+
+                const chestSideMat = makeMat(chestSideCanvas);
+                const chestFrontMat = makeMat(chestFrontCanvas);
+                this.materials[11] = [chestSideMat, chestSideMat, chestSideMat, chestSideMat, chestFrontMat, chestSideMat];
+                this.materials[12] = makeMat(bedrockCanvas);
+                this.materials[13] = makeMat(coalCanvas);
+                this.materials[14] = makeMat(saplingCanvas, { transparent: true, opacity: 0.9 });
+                this.materials[15] = makeMat(planksCanvas);
+
+                // Save DataURLs for 2D Inventory UI
+                const iconMap = {
+                    1: grassSideCanvas, 2: dirtCanvas, 3: stoneCanvas, 4: cobbleCanvas,
+                    5: coalOreCanvas, 6: ironOreCanvas, 7: diamondOreCanvas, 8: logSideCanvas,
+                    9: leavesCanvas, 10: glassCanvas, 11: chestFrontCanvas, 12: bedrockCanvas,
+                    13: coalCanvas, 14: saplingCanvas, 15: planksCanvas
+                };
+                Object.keys(iconMap).forEach(id => {
+                    this.icons[id] = iconMap[id].toDataURL();
+                });
+
+                // Draw Brand Icon on Header
+                const brandCanvas = document.getElementById('brand-turtle-icon');
+                if (brandCanvas) {
+                    const bctx = brandCanvas.getContext('2d');
+                    bctx.fillStyle = '#eab308';
+                    bctx.fillRect(3, 4, 22, 20);
+                    bctx.fillStyle = '#ca8a04';
+                    bctx.fillRect(3, 20, 22, 4);
+                    bctx.fillStyle = '#111827';
+                    bctx.fillRect(6, 7, 16, 10);
+                    bctx.fillStyle = '#4ade80';
+                    bctx.fillRect(8, 9, 4, 2);
+                    bctx.fillRect(8, 12, 8, 2);
+                }
+            }
+        };
+
+        /***********************************************************************
+         * 2. THREE.JS 3D VIEWPORT, TURTLE MODEL & PARTICLE SYSTEM
+         ***********************************************************************/
+        const CHUNK_SIZE = 16;
+
+        const Viewport = {
+            scene: null,
+            camera: null,
+            renderer: null,
+            controls: null,
+            turtleGroup: null,
+            pickaxeMesh: null,
+            blockGroup: null,
+            blockMeshes: new Map(), // key "x,y,z" -> Mesh
+            sharedBoxGeo: null,
+            particles: [],
+            cameraMode: 'orbit', // 'orbit' | 'follow' | 'top' | 'fpv'
+            raycaster: new THREE.Raycaster(),
+            mouse: new THREE.Vector2(),
+            hoverBox: null,
+
+            // Visual animation interpolation state
+            visualPos: new THREE.Vector3(7, 5, 7),
+            targetPos: new THREE.Vector3(7, 5, 7),
+            visualYaw: 0,
+            targetYaw: 0,
+            swingProgress: 0,
+
+            init() {
+                const container = document.getElementById('viewport-container');
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x0b0e16);
+                this.scene.fog = new THREE.FogExp2(0x0b0e16, 0.018);
+
+                this.camera = new THREE.PerspectiveCamera(55, container.clientWidth / container.clientHeight, 0.1, 200);
+                this.camera.position.set(22, 18, 24);
+
+                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer.setSize(container.clientWidth, container.clientHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.shadowMap.enabled = true;
+                container.appendChild(this.renderer.domElement);
+
+                // OrbitControls
+                this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+                this.controls.target.set(7.5, 4, 7.5);
+                this.controls.enableDamping = true;
+                this.controls.dampingFactor = 0.08;
+                this.controls.maxDistance = 60;
+
+                // Lighting
+                const ambient = new THREE.AmbientLight(0xdbeafe, 0.68);
+                this.scene.add(ambient);
+
+                const sun = new THREE.DirectionalLight(0xfffbeb, 0.82);
+                sun.position.set(25, 40, 20);
+                this.scene.add(sun);
+
+                const backLight = new THREE.DirectionalLight(0x60a5fa, 0.25);
+                backLight.position.set(-15, 20, -15);
+                this.scene.add(backLight);
+
+                // Chunk Boundary Grid Helper
+                const gridHelper = new THREE.GridHelper(CHUNK_SIZE, CHUNK_SIZE, 0x334155, 0x1e293b);
+                gridHelper.position.set(CHUNK_SIZE / 2 - 0.5, -0.5, CHUNK_SIZE / 2 - 0.5);
+                this.scene.add(gridHelper);
+
+                // Shared Geometry for Voxels
+                this.sharedBoxGeo = new THREE.BoxGeometry(1, 1, 1);
+                this.blockGroup = new THREE.Group();
+                this.scene.add(this.blockGroup);
+
+                // Selection Wireframe Highlight
+                const edgesGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(1.01, 1.01, 1.01));
+                this.hoverBox = new THREE.LineSegments(
+                    edgesGeo,
+                    new THREE.LineBasicMaterial({ color: 0xfbbf24, linewidth: 2 })
+                );
+                this.hoverBox.visible = false;
+                this.scene.add(this.hoverBox);
+
+                // Build 3D CC: Tweaked Mining Turtle Mesh
+                this.buildTurtleModel();
+
+                // Interactive Mouse Events for Block Placement / Breaking
+                this.setupInteraction(container);
+
+                window.addEventListener('resize', () => this.onResize());
+                this.animate();
+            },
+
+            buildTurtleModel() {
+                this.turtleGroup = new THREE.Group();
+
+                // Main Yellow Computer Craft Chassis
+                const chassisGeo = new THREE.BoxGeometry(0.82, 0.82, 0.82);
+                const chassisMat = new THREE.MeshLambertMaterial({ color: 0xeab308 });
+                const chassis = new THREE.Mesh(chassisGeo, chassisMat);
+                this.turtleGroup.add(chassis);
+
+                // Dark Base Trim
+                const baseGeo = new THREE.BoxGeometry(0.84, 0.18, 0.84);
+                const baseMat = new THREE.MeshLambertMaterial({ color: 0xa16207 });
+                const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+                baseMesh.position.y = -0.33;
+                this.turtleGroup.add(baseMesh);
+
+                // Front CRT Monitor Bezel & Screen (Facing -Z when yaw=0)
+                const bezelGeo = new THREE.BoxGeometry(0.64, 0.52, 0.06);
+                const bezelMat = new THREE.MeshLambertMaterial({ color: 0x1e293b });
+                const bezel = new THREE.Mesh(bezelGeo, bezelMat);
+                bezel.position.set(0, 0.06, -0.40);
+                this.turtleGroup.add(bezel);
+
+                const screenGeo = new THREE.PlaneGeometry(0.54, 0.42);
+                const screenMat = new THREE.MeshBasicMaterial({ color: 0x111827 });
+                const screen = new THREE.Mesh(screenGeo, screenMat);
+                screen.position.set(0, 0.06, -0.435);
+                screen.rotation.y = Math.PI;
+                this.turtleGroup.add(screen);
+
+                // Glowing Prompt Cursor on Turtle Screen
+                const cursorGeo = new THREE.PlaneGeometry(0.14, 0.06);
+                const cursorMat = new THREE.MeshBasicMaterial({ color: 0x4ade80 });
+                const cursor = new THREE.Mesh(cursorGeo, cursorMat);
+                cursor.position.set(-0.15, 0.16, -0.44);
+                cursor.rotation.y = Math.PI;
+                this.turtleGroup.add(cursor);
+
+                // Direction Arrow on Top of Turtle so Top-Down view is unmistakable
+                const arrowShape = new THREE.Shape();
+                arrowShape.moveTo(0, 0.25);
+                arrowShape.lineTo(-0.18, -0.15);
+                arrowShape.lineTo(0.18, -0.15);
+                arrowShape.closePath();
+                const arrowGeo = new THREE.ShapeGeometry(arrowShape);
+                const arrowMat = new THREE.MeshBasicMaterial({ color: 0x0f172a, side: THREE.DoubleSide });
+                const arrowMesh = new THREE.Mesh(arrowGeo, arrowMat);
+                arrowMesh.rotation.x = -Math.PI / 2;
+                arrowMesh.position.set(0, 0.42, 0);
+                this.turtleGroup.add(arrowMesh);
+
+                // Right-Side Diamond Pickaxe Attachment
+                this.pickaxeMesh = new THREE.Group();
+                this.pickaxeMesh.position.set(0.46, 0.0, -0.1);
+
+                const handleGeo = new THREE.BoxGeometry(0.06, 0.52, 0.06);
+                const handleMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+                const handle = new THREE.Mesh(handleGeo, handleMat);
+                handle.rotation.x = -Math.PI / 4;
+                this.pickaxeMesh.add(handle);
+
+                const headGeo = new THREE.BoxGeometry(0.08, 0.12, 0.44);
+                const headMat = new THREE.MeshLambertMaterial({ color: 0x2dd4bf });
+                const head = new THREE.Mesh(headGeo, headMat);
+                head.position.set(0, 0.16, -0.16);
+                this.pickaxeMesh.add(head);
+
+                this.turtleGroup.add(this.pickaxeMesh);
+
+                // Left-Side Redstone Modem Box
+                const modemGeo = new THREE.BoxGeometry(0.1, 0.42, 0.42);
+                const modemMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
+                const modem = new THREE.Mesh(modemGeo, modemMat);
+                modem.position.set(-0.44, 0, 0);
+                this.turtleGroup.add(modem);
+
+                this.scene.add(this.turtleGroup);
+            },
+
+            setupInteraction(container) {
+                let downX = 0, downY = 0;
+                const getTarget = (e) => {
+                    const rect = this.renderer.domElement.getBoundingClientRect();
+                    this.mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                    this.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                    this.raycaster.setFromCamera(this.mouse, this.camera);
+                    const meshes = Array.from(this.blockMeshes.values()).filter(m => m.visible);
+                    return this.raycaster.intersectObjects(meshes, false);
+                };
+
+                container.addEventListener('pointerdown', e => {
+                    downX = e.clientX;
+                    downY = e.clientY;
+                });
+
+                container.addEventListener('pointermove', e => {
+                    const hits = getTarget(e);
+                    if (hits.length > 0) {
+                        const hit = hits[0];
+                        this.hoverBox.position.copy(hit.object.position);
+                        this.hoverBox.visible = true;
+                    } else {
+                        this.hoverBox.visible = false;
+                    }
+                });
+
+                container.addEventListener('pointerup', e => {
+                    if (Math.hypot(e.clientX - downX, e.clientY - downY) > 5) return; // Dragged camera
+                    const hits = getTarget(e);
+                    if (hits.length === 0) return;
+
+                    const hit = hits[0];
+                    const pos = hit.object.position;
+
+                    if (e.shiftKey || e.button === 2) {
+                        // Break block
+                        if (World.getBlock(pos.x, pos.y, pos.z) !== 12) {
+                            this.spawnParticles(pos.x, pos.y, pos.z, World.getBlock(pos.x, pos.y, pos.z));
+                            World.setBlock(pos.x, pos.y, pos.z, 0);
+                            TurtleState.updateHUD();
+                        }
+                    } else if (e.button === 0) {
+                        // Place block adjacent to clicked face
+                        const normal = hit.face.normal;
+                        const nx = Math.round(pos.x + normal.x);
+                        const ny = Math.round(pos.y + normal.y);
+                        const nz = Math.round(pos.z + normal.z);
+                        if (nx === TurtleState.x && ny === TurtleState.y && nz === TurtleState.z) return;
+                        const brushId = parseInt(document.getElementById('brush-block-select').value, 10) || 4;
+                        if (World.inBounds(nx, ny, nz)) {
+                            World.setBlock(nx, ny, nz, brushId);
+                            TurtleState.updateHUD();
+                        }
+                    }
+                });
+            },
+
+            spawnParticles(x, y, z, blockId) {
+                const count = 14;
+                const mat = Array.isArray(TextureFactory.materials[blockId])
+                    ? TextureFactory.materials[blockId][0]
+                    : (TextureFactory.materials[blockId] || TextureFactory.materials[3]);
+
+                for (let i = 0; i < count; i++) {
+                    const geo = new THREE.BoxGeometry(0.16, 0.16, 0.16);
+                    const mesh = new THREE.Mesh(geo, mat);
+                    mesh.position.set(
+                        x + (Math.random() - 0.5) * 0.6,
+                        y + (Math.random() - 0.5) * 0.6,
+                        z + (Math.random() - 0.5) * 0.6
+                    );
+                    this.scene.add(mesh);
+                    this.particles.push({
+                        mesh,
+                        vx: (Math.random() - 0.5) * 0.08,
+                        vy: Math.random() * 0.09 + 0.02,
+                        vz: (Math.random() - 0.5) * 0.08,
+                        life: 25
+                    });
+                }
+            },
+
+            triggerPickaxeSwing() {
+                this.swingProgress = 1.0;
+            },
+
+            setCameraMode(mode) {
+                this.cameraMode = mode;
+                document.querySelectorAll('.cam-btn').forEach(btn => {
+                    btn.className = 'cam-btn px-2.5 py-1 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition';
+                });
+                const activeBtn = document.getElementById('cam-' + mode);
+                if (activeBtn) {
+                    activeBtn.className = 'cam-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-500 text-slate-950 font-semibold transition';
+                }
+
+                if (mode === 'top') {
+                    this.camera.position.set(7.5, 28, 7.51);
+                    this.controls.target.set(7.5, 4, 7.5);
+                } else if (mode === 'orbit') {
+                    this.camera.position.set(22, 18, 24);
+                    this.controls.target.copy(this.visualPos);
+                }
+            },
+
+            syncTurtleTarget(instant = false) {
+                this.targetPos.set(TurtleState.x, TurtleState.y, TurtleState.z);
+                // Facing: 0=North(-Z, yaw=0), 1=East(+X, yaw=-PI/2), 2=South(+Z, yaw=PI), 3=West(-X, yaw=PI/2)
+                const yawMap = [0, -Math.PI / 2, Math.PI, Math.PI / 2];
+                const desiredYaw = yawMap[TurtleState.dir];
+
+                // Shortest angular delta
+                let diff = desiredYaw - (this.targetYaw % (Math.PI * 2));
+                if (diff > Math.PI) diff -= Math.PI * 2;
+                if (diff < -Math.PI) diff += Math.PI * 2;
+                this.targetYaw += diff;
+
+                if (instant) {
+                    this.visualPos.copy(this.targetPos);
+                    this.visualYaw = this.targetYaw;
+                }
+            },
+
+            onResize() {
+                const container = document.getElementById('viewport-container');
+                if (!container) return;
+                this.camera.aspect = container.clientWidth / container.clientHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(container.clientWidth, container.clientHeight);
+            },
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+
+                // Smoothly interpolate turtle position & rotation
+                this.visualPos.lerp(this.targetPos, 0.25);
+                this.visualYaw += (this.targetYaw - this.visualYaw) * 0.25;
+
+                if (this.turtleGroup) {
+                    this.turtleGroup.position.copy(this.visualPos);
+                    this.turtleGroup.rotation.y = this.visualYaw;
+                }
+
+                // Animate Pickaxe Swing
+                if (this.swingProgress > 0) {
+                    this.swingProgress = Math.max(0, this.swingProgress - 0.1);
+                    this.pickaxeMesh.rotation.x = -Math.sin(this.swingProgress * Math.PI) * 1.2;
+                } else if (this.pickaxeMesh) {
+                    this.pickaxeMesh.rotation.x = 0;
+                }
+
+                // Update Particles
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.mesh.position.x += p.vx;
+                    p.mesh.position.y += p.vy;
+                    p.mesh.position.z += p.vz;
+                    p.vy -= 0.005; // gravity
+                    p.life--;
+                    p.mesh.scale.multiplyScalar(0.95);
+                    if (p.life <= 0) {
+                        this.scene.remove(p.mesh);
+                        p.mesh.geometry.dispose();
+                        this.particles.splice(i, 1);
+                    }
+                }
+
+                // Camera Mode Updates
+                if (this.cameraMode === 'follow') {
+                    const backOffset = new THREE.Vector3(0, 3.5, 5.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.visualYaw);
+                    const desiredCam = this.visualPos.clone().add(backOffset);
+                    this.camera.position.lerp(desiredCam, 0.1);
+                    this.controls.target.lerp(this.visualPos, 0.2);
+                    this.controls.update();
+                } else if (this.cameraMode === 'fpv') {
+                    const forward = new THREE.Vector3(0, 0.1, -0.48).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.visualYaw);
+                    const lookTarget = new THREE.Vector3(0, 0.05, -4).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.visualYaw);
+                    this.camera.position.copy(this.visualPos).add(forward);
+                    this.camera.lookAt(this.visualPos.clone().add(lookTarget));
+                } else {
+                    this.controls.update();
+                }
+
+                this.renderer.render(this.scene, this.camera);
+            }
+        };
+
+        /***********************************************************************
+         * 3. VOXEL CHUNK WORLD MANAGER & PRESET GENERATORS
+         ***********************************************************************/
+        const World = {
+            voxels: new Uint8Array(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE),
+            currentPreset: 'overworld',
+            sliceY: 15,
+
+            idx(x, y, z) {
+                return x + y * CHUNK_SIZE + z * CHUNK_SIZE * CHUNK_SIZE;
+            },
+
+            inBounds(x, y, z) {
+                return x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE;
+            },
+
+            getBlock(x, y, z) {
+                if (!this.inBounds(x, y, z)) return 0;
+                return this.voxels[this.idx(x, y, z)];
+            },
+
+            setBlock(x, y, z, id) {
+                if (!this.inBounds(x, y, z)) return false;
+                this.voxels[this.idx(x, y, z)] = id;
+                this.updateBlockMesh(x, y, z, id);
+                return true;
+            },
+
+            clearAll() {
+                this.voxels.fill(0);
+                Viewport.blockMeshes.forEach(mesh => Viewport.blockGroup.remove(mesh));
+                Viewport.blockMeshes.clear();
+            },
+
+            updateBlockMesh(x, y, z, id) {
+                const key = `${x},${y},${z}`;
+                const existing = Viewport.blockMeshes.get(key);
+                if (existing) {
+                    Viewport.blockGroup.remove(existing);
+                    Viewport.blockMeshes.delete(key);
+                }
+                if (id === 0) return;
+
+                const mat = TextureFactory.materials[id] || TextureFactory.materials[3];
+                const mesh = new THREE.Mesh(Viewport.sharedBoxGeo, mat);
+                mesh.position.set(x, y, z);
+                mesh.visible = (y <= this.sliceY);
+                Viewport.blockGroup.add(mesh);
+                Viewport.blockMeshes.set(key, mesh);
+            },
+
+            setSliceY(maxY) {
+                this.sliceY = maxY;
+                document.getElementById('slice-label').textContent = `Y ≤ ${maxY}`;
+                Viewport.blockMeshes.forEach((mesh) => {
+                    mesh.visible = (mesh.position.y <= maxY);
+                });
+            },
+
+            spawnOakTree(tx, ty, tz) {
+                for (let lx = tx - 2; lx <= tx + 2; lx++) {
+                    for (let lz = tz - 2; lz <= tz + 2; lz++) {
+                        for (let ly = ty + 3; ly <= ty + 4; ly++) {
+                            if (Math.abs(lx - tx) === 2 && Math.abs(lz - tz) === 2) continue;
+                            this.setBlock(lx, ly, lz, 9);
+                        }
+                    }
+                }
+                for (let lx = tx - 1; lx <= tx + 1; lx++) {
+                    for (let lz = tz - 1; lz <= tz + 1; lz++) {
+                        if (Math.abs(lx - tx) === 1 && Math.abs(lz - tz) === 1) continue;
+                        this.setBlock(lx, ty + 5, lz, 9);
+                    }
+                }
+                for (let h = 0; h < 5; h++) {
+                    this.setBlock(tx, ty + h, tz, 8);
+                }
+            },
+
+            loadPreset(presetName) {
+                Simulator.stopScript();
+                this.currentPreset = presetName;
+                this.clearAll();
+
+                if (presetName === 'overworld') {
+                    for (let x = 0; x < CHUNK_SIZE; x++) {
+                        for (let z = 0; z < CHUNK_SIZE; z++) {
+                            this.setBlock(x, 0, z, 12); // Bedrock
+                            for (let y = 1; y <= 5; y++) {
+                                // Procedural ore veins
+                                let id = 3; // Stone
+                                const r = TextureFactory.hash(x * 3 + y, z * 3 - y, y * 7);
+                                if (y <= 2 && r > 0.90) id = 7; // Diamond ore
+                                else if (r > 0.82) id = 6; // Iron ore
+                                else if (r > 0.72) id = 5; // Coal ore
+                                this.setBlock(x, y, z, id);
+                            }
+                            this.setBlock(x, 6, z, 2); // Dirt
+                            this.setBlock(x, 7, z, 1); // Grass
+                        }
+                    }
+                    // Add an exposed cliff cut-out & ore vein right in front of the turtle for branch mining
+                    for (let x = 5; x <= 9; x++) {
+                        for (let z = 8; z <= 14; z++) {
+                            this.setBlock(x, 7, z, 0);
+                            this.setBlock(x, 6, z, 0);
+                        }
+                    }
+                    // Guarantee a rich connected ore cluster at (7, 5, 5..3) for Vein Miner testing
+                    this.setBlock(7, 5, 5, 7);
+                    this.setBlock(7, 5, 4, 7);
+                    this.setBlock(8, 5, 4, 7);
+                    this.setBlock(7, 6, 4, 6);
+                    this.setBlock(6, 5, 4, 5);
+                    this.spawnOakTree(3, 8, 3);
+                    TurtleState.reset(7, 6, 10, 0);
+
+                } else if (presetName === 'flat') {
+                    for (let x = 0; x < CHUNK_SIZE; x++) {
+                        for (let z = 0; z < CHUNK_SIZE; z++) {
+                            this.setBlock(x, 0, z, 12);
+                            this.setBlock(x, 1, z, 3);
+                            this.setBlock(x, 2, z, 2);
+                            this.setBlock(x, 3, z, 1);
+                        }
+                    }
+                    TurtleState.reset(7, 4, 11, 0);
+
+                } else if (presetName === 'trees') {
+                    for (let x = 0; x < CHUNK_SIZE; x++) {
+                        for (let z = 0; z < CHUNK_SIZE; z++) {
+                            this.setBlock(x, 0, z, 12);
+                            this.setBlock(x, 1, z, 2);
+                            this.setBlock(x, 2, z, 1);
+                        }
+                    }
+                    this.spawnOakTree(7, 3, 7);
+                    this.spawnOakTree(3, 3, 4);
+                    this.spawnOakTree(12, 3, 4);
+                    TurtleState.reset(7, 3, 9, 0);
+
+                } else if (presetName === 'maze') {
+                    for (let x = 0; x < CHUNK_SIZE; x++) {
+                        for (let z = 0; z < CHUNK_SIZE; z++) {
+                            this.setBlock(x, 0, z, 12);
+                            this.setBlock(x, 1, z, 4);
+                            if (x === 0 || x === 15 || z === 0 || z === 15) {
+                                this.setBlock(x, 2, z, 3);
+                                this.setBlock(x, 3, z, 3);
+                            }
+                        }
+                    }
+                    // Internal walls
+                    for (let x = 3; x < 12; x++) {
+                        this.setBlock(x, 2, 10, 3);
+                        this.setBlock(x, 2, 6, 3);
+                    }
+                    this.setBlock(7, 2, 3, 7); // Diamond prize
+                    TurtleState.reset(7, 2, 13, 0);
+
+                } else if (presetName === 'void') {
+                    for (let x = 5; x <= 10; x++) {
+                        for (let z = 5; z <= 10; z++) {
+                            this.setBlock(x, 1, z, 15);
+                        }
+                    }
+                    TurtleState.reset(7, 2, 8, 0);
+                }
+
+                this.setSliceY(this.sliceY);
+            },
+
+            resetCurrentPreset() {
+                this.loadPreset(this.currentPreset);
+                Terminal.println("World chunk & Turtle reset.", "#4ade80");
+            }
+        };
+
+        /***********************************************************************
+         * 4. TURTLE STATE, INVENTORY (16 SLOTS) & NATIVE CC:TWEAKED ACTIONS
+         ***********************************************************************/
+        const DIR_VECTORS = [
+            { dx: 0,   dz: -1, name: 'NORTH (-Z)' }, // 0: North
+            { dx: 1,  dz: 0,  name: 'EAST (+X)'  }, // 1: East
+            { dx: 0,  dz: 1,  name: 'SOUTH (+Z)' }, // 2: South
+            { dx: -1, dz: 0,  name: 'WEST (-X)'  }  // 3: West
+        ];
+
+        const TurtleState = {
+            x: 7,
+            y: 6,
+            z: 10,
+            dir: 0, // 0=North, 1=East, 2=South, 3=West
+            fuel: 1000,
+            fuelLimit: 20000,
+            infiniteFuel: false,
+            selectedSlot: 1, // 1-indexed (1..16)
+            inventory: Array.from({ length: 16 }, () => ({ id: 0, count: 0 })),
+
+            reset(x, y, z, dir) {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+                this.dir = dir;
+                this.fuel = 1000;
+                this.selectedSlot = 1;
+
+                // Default Starter Kit in Inventory
+                this.inventory = Array.from({ length: 16 }, () => ({ id: 0, count: 0 }));
+                this.inventory[0] = { id: 4,  count: 64 }; // Slot 1: 64 Cobblestone
+                this.inventory[1] = { id: 15, count: 64 }; // Slot 2: 64 Oak Planks
+                this.inventory[2] = { id: 13, count: 16 }; // Slot 3: 16 Coal
+                this.inventory[3] = { id: 14, count: 8  }; // Slot 4: 8 Oak Saplings
+
+                Viewport.syncTurtleTarget(true);
+                this.renderInventoryUI();
+                this.updateHUD();
+            },
+
+            frontCoords(offsetY = 0, step = 1) {
+                if (offsetY !== 0) {
+                    return { x: this.x, y: this.y + offsetY, z: this.z };
+                }
+                const v = DIR_VECTORS[this.dir];
+                return { x: this.x + v.dx * step, y: this.y, z: this.z + v.dz * step };
+            },
+
+            consumeFuel() {
+                if (this.infiniteFuel) return true;
+                if (this.fuel <= 0) return false;
+                this.fuel--;
+                return true;
+            },
+
+            addItemToInventory(blockId, amount = 1) {
+                if (!blockId || blockId === 0) return true;
+                // Try stacking in existing slots starting from selectedSlot
+                for (let i = 0; i < 16; i++) {
+                    const idx = (this.selectedSlot - 1 + i) % 16;
+                    const slot = this.inventory[idx];
+                    if (slot.id === blockId && slot.count < 64) {
+                        const add = Math.min(64 - slot.count, amount);
+                        slot.count += add;
+                        amount -= add;
+                        if (amount <= 0) {
+                            this.renderInventoryUI();
+                            return true;
+                        }
+                    }
+                }
+                // Try empty slots
+                for (let i = 0; i < 16; i++) {
+                    const idx = (this.selectedSlot - 1 + i) % 16;
+                    const slot = this.inventory[idx];
+                    if (slot.id === 0 || slot.count === 0) {
+                        slot.id = blockId;
+                        slot.count = Math.min(64, amount);
+                        this.renderInventoryUI();
+                        return true;
+                    }
+                }
+                this.renderInventoryUI();
+                return false;
+            },
+
+            // --- MOVEMENT API ---
+            move(offsetY, step = 1) {
+                if (!this.consumeFuel()) return [false, "Out of fuel"];
+                const target = this.frontCoords(offsetY, step);
+                if (!World.inBounds(target.x, target.y, target.z)) {
+                    return [false, "Cannot leave chunk boundary"];
+                }
+                const blockId = World.getBlock(target.x, target.y, target.z);
+                if (blockId !== 0 && BLOCK_DEFS[blockId]?.solid) {
+                    return [false, "Movement obstructed"];
+                }
+                this.x = target.x;
+                this.y = target.y;
+                this.z = target.z;
+                Viewport.syncTurtleTarget(Simulator.tickDelay === 0);
+                this.updateHUD();
+                return [true, null];
+            },
+
+            turn(delta) {
+                this.dir = (this.dir + delta + 4) % 4;
+                Viewport.syncTurtleTarget(Simulator.tickDelay === 0);
+                this.updateHUD();
+                return [true, null];
+            },
+
+            // --- DIGGING API ---
+            dig(offsetY = 0) {
+                const target = this.frontCoords(offsetY, 1);
+                if (!World.inBounds(target.x, target.y, target.z)) return [false, "Nothing to dig here"];
+                const blockId = World.getBlock(target.x, target.y, target.z);
+                if (blockId === 0) return [false, "Nothing to dig here"];
+                const def = BLOCK_DEFS[blockId];
+                if (def.unbreakable) return [false, "Unbreakable block"];
+
+                Viewport.triggerPickaxeSwing();
+                Viewport.spawnParticles(target.x, target.y, target.z, blockId);
+                World.setBlock(target.x, target.y, target.z, 0);
+                this.addItemToInventory(def.drop || blockId, 1);
+                this.updateHUD();
+                return [true, null];
+            },
+
+            // --- PLACING API ---
+            place(offsetY = 0) {
+                const slot = this.inventory[this.selectedSlot - 1];
+                if (!slot || slot.id === 0 || slot.count <= 0) {
+                    return [false, "No items to place"];
+                }
+                const target = this.frontCoords(offsetY, 1);
+                if (!World.inBounds(target.x, target.y, target.z)) {
+                    return [false, "Outside chunk boundary"];
+                }
+                if (World.getBlock(target.x, target.y, target.z) !== 0) {
+                    return [false, "Cannot place block here"];
+                }
+                World.setBlock(target.x, target.y, target.z, slot.id);
+                slot.count--;
+                if (slot.count <= 0) slot.id = 0;
+                this.renderInventoryUI();
+                this.updateHUD();
+                return [true, null];
+            },
+
+            // --- INSPECTION & DETECTION API ---
+            detect(offsetY = 0) {
+                const target = this.frontCoords(offsetY, 1);
+                const id = World.getBlock(target.x, target.y, target.z);
+                return id !== 0 && !!BLOCK_DEFS[id]?.solid;
+            },
+
+            inspect(offsetY = 0) {
+                const target = this.frontCoords(offsetY, 1);
+                const id = World.getBlock(target.x, target.y, target.z);
+                if (id === 0) return [false, "No block to inspect"];
+                const def = BLOCK_DEFS[id];
+                return [true, { name: def.name, label: def.label, isOre: !!def.isOre }];
+            },
+
+            compare(offsetY = 0) {
+                const slot = this.inventory[this.selectedSlot - 1];
+                if (!slot || slot.id === 0 || slot.count <= 0) return false;
+                const target = this.frontCoords(offsetY, 1);
+                const id = World.getBlock(target.x, target.y, target.z);
+                return id === slot.id;
+            },
+
+            // --- INVENTORY & FUEL API ---
+            select(slotNum) {
+                const n = Math.floor(Number(slotNum));
+                if (isNaN(n) || n < 1 || n > 16) return false;
+                this.selectedSlot = n;
+                this.renderInventoryUI();
+                return true;
+            },
+
+            refuel(count = 64) {
+                const slot = this.inventory[this.selectedSlot - 1];
+                if (!slot || slot.id === 0 || slot.count <= 0) return [false, "No items to combust"];
+                const def = BLOCK_DEFS[slot.id];
+                if (!def || !def.fuel || def.fuel <= 0) return [false, "Items not combustible"];
+                if (count === 0) return [true, null]; // CC test combustibility check
+
+                const useCount = Math.min(slot.count, Math.max(1, Math.floor(count)));
+                this.fuel = Math.min(this.fuelLimit, this.fuel + useCount * def.fuel);
+                slot.count -= useCount;
+                if (slot.count <= 0) slot.id = 0;
+                this.renderInventoryUI();
+                this.updateHUD();
+                return [true, null];
+            },
+
+            transferTo(targetSlot, count = 64) {
+                const destIdx = Math.floor(Number(targetSlot)) - 1;
+                if (destIdx < 0 || destIdx >= 16) return false;
+                const src = this.inventory[this.selectedSlot - 1];
+                const dst = this.inventory[destIdx];
+                if (!src || src.id === 0 || src.count <= 0) return true;
+                if (destIdx === this.selectedSlot - 1) return true;
+
+                const moveAmt = Math.min(src.count, Math.max(1, Math.floor(count)));
+                if (dst.id === 0 || dst.count === 0) {
+                    dst.id = src.id;
+                    dst.count = moveAmt;
+                    src.count -= moveAmt;
+                    if (src.count <= 0) src.id = 0;
+                    this.renderInventoryUI();
+                    return true;
+                } else if (dst.id === src.id && dst.count < 64) {
+                    const space = 64 - dst.count;
+                    const actual = Math.min(space, moveAmt);
+                    dst.count += actual;
+                    src.count -= actual;
+                    if (src.count <= 0) src.id = 0;
+                    this.renderInventoryUI();
+                    return true;
+                }
+                return false;
+            },
+
+            drop(count = 64) {
+                const slot = this.inventory[this.selectedSlot - 1];
+                if (!slot || slot.id === 0 || slot.count <= 0) return false;
+                const dropAmt = Math.min(slot.count, Math.max(1, Math.floor(count)));
+                slot.count -= dropAmt;
+                if (slot.count <= 0) slot.id = 0;
+                this.renderInventoryUI();
+                return true;
+            },
+
+            // --- UI HELPERS ---
+            renderInventoryUI() {
+                const grid = document.getElementById('inventory-grid');
+                if (!grid) return;
+                grid.innerHTML = '';
+
+                for (let i = 0; i < 16; i++) {
+                    const slot = this.inventory[i];
+                    const isSelected = (i + 1 === this.selectedSlot);
+                    const btn = document.createElement('button');
+                    btn.className = `relative h-10 rounded-lg bg-[#181d2c] border ${
+                        isSelected ? 'slot-selected' : 'border-slate-800 hover:border-slate-600'
+                    } flex items-center justify-center transition`;
+                    btn.onclick = () => {
+                        this.selectedSlot = i + 1;
+                        this.renderInventoryUI();
+                    };
+
+                    // Slot index corner
+                    const numSpan = document.createElement('span');
+                    numSpan.className = 'absolute top-0.5 left-1 text-[9px] font-mono-code text-slate-500';
+                    numSpan.textContent = i + 1;
+                    btn.appendChild(numSpan);
+
+                    if (slot.id !== 0 && slot.count > 0) {
+                        const img = document.createElement('img');
+                        img.src = TextureFactory.icons[slot.id];
+                        img.className = 'w-6 h-6 pixelated rounded-sm';
+                        btn.appendChild(img);
+
+                        const cnt = document.createElement('span');
+                        cnt.className = 'absolute bottom-0 right-1 text-[10px] font-mono-code font-bold text-white drop-shadow';
+                        cnt.textContent = slot.count;
+                        btn.appendChild(cnt);
+                    }
+
+                    grid.appendChild(btn);
+                }
+
+                document.getElementById('selected-slot-label').textContent = `Slot #${this.selectedSlot}`;
+                const activeSlot = this.inventory[this.selectedSlot - 1];
+                const nameEl = document.getElementById('slot-item-name');
+                if (activeSlot && activeSlot.id !== 0 && activeSlot.count > 0) {
+                    nameEl.textContent = `${BLOCK_DEFS[activeSlot.id].name} (x${activeSlot.count})`;
+                    nameEl.className = 'text-amber-300 font-mono-code truncate';
+                } else {
+                    nameEl.textContent = 'Empty Slot';
+                    nameEl.className = 'text-slate-500 font-mono-code truncate';
+                }
+            },
+
+            clearSelectedSlot() {
+                this.inventory[this.selectedSlot - 1] = { id: 0, count: 0 };
+                this.renderInventoryUI();
+            },
+
+            fillSelectedSlot() {
+                const selectEl = document.getElementById('spawn-item-select');
+                const blockId = parseInt(selectEl.value, 10) || 4;
+                const slot = this.inventory[this.selectedSlot - 1];
+                if (slot.id === blockId) {
+                    slot.count = Math.min(64, slot.count + 16);
+                } else {
+                    slot.id = blockId;
+                    slot.count = 16;
+                }
+                this.renderInventoryUI();
+            },
+
+            updateHUD() {
+                document.getElementById('hud-x').textContent = this.x;
+                document.getElementById('hud-y').textContent = this.y;
+                document.getElementById('hud-z').textContent = this.z;
+                document.getElementById('hud-facing').textContent = DIR_VECTORS[this.dir].name;
+
+                const fuelText = document.getElementById('hud-fuel-text');
+                const fuelBar = document.getElementById('hud-fuel-bar');
+                if (this.infiniteFuel) {
+                    fuelText.textContent = 'UNLIMITED';
+                    fuelBar.style.width = '100%';
+                } else {
+                    fuelText.textContent = `${this.fuel} / ${this.fuelLimit}`;
+                    const pct = Math.min(100, Math.max(2, (this.fuel / 2000) * 100));
+                    fuelBar.style.width = `${pct}%`;
+                }
+
+                const front = this.frontCoords(0, 1);
+                const frontId = World.getBlock(front.x, front.y, front.z);
+                const frontDef = BLOCK_DEFS[frontId] || BLOCK_DEFS[0];
+                document.getElementById('hud-front-block').textContent = frontDef.name;
+            }
+        };
+
+        /***********************************************************************
+         * 5. CRAFTOS TERMINAL CONSOLE
+         ***********************************************************************/
+        const Terminal = {
+            outputEl: null,
+
+            init() {
+                this.outputEl = document.getElementById('terminal-output');
+                this.clear();
+                this.println("CraftOS 1.8 (CC: Tweaked 3D Simulator)", "#fbbf24");
+                this.println("Type Lua commands below or click 'Run' above.", "#94a3b8");
+            },
+
+            clear() {
+                if (this.outputEl) this.outputEl.innerHTML = '';
+            },
+
+            println(text, color = "#fde68a") {
+                if (!this.outputEl) return;
+                const line = document.createElement('div');
+                line.style.color = color;
+                line.className = 'whitespace-pre-wrap break-words leading-snug';
+                line.textContent = String(text);
+                this.outputEl.appendChild(line);
+                this.outputEl.scrollTop = this.outputEl.scrollHeight;
+            },
+
+            write(text, color = "#fde68a") {
+                if (!this.outputEl) return;
+                let last = this.outputEl.lastElementChild;
+                if (!last) {
+                    this.println(text, color);
+                    return;
+                }
+                last.textContent += String(text);
+                this.outputEl.scrollTop = this.outputEl.scrollHeight;
+            }
+        };
+
+        /***********************************************************************
+         * 6. FENGARI LUA 5.3 COROUTINE ENGINE & CC:TWEAKED RUNTIME
+         ***********************************************************************/
+        const Simulator = {
+            running: false,
+            paused: false,
+            tickDelay: 200, // ms per action
+            timerId: null,
+            L: null,
+
+            updateSpeed(val) {
+                this.tickDelay = parseInt(val, 10);
+                const label = document.getElementById('speed-val');
+                if (this.tickDelay === 0) {
+                    label.textContent = 'WARP';
+                } else {
+                    label.textContent = (this.tickDelay / 1000).toFixed(2) + 's';
+                }
+            },
+
+            toggleInfiniteFuel(checked) {
+                TurtleState.infiniteFuel = checked;
+                TurtleState.updateHUD();
+            },
+
+            updateButtons() {
+                document.getElementById('btn-run').disabled = this.running;
+                document.getElementById('btn-pause').disabled = !this.running;
+                document.getElementById('btn-step').disabled = !(this.running && this.paused);
+                document.getElementById('btn-stop').disabled = !this.running;
+
+                const badge = document.getElementById('vm-status-badge');
+                const pauseLabel = document.getElementById('pause-label');
+
+                if (!this.running) {
+                    badge.textContent = 'IDLE';
+                    badge.className = 'text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
+                    pauseLabel.textContent = 'Pause';
+                } else if (this.paused) {
+                    badge.textContent = 'PAUSED';
+                    badge.className = 'text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
+                    pauseLabel.textContent = 'Resume';
+                } else {
+                    badge.textContent = 'RUNNING';
+                    badge.className = 'text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse';
+                    pauseLabel.textContent = 'Pause';
+                }
+            },
+
+            // Host Dispatcher invoked from inside Lua via js.global:ccHostCall(cmd, arg1, arg2)
+            hostDispatch(cmd, arg1, arg2) {
+                switch (cmd) {
+                    case 'print':
+                        Terminal.println(arg1);
+                        return { ok: true };
+                    case 'write':
+                        Terminal.write(arg1);
+                        return { ok: true };
+                    case 'clear':
+                        Terminal.clear();
+                        return { ok: true };
+                    case 'gps':
+                        return { x: TurtleState.x, y: TurtleState.y, z: TurtleState.z };
+
+                    // Movement
+                    case 'forward': {
+                        const [ok, err] = TurtleState.move(0, 1);
+                        return { ok, err };
+                    }
+                    case 'back': {
+                        const [ok, err] = TurtleState.move(0, -1);
+                        return { ok, err };
+                    }
+                    case 'up': {
+                        const [ok, err] = TurtleState.move(1, 1);
+                        return { ok, err };
+                    }
+                    case 'down': {
+                        const [ok, err] = TurtleState.move(-1, 1);
+                        return { ok, err };
+                    }
+                    case 'turnLeft': {
+                        const [ok, err] = TurtleState.turn(-1);
+                        return { ok, err };
+                    }
+                    case 'turnRight': {
+                        const [ok, err] = TurtleState.turn(1);
+                        return { ok, err };
+                    }
+
+                    // Digging
+                    case 'dig': {
+                        const [ok, err] = TurtleState.dig(0);
+                        return { ok, err };
+                    }
+                    case 'digUp': {
+                        const [ok, err] = TurtleState.dig(1);
+                        return { ok, err };
+                    }
+                    case 'digDown': {
+                        const [ok, err] = TurtleState.dig(-1);
+                        return { ok, err };
+                    }
+
+                    // Placing
+                    case 'place': {
+                        const [ok, err] = TurtleState.place(0);
+                        return { ok, err };
+                    }
+                    case 'placeUp': {
+                        const [ok, err] = TurtleState.place(1);
+                        return { ok, err };
+                    }
+                    case 'placeDown': {
+                        const [ok, err] = TurtleState.place(-1);
+                        return { ok, err };
+                    }
+
+                    // Detection & Inspection
+                    case 'detect':
+                        return { ok: TurtleState.detect(0) };
+                    case 'detectUp':
+                        return { ok: TurtleState.detect(1) };
+                    case 'detectDown':
+                        return { ok: TurtleState.detect(-1) };
+
+                    case 'inspect': {
+                        const [ok, info] = TurtleState.inspect(0);
+                        return { ok, name: info?.name || info, isOre: !!info?.isOre };
+                    }
+                    case 'inspectUp': {
+                        const [ok, info] = TurtleState.inspect(1);
+                        return { ok, name: info?.name || info, isOre: !!info?.isOre };
+                    }
+                    case 'inspectDown': {
+                        const [ok, info] = TurtleState.inspect(-1);
+                        return { ok, name: info?.name || info, isOre: !!info?.isOre };
+                    }
+
+                    case 'compare':
+                        return { ok: TurtleState.compare(0) };
+                    case 'compareUp':
+                        return { ok: TurtleState.compare(1) };
+                    case 'compareDown':
+                        return { ok: TurtleState.compare(-1) };
+
+                    // Inventory & Fuel
+                    case 'select':
+                        return { ok: TurtleState.select(arg1) };
+                    case 'getSelectedSlot':
+                        return { val: TurtleState.selectedSlot };
+                    case 'getItemCount': {
+                        const s = arg1 ? Math.floor(Number(arg1)) - 1 : TurtleState.selectedSlot - 1;
+                        return { val: TurtleState.inventory[s]?.count || 0 };
+                    }
+                    case 'getItemSpace': {
+                        const s = arg1 ? Math.floor(Number(arg1)) - 1 : TurtleState.selectedSlot - 1;
+                        const cnt = TurtleState.inventory[s]?.count || 0;
+                        return { val: Math.max(0, 64 - cnt) };
+                    }
+                    case 'getItemDetail': {
+                        const s = arg1 ? Math.floor(Number(arg1)) - 1 : TurtleState.selectedSlot - 1;
+                        const slot = TurtleState.inventory[s];
+                        if (!slot || slot.id === 0 || slot.count <= 0) return { ok: false };
+                        return { ok: true, name: BLOCK_DEFS[slot.id].name, count: slot.count };
+                    }
+                    case 'transferTo':
+                        return { ok: TurtleState.transferTo(arg1, arg2 ?? 64) };
+                    case 'refuel': {
+                        const [ok, err] = TurtleState.refuel(arg1 ?? 64);
+                        return { ok, err };
+                    }
+                    case 'getFuelLevel':
+                        return { val: TurtleState.infiniteFuel ? 999999 : TurtleState.fuel };
+                    case 'getFuelLimit':
+                        return { val: TurtleState.fuelLimit };
+                    case 'drop':
+                        return { ok: TurtleState.drop(arg1 ?? 64) };
+                    default:
+                        return { ok: true };
+                }
+            },
+
+            initLuaBootstrap(userScript) {
+                const lua = fengari.lua;
+                const lauxlib = fengari.lauxlib;
+                const lualib = fengari.lualib;
+                const interop = fengari.interop;
+
+                const L = lauxlib.luaL_newstate();
+                lualib.luaL_openlibs(L);
+                interop.luaopen_js(L);
+                lua.lua_setglobal(L, fengari.to_luastring("js"));
+
+                // Store user script safely on window for Fengari to read without string escaping issues
+                window.__ccUserScript = userScript;
+
+                const bootstrapLua = `
+                    local js = require("js")
+                    local global = js.global
+
+                    local function host(cmd, a, b)
+                        return global:ccHostCall(cmd, a, b)
+                    end
+
+                    local function stepAction(cmd, a, b)
+                        local res = host(cmd, a, b)
+                        coroutine.yield("STEP")
+                        return res.ok, res.err
+                    end
+
+                    -- Override print & write
+                    function print(...)
+                        local parts = {}
+                        for i = 1, select("#", ...) do
+                            parts[#parts + 1] = tostring(select(i, ...))
+                        end
+                        host("print", table.concat(parts, " "))
+                    end
+
+                    function write(text)
+                        host("write", tostring(text or ""))
+                    end
+
+                    function sleep(sec)
+                        coroutine.yield("SLEEP:" .. tostring(tonumber(sec) or 0.05))
+                    end
+
+                    os = os or {}
+                    os.sleep = sleep
+
+                    term = {
+                        clear = function() host("clear") end,
+                        setCursorPos = function(x, y) end
+                    }
+
+                    gps = {
+                        locate = function()
+                            local r = host("gps")
+                            return r.x, r.y, r.z
+                        end
+                    }
+
+                    turtle = {
+                        forward = function() return stepAction("forward") end,
+                        back = function() return stepAction("back") end,
+                        up = function() return stepAction("up") end,
+                        down = function() return stepAction("down") end,
+                        turnLeft = function() return stepAction("turnLeft") end,
+                        turnRight = function() return stepAction("turnRight") end,
+
+                        dig = function() return stepAction("dig") end,
+                        digUp = function() return stepAction("digUp") end,
+                        digDown = function() return stepAction("digDown") end,
+
+                        place = function() return stepAction("place") end,
+                        placeUp = function() return stepAction("placeUp") end,
+                        placeDown = function() return stepAction("placeDown") end,
+
+                        detect = function() return host("detect").ok end,
+                        detectUp = function() return host("detectUp").ok end,
+                        detectDown = function() return host("detectDown").ok end,
+
+                        inspect = function()
+                            local r = host("inspect")
+                            if not r.ok then return false, r.name end
+                            return true, { name = r.name, tags = { ["minecraft:ores"] = r.isOre } }
+                        end,
+                        inspectUp = function()
+                            local r = host("inspectUp")
+                            if not r.ok then return false, r.name end
+                            return true, { name = r.name, tags = { ["minecraft:ores"] = r.isOre } }
+                        end,
+                        inspectDown = function()
+                            local r = host("inspectDown")
+                            if not r.ok then return false, r.name end
+                            return true, { name = r.name, tags = { ["minecraft:ores"] = r.isOre } }
+                        end,
+
+                        compare = function() return host("compare").ok end,
+                        compareUp = function() return host("compareUp").ok end,
+                        compareDown = function() return host("compareDown").ok end,
+
+                        select = function(slot)
+                            local ok = host("select", slot).ok
+                            coroutine.yield("FAST")
+                            return ok
+                        end,
+                        getSelectedSlot = function() return host("getSelectedSlot").val end,
+                        getItemCount = function(slot) return host("getItemCount", slot).val end,
+                        getItemSpace = function(slot) return host("getItemSpace", slot).val end,
+                        getItemDetail = function(slot)
+                            local r = host("getItemDetail", slot)
+                            if not r.ok then return nil end
+                            return { name = r.name, count = r.count }
+                        end,
+                        transferTo = function(slot, count) return host("transferTo", slot, count).ok end,
+                        refuel = function(count)
+                            local r = host("refuel", count)
+                            return r.ok, r.err
+                        end,
+                        getFuelLevel = function() return host("getFuelLevel").val end,
+                        getFuelLimit = function() return host("getFuelLimit").val end,
+                        drop = function(count) return host("drop", count).ok end,
+                        dropUp = function(count) return host("drop", count).ok end,
+                        dropDown = function(count) return host("drop", count).ok end,
+                        suck = function(count) return true end,
+                        suckUp = function(count) return true end,
+                        suckDown = function(count) return true end
+                    }
+
+                    local fn, syntaxErr = load(global.__ccUserScript, "startup.lua")
+                    if not fn then
+                        host("print", "[SYNTAX ERROR] " .. tostring(syntaxErr))
+                        function __ccStep() return "DONE" end
+                    else
+                        local co = coroutine.create(fn)
+                        function __ccStep()
+                            if coroutine.status(co) == "dead" then return "DONE" end
+                            local ok, val = coroutine.resume(co)
+                            if not ok then
+                                host("print", "[RUNTIME ERROR] " .. tostring(val))
+                                return "ERROR"
+                            end
+                            if coroutine.status(co) == "dead" then return "DONE" end
+                            return tostring(val or "STEP")
+                        end
+                    end
+                `;
+
+                lauxlib.luaL_dostring(L, fengari.to_luastring(bootstrapLua));
+                return L;
+            },
+
+            runScript(customCode = null) {
+                this.stopScript();
+                const code = customCode !== null ? customCode : document.getElementById('code-editor').value;
+                if (customCode === null) {
+                    Terminal.println("> Running startup.lua...", "#38bdf8");
+                }
+
+                this.L = this.initLuaBootstrap(code);
+                this.running = true;
+                this.paused = false;
+                this.updateButtons();
+                this.scheduleNextStep(10);
+            },
+
+            scheduleNextStep(delayMs) {
+                if (!this.running || this.paused) return;
+                clearTimeout(this.timerId);
+                this.timerId = setTimeout(() => this.executeTick(), delayMs);
+            },
+
+            executeTick() {
+                if (!this.running || !this.L) return;
+
+                const lua = fengari.lua;
+                // In WARP (0ms) mode, run up to 15 actions per animation frame so browser remains responsive
+                const batchCount = (this.tickDelay === 0 && !this.paused) ? 12 : 1;
+
+                for (let i = 0; i < batchCount; i++) {
+                    lua.lua_getglobal(this.L, fengari.to_luastring("__ccStep"));
+                    const status = lua.lua_pcall(this.L, 0, 1, 0);
+                    if (status !== lua.LUA_OK) {
+                        const errMsg = lua.lua_tojsstring(this.L, -1);
+                        Terminal.println("[LUA VM ERROR] " + errMsg, "#f87171");
+                        this.stopScript();
+                        return;
+                    }
+
+                    const res = lua.lua_tojsstring(this.L, -1);
+                    lua.lua_pop(this.L, 1);
+
+                    if (res === "DONE" || res === "ERROR") {
+                        if (res === "DONE") Terminal.println("Program finished.", "#4ade80");
+                        this.stopScript();
+                        return;
+                    }
+
+                    if (res.startsWith("SLEEP:")) {
+                        const sec = parseFloat(res.split(":")[1]) || 0.1;
+                        this.scheduleNextStep(Math.min(5000, sec * 1000));
+                        return;
+                    }
+                }
+
+                if (this.running && !this.paused) {
+                    this.scheduleNextStep(Math.max(16, this.tickDelay));
+                }
+            },
+
+            togglePause() {
+                if (!this.running) return;
+                this.paused = !this.paused;
+                this.updateButtons();
+                if (!this.paused) {
+                    this.scheduleNextStep(20);
+                } else {
+                    clearTimeout(this.timerId);
+                }
+            },
+
+            stepOnce() {
+                if (!this.running || !this.paused) return;
+                this.executeTick();
+            },
+
+            stopScript() {
+                clearTimeout(this.timerId);
+                this.running = false;
+                this.paused = false;
+                this.L = null;
+                this.updateButtons();
+            },
+
+            runReplCommand(inputEl) {
+                const cmd = inputEl.value.trim();
+                if (!cmd) return;
+                Terminal.println("lua> " + cmd, "#fbbf24");
+                inputEl.value = '';
+                this.runScript(cmd);
+            },
+
+            manualAction(actionName) {
+                if (this.running) return;
+                this.hostDispatch(actionName);
+            }
+        };
+
+        // Expose Host Dispatcher globally for Fengari JS interop
+        window.ccHostCall = function(cmd, arg1, arg2) {
+            return Simulator.hostDispatch(cmd, arg1, arg2);
+        };
+
+        /***********************************************************************
+         * 7. CODE EDITOR & 5 PRESET CC:TWEAKED SCRIPTS
+         ***********************************************************************/
+        const PRESET_SCRIPTS = {
+            tunnel3x3: `-- 1. 3x3 Tunnel Bore (Branch Miner)
+-- Excavates a 3-wide, 3-high tunnel forward for N steps
+local length = 4
+
+local function digColumn()
+  turtle.dig()
+  turtle.forward()
+  turtle.digUp()
+  turtle.digDown()
+end
+
+print("Starting 3x3 Tunnel Bore (" .. length .. "m)...")
+
+for step = 1, length do
+  print("Excavating slice " .. step .. "/" .. length)
+  -- Center column
+  digColumn()
+
+  -- Left column
+  turtle.turnLeft()
+  turtle.dig()
+  turtle.forward()
+  turtle.digUp()
+  turtle.digDown()
+
+  -- Return to center & dig Right column
+  turtle.back()
+  turtle.turnRight()
+  turtle.turnRight()
+  turtle.dig()
+  turtle.forward()
+  turtle.digUp()
+  turtle.digDown()
+
+  -- Return to center & face forward
+  turtle.back()
+  turtle.turnLeft()
+end
+
+print("3x3 Tunnel Complete! Fuel left: " .. turtle.getFuelLevel())`,
+
+            quarry4x4: `-- 2. 4x4 Quarry Excavator
+-- Digs a 4x4 pit downward for 2 layers
+local size = 4
+local layers = 2
+
+print("Starting 4x4 Quarry (" .. layers .. " layers)...")
+
+for d = 1, layers do
+  print("Mining layer " .. d)
+  turtle.digDown()
+  turtle.down()
+
+  for row = 1, size do
+    for col = 1, size - 1 do
+      turtle.dig()
+      turtle.forward()
+    end
+
+    if row < size then
+      if row % 2 == 1 then
+        turtle.turnRight()
+        turtle.dig()
+        turtle.forward()
+        turtle.turnRight()
+      else
+        turtle.turnLeft()
+        turtle.dig()
+        turtle.forward()
+        turtle.turnLeft()
+      end
+    end
+  end
+  -- Orient for next layer
+  turtle.turnRight()
+end
+
+print("Quarry finished! Climbing back up...")
+for d = 1, layers do
+  turtle.up()
+end`,
+
+            tower: `-- 3. Watchtower / Wall Perimeter Builder
+-- Builds a 4x4 stone battlements tower using Slot #1 & #2
+print("Building 4x4 Fortified Watchtower...")
+
+local function selectBuildingBlock()
+  for s = 1, 16 do
+    if turtle.getItemCount(s) > 0 then
+      local detail = turtle.getItemDetail(s)
+      if detail and (detail.name == "minecraft:cobblestone" or detail.name == "minecraft:oak_planks") then
+        turtle.select(s)
+        return true
+      end
+    end
+  end
+  return false
+end
+
+for height = 1, 3 do
+  turtle.up()
+  print("Constructing wall tier " .. height)
+  for side = 1, 4 do
+    for step = 1, 3 do
+      if selectBuildingBlock() then
+        turtle.placeDown()
+      end
+      turtle.forward()
+    end
+    turtle.turnRight()
+  end
+end
+
+print("Watchtower complete!")`,
+
+            veinminer: `-- 4. Recursive Ore Vein Miner (turtle.inspect)
+-- Digs into the cliff & recursively mines connected ores!
+local TARGET_ORES = {
+  ["minecraft:coal_ore"] = true,
+  ["minecraft:iron_ore"] = true,
+  ["minecraft:diamond_ore"] = true
+}
+
+local minedCount = 0
+
+local function isOre(ok, data)
+  return ok and data and TARGET_ORES[data.name] == true
+end
+
+local function mineVein()
+  -- Check all 4 horizontal directions
+  for dir = 1, 4 do
+    if isOre(turtle.inspect()) then
+      local _, info = turtle.inspect()
+      print("Found ore: " .. info.name)
+      turtle.dig()
+      if turtle.forward() then
+        minedCount = minedCount + 1
+        mineVein()
+        turtle.back()
+      end
+    end
+    turtle.turnRight()
+  end
+
+  -- Check Up
+  if isOre(turtle.inspectUp()) then
+    turtle.digUp()
+    if turtle.up() then
+      minedCount = minedCount + 1
+      mineVein()
+      turtle.down()
+    end
+  end
+
+  -- Check Down
+  if isOre(turtle.inspectDown()) then
+    turtle.digDown()
+    if turtle.down() then
+      minedCount = minedCount + 1
+      mineVein()
+      turtle.up()
+    end
+  end
+end
+
+print("Advancing to cliffside & scanning for ore veins...")
+turtle.down()
+for i = 1, 5 do
+  turtle.dig()
+  turtle.forward()
+  mineVein()
+end
+
+print("Vein mining complete! Total ores extracted: " .. minedCount)`,
+
+            treechopper: `-- 5. Tree Chopper & Automatic Replanter
+-- Approaches an Oak Tree, harvests trunk, and plants sapling
+print("Searching for tree in front...")
+
+-- Approach tree if 1 block away
+if not turtle.detect() then
+  turtle.forward()
+end
+
+local ok, block = turtle.inspect()
+if ok and block.name == "minecraft:oak_log" then
+  print("Oak Tree detected! Harvesting trunk...")
+  turtle.dig()
+  turtle.forward()
+
+  local height = 0
+  while true do
+    local upOk, upBlock = turtle.inspectUp()
+    if upOk and upBlock.name == "minecraft:oak_log" then
+      turtle.digUp()
+      turtle.up()
+      height = height + 1
+    else
+      break
+    end
+  end
+
+  print("Felled " .. (height + 1) .. " logs! Descending...")
+  for i = 1, height do
+    turtle.down()
+  end
+
+  turtle.back()
+
+  -- Replant sapling from Slot 4 if available
+  for s = 1, 16 do
+    local d = turtle.getItemDetail(s)
+    if d and d.name == "minecraft:oak_sapling" then
+      turtle.select(s)
+      turtle.place()
+      print("Oak Sapling replanted!")
+      break
+    end
+  end
+else
+  print("No oak_log directly ahead. Try loading 'Oak Tree Farm' world preset!")
+end`
+        };
+
+        const Editor = {
+            textarea: null,
+            lineNums: null,
+
+            init() {
+                this.textarea = document.getElementById('code-editor');
+                this.lineNums = document.getElementById('line-numbers');
+
+                this.textarea.addEventListener('input', () => this.updateLineNumbers());
+                this.textarea.addEventListener('scroll', () => {
+                    this.lineNums.scrollTop = this.textarea.scrollTop;
+                });
+
+                // Support Tab key indentation
+                this.textarea.addEventListener('keydown', (e) => {
+                    if (e.key === 'Tab') {
+                        e.preventDefault();
+                        const start = this.textarea.selectionStart;
+                        const end = this.textarea.selectionEnd;
+                        this.textarea.value = this.textarea.value.substring(0, start) + "  " + this.textarea.value.substring(end);
+                        this.textarea.selectionStart = this.textarea.selectionEnd = start + 2;
+                        this.updateLineNumbers();
+                    }
+                });
+
+                this.loadPreset('tunnel3x3');
+            },
+
+            updateLineNumbers() {
+                const lines = this.textarea.value.split('\n').length;
+                let html = '';
+                for (let i = 1; i <= lines; i++) {
+                    html += i + '<br>';
+                }
+                this.lineNums.innerHTML = html;
+            },
+
+            loadPreset(key) {
+                if (!PRESET_SCRIPTS[key]) return;
+                this.textarea.value = PRESET_SCRIPTS[key];
+                this.updateLineNumbers();
+
+                // Automatically switch to Tree Farm world if user selects Tree Chopper
+                if (key === 'treechopper' && World.currentPreset !== 'trees') {
+                    document.getElementById('world-preset').value = 'trees';
+                    World.loadPreset('trees');
+                }
+            }
+        };
+
+        /***********************************************************************
+         * 8. UI INITIALIZATION & MODALS
+         ***********************************************************************/
+        const UI = {
+            initDropdowns() {
+                const spawnSelect = document.getElementById('spawn-item-select');
+                const brushSelect = document.getElementById('brush-block-select');
+
+                Object.values(BLOCK_DEFS).forEach(def => {
+                    if (def.id === 0) return;
+                    const opt1 = document.createElement('option');
+                    opt1.value = def.id;
+                    opt1.textContent = def.label;
+                    opt1.className = 'bg-slate-900';
+                    spawnSelect.appendChild(opt1);
+
+                    if (!def.unbreakable && def.id !== 13) {
+                        const opt2 = document.createElement('option');
+                        opt2.value = def.id;
+                        opt2.textContent = def.label;
+                        opt2.className = 'bg-slate-900';
+                        if (def.id === 4) opt2.selected = true;
+                        brushSelect.appendChild(opt2);
+                    }
+                });
+            },
+
+            toggleApiModal() {
+                const modal = document.getElementById('api-modal');
+                if (modal.classList.contains('hidden')) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                } else {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            }
+        };
+
+        // BOOTSTRAP ON WINDOW LOAD
+        window.onload = function() {
+            lucide.createIcons();
+            TextureFactory.init();
+            UI.initDropdowns();
+            Terminal.init();
+            Viewport.init();
+            World.loadPreset('overworld');
+            Editor.init();
+        };
+    </script>
+</body>
+</html>
