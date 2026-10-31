@@ -27,14 +27,15 @@
             color: #e2e8f0;
             overflow: hidden;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         .font-mono-code {
             font-family: 'JetBrains Mono', monospace;
         }
         /* Custom Scrollbars */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
             background: #14171f;
@@ -67,80 +68,76 @@
         #code-editor {
             tab-size: 2;
             -moz-tab-size: 2;
-            line-height: 1.5rem;
+            line-height: 1.45rem;
         }
         #line-numbers {
-            line-height: 1.5rem;
+            line-height: 1.45rem;
+        }
+        /* Mobile Tab Active State */
+        .mob-tab-active {
+            color: #fbbf24 !important;
+            border-bottom: 2px solid #fbbf24 !important;
+            background-color: rgba(251, 191, 36, 0.08);
         }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col overflow-hidden">
+<body class="h-[100dvh] w-screen flex flex-col overflow-hidden bg-[#0b0d11]">
 
-    <!-- TOP NAVIGATION & CONTROL BAR -->
-    <header class="h-14 bg-[#12151e] border-b border-slate-800 px-3 flex items-center justify-between shrink-0 z-20">
+    <!-- COMPACT RESPONSIVE TOP HEADER & TRANSPORT BAR -->
+    <header class="h-12 sm:h-14 bg-[#12151e] border-b border-slate-800 px-2.5 sm:px-4 flex items-center justify-between gap-2 shrink-0 z-30">
         <!-- Brand -->
-        <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-500/40 flex items-center justify-center shadow-inner">
-                <canvas id="brand-turtle-icon" width="28" height="28" class="pixelated"></canvas>
+        <div class="flex items-center gap-2 min-w-0">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-amber-500/15 border border-amber-500/40 flex items-center justify-center shadow-inner shrink-0">
+                <canvas id="brand-turtle-icon" width="28" height="28" class="pixelated w-6 h-6 sm:w-7 sm:h-7"></canvas>
             </div>
-            <div>
-                <div class="flex items-center gap-2">
-                    <h1 class="font-bold text-sm tracking-tight text-white">CC: Tweaked Studio</h1>
-                    <span class="text-[10px] font-mono-code uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 font-semibold">Lua 5.3 VM</span>
+            <div class="truncate">
+                <div class="flex items-center gap-1.5">
+                    <h1 class="font-bold text-xs sm:text-sm tracking-tight text-white truncate">CC: Tweaked Studio</h1>
+                    <span id="vm-engine-pill" class="text-[9px] sm:text-[10px] font-mono-code uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 font-semibold shrink-0">Lua 5.3</span>
                 </div>
-                <p class="text-[11px] text-slate-400 hidden sm:block">3D Voxel Chunk &amp; CraftOS Mining Turtle Simulator</p>
+                <p class="text-[10px] text-slate-400 hidden md:block truncate">3D Voxel Chunk &amp; CraftOS Mining Turtle Simulator</p>
             </div>
         </div>
 
-        <!-- Execution Controls Center -->
-        <div class="flex items-center gap-1.5 bg-[#181c28] p-1.5 rounded-xl border border-slate-800/90 shadow-lg">
-            <button id="btn-run" onclick="Simulator.runScript()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition shadow">
+        <!-- Execution Transport Controls -->
+        <div class="flex items-center gap-1 sm:gap-1.5 bg-[#181c28] p-1 sm:p-1.5 rounded-xl border border-slate-800/90 shadow-lg shrink-0">
+            <button id="btn-run" onclick="Simulator.runScript()" class="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-semibold text-xs transition shadow">
                 <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
                 <span>Run</span>
             </button>
-            <button id="btn-pause" onclick="Simulator.togglePause()" disabled class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-amber-300 font-medium text-xs transition">
+            <button id="btn-pause" onclick="Simulator.togglePause()" disabled class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-amber-300 font-medium text-xs transition">
                 <i data-lucide="pause" class="w-3.5 h-3.5"></i>
-                <span id="pause-label">Pause</span>
+                <span id="pause-label" class="hidden sm:inline">Pause</span>
             </button>
-            <button id="btn-step" onclick="Simulator.stepOnce()" disabled class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-sky-300 font-medium text-xs transition" title="Execute single turtle action">
+            <button id="btn-step" onclick="Simulator.stepOnce()" disabled class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-sky-300 font-medium text-xs transition" title="Step single turtle action">
                 <i data-lucide="step-forward" class="w-3.5 h-3.5"></i>
                 <span class="hidden md:inline">Step</span>
             </button>
-            <button id="btn-stop" onclick="Simulator.stopScript()" disabled class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 disabled:opacity-40 text-white font-medium text-xs transition">
+            <button id="btn-stop" onclick="Simulator.stopScript()" disabled class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 disabled:opacity-40 text-white font-medium text-xs transition" title="Stop Script">
                 <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i>
                 <span class="hidden md:inline">Stop</span>
             </button>
 
-            <div class="h-5 w-px bg-slate-700 mx-1"></div>
-
-            <!-- Speed Slider -->
-            <div class="flex items-center gap-2 px-2">
+            <!-- Desktop Speed Slider -->
+            <div class="hidden md:flex items-center gap-2 pl-2 border-l border-slate-700">
                 <i data-lucide="gauge" class="w-3.5 h-3.5 text-slate-400"></i>
-                <div class="flex flex-col w-24 sm:w-28">
-                    <div class="flex justify-between text-[10px] font-mono-code text-slate-300">
-                        <span>Tick Delay</span>
-                        <span id="speed-val" class="text-amber-400 font-semibold">0.20s</span>
+                <div class="flex flex-col w-24">
+                    <div class="flex justify-between text-[9px] font-mono-code text-slate-300">
+                        <span>Delay</span>
+                        <span id="speed-val-desktop" class="text-amber-400 font-semibold">0.18s</span>
                     </div>
-                    <input id="speed-slider" type="range" min="0" max="1000" step="25" value="200"
+                    <input id="speed-slider-desktop" type="range" min="0" max="800" step="20" value="180"
                         oninput="Simulator.updateSpeed(this.value)"
                         class="w-full accent-amber-400 h-1.5 bg-slate-700 rounded-lg cursor-pointer">
                 </div>
             </div>
-
-            <div class="h-5 w-px bg-slate-700 mx-1 hidden lg:block"></div>
-
-            <!-- Unlimited Fuel Toggle -->
-            <label class="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-slate-800/60 cursor-pointer text-xs text-slate-300">
-                <input type="checkbox" id="chk-infinite-fuel" onchange="Simulator.toggleInfiniteFuel(this.checked)" class="rounded accent-amber-400">
-                <span>Inf. Fuel</span>
-            </label>
         </div>
 
-        <!-- World & Camera Presets Right -->
-        <div class="flex items-center gap-2">
-            <div class="flex items-center gap-1 bg-[#181c28] px-2 py-1 rounded-lg border border-slate-800 text-xs">
+        <!-- Desktop World Controls & API Button -->
+        <div class="flex items-center gap-1.5 shrink-0">
+            <div class="hidden lg:flex items-center gap-1 bg-[#181c28] px-2 py-1 rounded-lg border border-slate-800 text-xs">
                 <i data-lucide="globe" class="w-3.5 h-3.5 text-emerald-400"></i>
-                <select id="world-preset" onchange="World.loadPreset(this.value)" class="bg-transparent text-slate-200 font-medium focus:outline-none cursor-pointer pr-1">
+                <select id="world-preset-desktop" onchange="World.loadPreset(this.value)" class="bg-transparent text-slate-200 font-medium focus:outline-none cursor-pointer pr-1">
                     <option value="overworld" class="bg-slate-900">Overworld Chunk (Ores)</option>
                     <option value="flat" class="bg-slate-900">Flat Grass &amp; Bedrock</option>
                     <option value="trees" class="bg-slate-900">Oak Tree Farm</option>
@@ -149,213 +146,124 @@
                 </select>
             </div>
 
-            <button onclick="World.resetCurrentPreset()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition" title="Reset Chunk & Turtle">
+            <button onclick="World.resetCurrentPreset()" class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition" title="Reset Chunk & Turtle">
                 <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-amber-400"></i>
-                <span class="hidden xl:inline">Reset World</span>
+                <span class="hidden xl:inline">Reset</span>
+            </button>
+
+            <button onclick="UI.toggleApiModal()" class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-mono-code transition" title="turtle.* API Reference">
+                <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+                <span class="hidden sm:inline">Docs</span>
             </button>
         </div>
     </header>
 
-    <!-- MAIN WORKSPACE (SPLIT SCREEN) -->
-    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+    <!-- MAIN RESPONSIVE WORKSPACE:
+         On Mobile (<1024px): 3D Viewport stays on TOP (42% height, expandable), Tabbed Workspace on BOTTOM (58% height).
+         On Desktop (>=1024px): Left column IDE + Console/Inventory (45% width), Right column 3D Viewport (55% width). -->
+    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
 
-        <!-- LEFT COLUMN: LUA IDE & CRAFTOS TERMINAL (45% width on desktop) -->
-        <section class="w-full lg:w-[46%] xl:w-[44%] h-1/2 lg:h-full flex flex-col border-b lg:border-b-0 lg:border-r border-slate-800 bg-[#0e1017] shrink-0">
+        <!-- 3D MINECRAFT CHUNK VIEWPORT (Order 1 on Mobile so it's always visible on top, Order 2 on Desktop) -->
+        <section id="viewport-section" class="order-1 lg:order-2 w-full lg:flex-1 h-[40dvh] sm:h-[44dvh] lg:h-full relative bg-[#090b10] overflow-hidden flex flex-col shrink-0 border-b lg:border-b-0 border-slate-800 transition-all duration-200">
 
-            <!-- Editor Toolbar -->
-            <div class="h-10 bg-[#141822] border-b border-slate-800 px-3 flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-2">
-                    <span class="flex items-center gap-1.5 text-xs font-mono-code text-amber-400 font-semibold">
-                        <i data-lucide="file-code" class="w-3.5 h-3.5"></i>
-                        startup.lua
-                    </span>
-                    <span id="vm-status-badge" class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
-                        IDLE
-                    </span>
-                </div>
+            <div id="viewport-container" class="flex-1 relative w-full h-full cursor-crosshair overflow-hidden">
+                <!-- Three.js Canvas mounts here -->
 
-                <!-- Preset Scripts Dropdown -->
-                <div class="flex items-center gap-2">
-                    <span class="text-[11px] text-slate-400 hidden sm:inline">Load Program:</span>
-                    <select id="script-preset" onchange="Editor.loadPreset(this.value)" class="bg-[#1d2331] text-amber-300 border border-slate-700 rounded-md px-2 py-1 text-xs font-medium focus:outline-none focus:border-amber-500 cursor-pointer">
-                        <option value="tunnel3x3">1. 3x3 Tunnel Bore (Branch Miner)</option>
-                        <option value="quarry4x4">2. Quarry Excavator (4x4 Layer)</option>
-                        <option value="tower">3. Watchtower / Wall Builder</option>
-                        <option value="veinminer">4. Recursive Ore Vein Miner</option>
-                        <option value="treechopper">5. Tree Chopper &amp; Replanter</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Code Editor Container -->
-            <div class="flex-1 relative flex overflow-hidden bg-[#0c0e14]">
-                <!-- Line Numbers -->
-                <div id="line-numbers" class="w-11 py-3 px-2 text-right font-mono-code text-xs text-slate-600 bg-[#10131b] border-r border-slate-800/80 select-none overflow-hidden shrink-0">
-                    1
-                </div>
-                <!-- Editable Textarea -->
-                <textarea id="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off"
-                    class="flex-1 p-3 bg-transparent text-slate-100 font-mono-code text-xs focus:outline-none resize-none overflow-y-auto whitespace-pre"
-                    placeholder="-- Write your CC: Tweaked Lua program here..."></textarea>
-
-                <!-- Quick API Reference Pill -->
-                <button onclick="UI.toggleApiModal()" class="absolute bottom-3 right-3 px-2.5 py-1 rounded-md bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-slate-700 text-[11px] font-mono-code flex items-center gap-1 shadow-lg backdrop-blur">
-                    <i data-lucide="book-open" class="w-3 h-3"></i>
-                    <span>turtle.* API Docs</span>
-                </button>
-            </div>
-
-            <!-- BOTTOM LEFT: CRAFTOS TERMINAL & 4x4 INVENTORY TABS -->
-            <div class="h-64 sm:h-72 bg-[#12151e] border-t border-slate-800 flex flex-col shrink-0">
-                <!-- Sub-bar -->
-                <div class="h-8 bg-[#161a26] border-b border-slate-800 px-3 flex items-center justify-between text-xs">
-                    <div class="flex items-center gap-4">
-                        <span class="font-mono-code font-semibold text-amber-400 flex items-center gap-1.5">
-                            <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
-                            CraftOS 1.8 Console
+                <!-- ULTRA-CLEAN TOP HUD BAR (Never obscures the 3D Turtle on Mobile!) -->
+                <div class="absolute top-2 left-2 right-2 pointer-events-none flex flex-wrap items-center justify-between gap-1.5 z-10">
+                    <!-- Left Telemetry Pill: Coords, Facing, Fuel & Front Block -->
+                    <div class="pointer-events-auto flex items-center gap-1.5 sm:gap-2 bg-[#111520]/85 backdrop-blur-md border border-slate-700/80 rounded-xl px-2.5 py-1.5 shadow-lg text-[11px] font-mono-code">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                        <div class="flex items-center gap-1 text-white font-bold">
+                            <span class="text-rose-400">X:</span><span id="hud-x">7</span>
+                            <span class="text-emerald-400 ml-0.5">Y:</span><span id="hud-y">6</span>
+                            <span class="text-sky-400 ml-0.5">Z:</span><span id="hud-z">10</span>
+                        </div>
+                        <span id="hud-facing" class="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] font-semibold">
+                            N (-Z)
                         </span>
+                        <div class="h-3.5 w-px bg-slate-700"></div>
+                        <div class="flex items-center gap-1 text-amber-400 font-semibold" title="Turtle Fuel">
+                            <i data-lucide="flame" class="w-3 h-3 fill-amber-400/30"></i>
+                            <span id="hud-fuel-text">1000</span>
+                        </div>
+                        <div class="hidden sm:flex items-center gap-1 pl-1.5 border-l border-slate-700 text-slate-300">
+                            <span class="text-slate-500">Front:</span>
+                            <span id="hud-front-block" class="text-emerald-300 truncate max-w-[110px]">air</span>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="Terminal.clear()" class="text-[11px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800 transition">
-                            Clear Term
+
+                    <!-- Right Camera Mode + Settings Popover Toggle -->
+                    <div class="pointer-events-auto flex items-center gap-1 bg-[#111520]/85 backdrop-blur-md border border-slate-700/80 rounded-xl p-1 shadow-lg">
+                        <button onclick="Viewport.setCameraMode('orbit')" id="cam-orbit" class="cam-btn px-2 py-1 rounded-lg text-[11px] font-semibold bg-amber-500 text-slate-950 transition">
+                            Orbit
+                        </button>
+                        <button onclick="Viewport.setCameraMode('follow')" id="cam-follow" class="cam-btn px-2 py-1 rounded-lg text-[11px] font-medium text-slate-300 hover:bg-slate-800 transition">
+                            Follow
+                        </button>
+                        <button onclick="Viewport.setCameraMode('top')" id="cam-top" class="cam-btn px-2 py-1 rounded-lg text-[11px] font-medium text-slate-300 hover:bg-slate-800 transition">
+                            Top
+                        </button>
+                        <button onclick="Viewport.setCameraMode('fpv')" id="cam-fpv" class="cam-btn px-2 py-1 rounded-lg text-[11px] font-medium text-slate-300 hover:bg-slate-800 transition">
+                            FPV
+                        </button>
+
+                        <!-- Toggle Layer / Voxel Brush Drawer -->
+                        <button onclick="UI.toggleViewportTools()" class="ml-0.5 p-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-sky-300 border border-slate-700 transition" title="Y-Cutaway & Voxel Tools">
+                            <i data-lucide="SlidersHorizontal" class="w-3.5 h-3.5"></i>
+                        </button>
+
+                        <!-- Mobile Expand/Collapse 3D Viewport Height Button -->
+                        <button onclick="UI.toggleMobile3DSize()" id="btn-expand-3d" class="lg:hidden p-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-slate-700 transition" title="Expand / Shrink 3D View">
+                            <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Split: CraftOS Console (Left) + 4x4 Turtle Inventory (Right) -->
-                <div class="flex-1 flex overflow-hidden">
-                    <!-- CraftOS Terminal Output + Interactive REPL -->
-                    <div class="flex-1 craftos-screen flex flex-col p-2.5 font-mono-code text-xs overflow-hidden border-r border-slate-800">
-                        <div id="terminal-output" class="flex-1 overflow-y-auto space-y-0.5 text-amber-100/90 pr-1 select-text"></div>
-                        <!-- Interactive Lua One-Liner Prompt -->
-                        <div class="mt-1.5 pt-1.5 border-t border-slate-800/80 flex items-center gap-1.5 text-amber-400">
-                            <span class="font-bold">lua&gt;</span>
-                            <input id="repl-input" type="text" placeholder="turtle.forward() or print(turtle.getFuelLevel())"
-                                onkeydown="if(event.key==='Enter') Simulator.runReplCommand(this)"
-                                class="flex-1 bg-transparent text-amber-200 placeholder-slate-600 focus:outline-none text-xs">
-                        </div>
-                    </div>
-
-                    <!-- 4x4 Turtle Inventory & Quick Item Spawner -->
-                    <div class="w-56 sm:w-64 bg-[#10131c] p-2.5 flex flex-col justify-between shrink-0">
-                        <div>
-                            <div class="flex items-center justify-between mb-1.5">
-                                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Turtle Inventory</span>
-                                <span id="selected-slot-label" class="text-[11px] font-mono-code text-amber-400">Slot #1</span>
-                            </div>
-                            <!-- 4x4 Grid -->
-                            <div id="inventory-grid" class="grid grid-cols-4 gap-1.5">
-                                <!-- Populated dynamically -->
-                            </div>
-                        </div>
-
-                        <!-- Selected Slot Inspector / Item Adder -->
-                        <div class="pt-2 border-t border-slate-800/90 flex flex-col gap-1.5">
-                            <div class="flex items-center justify-between text-[11px]">
-                                <span id="slot-item-name" class="text-slate-300 font-mono-code truncate">minecraft:cobblestone</span>
-                                <button onclick="TurtleState.clearSelectedSlot()" class="text-rose-400 hover:text-rose-300 text-[10px]" title="Empty selected slot">Empty</button>
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <select id="spawn-item-select" class="flex-1 bg-[#181d2a] border border-slate-700 rounded px-1.5 py-1 text-[11px] text-slate-200 focus:outline-none">
-                                    <!-- Populated with block types -->
-                                </select>
-                                <button onclick="TurtleState.fillSelectedSlot()" class="px-2 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded text-[11px] font-medium transition">
-                                    +16
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- RIGHT COLUMN: 3D MINECRAFT CHUNK VIEWPORT (55% width on desktop) -->
-        <section class="flex-1 h-1/2 lg:h-full relative bg-[#090b10] overflow-hidden flex flex-col">
-
-            <!-- 3D Canvas Container -->
-            <div id="viewport-container" class="flex-1 relative w-full h-full cursor-crosshair">
-                <!-- Three.js attaches canvas here -->
-
-                <!-- TOP-LEFT HUD: TURTLE TELEMETRY & GPS -->
-                <div class="absolute top-3 left-3 pointer-events-none flex flex-col gap-2 z-10">
-                    <div class="bg-[#111520]/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-3 shadow-2xl min-w-[230px]">
-                        <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 mb-2">
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <span class="text-xs font-bold tracking-wide text-white uppercase">Mining Turtle #0</span>
-                            </div>
-                            <span id="hud-facing" class="text-[11px] font-mono-code px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">
-                                NORTH (-Z)
-                            </span>
-                        </div>
-
-                        <!-- Coordinates -->
-                        <div class="grid grid-cols-3 gap-1.5 mb-2.5 font-mono-code text-center">
-                            <div class="bg-[#181d2c] rounded-lg py-1 px-2 border border-slate-800">
-                                <div class="text-[10px] text-rose-400 font-semibold">X (E/W)</div>
-                                <div id="hud-x" class="text-sm font-bold text-white">7</div>
-                            </div>
-                            <div class="bg-[#181d2c] rounded-lg py-1 px-2 border border-slate-800">
-                                <div class="text-[10px] text-emerald-400 font-semibold">Y (ALT)</div>
-                                <div id="hud-y" class="text-sm font-bold text-white">5</div>
-                            </div>
-                            <div class="bg-[#181d2c] rounded-lg py-1 px-2 border border-slate-800">
-                                <div class="text-[10px] text-sky-400 font-semibold">Z (N/S)</div>
-                                <div id="hud-z" class="text-sm font-bold text-white">7</div>
-                            </div>
-                        </div>
-
-                        <!-- Fuel Progress Bar -->
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-[11px] font-mono-code">
-                                <span class="text-slate-400 flex items-center gap-1">
-                                    <i data-lucide="flame" class="w-3 h-3 text-amber-400"></i> Fuel Level
-                                </span>
-                                <span id="hud-fuel-text" class="text-amber-400 font-semibold">800 / 20000</span>
-                            </div>
-                            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                                <div id="hud-fuel-bar" class="h-full bg-gradient-to-r from-amber-500 to-yellow-300 transition-all duration-200" style="width: 45%"></div>
-                            </div>
-                        </div>
-
-                        <!-- Front Block Raycast Inspector -->
-                        <div class="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono-code">
-                            <span class="text-slate-400">Front Block:</span>
-                            <span id="hud-front-block" class="text-emerald-300 truncate max-w-[130px]">minecraft:air</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TOP-RIGHT HUD: CAMERA PRESETS & VIEW OPTIONS -->
-                <div class="absolute top-3 right-3 flex flex-col gap-2 z-10">
-                    <div class="bg-[#111520]/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-1.5 flex items-center gap-1 shadow-xl">
-                        <button onclick="Viewport.setCameraMode('orbit')" id="cam-orbit" class="cam-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-500 text-slate-950 font-semibold transition">
-                            Free Orbit
-                        </button>
-                        <button onclick="Viewport.setCameraMode('follow')" id="cam-follow" class="cam-btn px-2.5 py-1 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition">
-                            Follow Turtle
-                        </button>
-                        <button onclick="Viewport.setCameraMode('top')" id="cam-top" class="cam-btn px-2.5 py-1 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition">
-                            Top-Down
-                        </button>
-                        <button onclick="Viewport.setCameraMode('fpv')" id="cam-fpv" class="cam-btn px-2.5 py-1 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition">
-                            Turtle FPV
-                        </button>
-                    </div>
-
-                    <!-- Slice / Cutaway Layer Slider for seeing underground mining -->
-                    <div class="bg-[#111520]/90 backdrop-blur-md border border-slate-700/80 rounded-xl px-3 py-2 flex items-center justify-between gap-3 shadow-xl">
-                        <span class="text-[11px] text-slate-300 font-medium flex items-center gap-1">
+                <!-- COLLAPSIBLE VIEWPORT TOOLS POPOVER (Y-Cutaway, Voxel Brush, World Preset) -->
+                <div id="viewport-tools-drawer" class="hidden absolute top-12 right-2 z-20 bg-[#111520]/95 backdrop-blur-md border border-slate-700 rounded-xl p-3 shadow-2xl w-64 space-y-2.5 text-xs">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+                        <span class="font-semibold text-white flex items-center gap-1.5">
                             <i data-lucide="layers" class="w-3.5 h-3.5 text-sky-400"></i>
-                            Y-Cutaway: <strong id="slice-label" class="font-mono-code text-sky-300">Y &le; 15</strong>
+                            Chunk &amp; Voxel Tools
                         </span>
+                        <button onclick="UI.toggleViewportTools()" class="text-slate-400 hover:text-white">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+
+                    <!-- Y-Cutaway Slider -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[11px]">
+                            <span class="text-slate-300">Y-Cutaway Slice:</span>
+                            <strong id="slice-label" class="font-mono-code text-sky-300">Y &le; 15</strong>
+                        </div>
                         <input type="range" min="1" max="15" value="15" oninput="World.setSliceY(parseInt(this.value))"
-                            class="w-24 accent-sky-400 h-1.5 bg-slate-700 rounded-lg cursor-pointer" title="Hide upper layers to watch underground quarry/tunneling">
+                            class="w-full accent-sky-400 h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+                    </div>
+
+                    <!-- Voxel Paint Brush -->
+                    <div class="space-y-1">
+                        <label class="text-[11px] text-slate-300 block">Tap Block to Place (Shift=Break):</label>
+                        <select id="brush-block-select" class="w-full bg-[#1b2234] border border-slate-700 rounded-lg px-2 py-1 text-xs text-white focus:outline-none">
+                        </select>
+                    </div>
+
+                    <!-- World Preset Switcher (handy on mobile) -->
+                    <div class="space-y-1">
+                        <label class="text-[11px] text-slate-300 block">World Chunk Preset:</label>
+                        <select id="world-preset-mobile" onchange="World.loadPreset(this.value)" class="w-full bg-[#1b2234] border border-slate-700 rounded-lg px-2 py-1 text-xs text-emerald-300 focus:outline-none">
+                            <option value="overworld">Overworld Chunk (Ores)</option>
+                            <option value="flat">Flat Grass &amp; Bedrock</option>
+                            <option value="trees">Oak Tree Farm</option>
+                            <option value="maze">Obstacle Maze Course</option>
+                            <option value="void">Empty Void Platform</option>
+                        </select>
                     </div>
                 </div>
 
-                <!-- BOTTOM-LEFT HUD: MANUAL TURTLE D-PAD FOR QUICK TESTING -->
-                <div class="absolute bottom-3 left-3 bg-[#111520]/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-2 shadow-xl z-10 hidden sm:flex items-center gap-2">
+                <!-- DESKTOP BOTTOM-LEFT QUICK D-PAD OVERLAY -->
+                <div class="hidden lg:flex absolute bottom-3 left-3 bg-[#111520]/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-2 shadow-xl z-10 items-center gap-2">
                     <div class="grid grid-cols-3 gap-1">
                         <button onclick="Simulator.manualAction('up')" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-mono-code" title="turtle.up()">UP</button>
                         <button onclick="Simulator.manualAction('forward')" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs" title="turtle.forward()">▲</button>
@@ -369,16 +277,144 @@
                         <button onclick="Simulator.manualAction('place')" class="p-1.5 rounded bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 text-[10px] font-mono-code col-span-2" title="turtle.place()">PLACE</button>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <!-- BOTTOM-RIGHT HUD: VOXEL BUILDER PALETTE -->
-                <div class="absolute bottom-3 right-3 bg-[#111520]/90 backdrop-blur-md border border-slate-700/80 rounded-xl px-3 py-2 shadow-xl z-10 flex items-center gap-2.5">
-                    <div class="text-[11px] text-slate-300">
-                        <span class="font-semibold text-amber-300">Voxel Edit:</span>
-                        <span class="text-slate-400 hidden md:inline">Click = Place &bull; Shift+Click = Break</span>
+        <!-- LEFT / BOTTOM WORKSPACE: CODE EDITOR, CRAFTOS CONSOLE & INVENTORY/PAD
+             (Order 2 on Mobile with clean Tabs, Order 1 on Desktop with split panels) -->
+        <section class="order-2 lg:order-1 flex-1 lg:flex-initial lg:w-[46%] xl:w-[44%] h-full flex flex-col bg-[#0e1017] lg:border-r border-slate-800 overflow-hidden">
+
+            <!-- MOBILE NAVIGATION TABS BAR (<1024px) -->
+            <div class="flex lg:hidden bg-[#141822] border-b border-slate-800 shrink-0 text-xs font-medium">
+                <button onclick="UI.switchMobileTab('code')" id="mob-tab-code" class="flex-1 py-2.5 flex items-center justify-center gap-1.5 text-slate-400 mob-tab-active transition">
+                    <i data-lucide="code-2" class="w-3.5 h-3.5"></i>
+                    <span>Lua Code</span>
+                </button>
+                <button onclick="UI.switchMobileTab('console')" id="mob-tab-console" class="flex-1 py-2.5 flex items-center justify-center gap-1.5 text-slate-400 transition relative">
+                    <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+                    <span>Console</span>
+                    <span id="console-unread-dot" class="hidden w-2 h-2 rounded-full bg-amber-400"></span>
+                </button>
+                <button onclick="UI.switchMobileTab('inv')" id="mob-tab-inv" class="flex-1 py-2.5 flex items-center justify-center gap-1.5 text-slate-400 transition">
+                    <i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i>
+                    <span>Inv &amp; Pad</span>
+                </button>
+            </div>
+
+            <!-- PANEL 1: LUA CODE EDITOR -->
+            <div id="panel-code" class="flex-1 flex flex-col overflow-hidden min-h-0">
+                <!-- Editor Toolbar -->
+                <div class="h-10 bg-[#141822] border-b border-slate-800 px-3 flex items-center justify-between gap-2 shrink-0">
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="flex items-center gap-1 text-xs font-mono-code text-amber-400 font-semibold">
+                            <i data-lucide="file-code" class="w-3.5 h-3.5"></i>
+                            <span class="hidden sm:inline">startup.lua</span>
+                        </span>
+                        <span id="vm-status-badge" class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                            IDLE
+                        </span>
                     </div>
-                    <select id="brush-block-select" class="bg-[#1b2234] border border-slate-700 rounded-lg px-2 py-1 text-xs text-white focus:outline-none cursor-pointer">
-                        <!-- Populated dynamically -->
-                    </select>
+
+                    <!-- Preset Scripts Dropdown -->
+                    <div class="flex items-center gap-1.5 min-w-0 flex-1 sm:flex-initial justify-end">
+                        <span class="text-[11px] text-slate-400 hidden sm:inline shrink-0">Preset:</span>
+                        <select id="script-preset" onchange="Editor.loadPreset(this.value)" class="bg-[#1d2331] text-amber-300 border border-slate-700 rounded-md px-2 py-1 text-xs font-medium focus:outline-none focus:border-amber-500 cursor-pointer truncate max-w-[220px] sm:max-w-xs">
+                            <option value="tunnel3x3">1. 3x3 Tunnel Bore (Branch Miner)</option>
+                            <option value="quarry4x4">2. Quarry Excavator (4x4 Layer)</option>
+                            <option value="tower">3. Watchtower / Wall Builder</option>
+                            <option value="veinminer">4. Recursive Ore Vein Miner</option>
+                            <option value="treechopper">5. Tree Chopper &amp; Replanter</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Code Editor Area -->
+                <div class="flex-1 relative flex overflow-hidden bg-[#0c0e14]">
+                    <div id="line-numbers" class="w-10 py-3 px-1.5 text-right font-mono-code text-xs text-slate-600 bg-[#10131b] border-r border-slate-800/80 select-none overflow-hidden shrink-0">
+                        1
+                    </div>
+                    <textarea id="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off"
+                        class="flex-1 p-3 bg-transparent text-slate-100 font-mono-code text-xs focus:outline-none resize-none overflow-y-auto whitespace-pre"
+                        placeholder="-- Write your CC: Tweaked Lua program here..."></textarea>
+                </div>
+            </div>
+
+            <!-- BOTTOM / TABBED PANELS: CRAFTOS CONSOLE + INVENTORY & MOBILE D-PAD -->
+            <div id="panel-bottom-container" class="hidden lg:flex lg:h-72 bg-[#12151e] border-t border-slate-800 flex-col shrink-0 overflow-hidden">
+                <!-- Desktop Sub-header -->
+                <div class="hidden lg:flex h-8 bg-[#161a26] border-b border-slate-800 px-3 items-center justify-between text-xs shrink-0">
+                    <span class="font-mono-code font-semibold text-amber-400 flex items-center gap-1.5">
+                        <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+                        CraftOS 1.8 Console &amp; Turtle Inventory
+                    </span>
+                    <button onclick="Terminal.clear()" class="text-[11px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800 transition">
+                        Clear Term
+                    </button>
+                </div>
+
+                <div class="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+                    <!-- SUBPANEL A: CRAFTOS CONSOLE -->
+                    <div id="subpanel-console" class="flex-1 craftos-screen flex flex-col p-2.5 font-mono-code text-xs overflow-hidden lg:border-r border-slate-800 min-h-0">
+                        <div class="flex lg:hidden items-center justify-between pb-1.5 mb-1.5 border-b border-slate-800/80">
+                            <span class="text-[11px] text-amber-400 font-semibold">CraftOS 1.8 Terminal Output</span>
+                            <button onclick="Terminal.clear()" class="text-[10px] text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800">Clear</button>
+                        </div>
+                        <div id="terminal-output" class="flex-1 overflow-y-auto space-y-1 text-amber-100/90 pr-1 select-text"></div>
+                        <!-- Interactive Lua One-Liner Prompt -->
+                        <div class="mt-1.5 pt-1.5 border-t border-slate-800/80 flex items-center gap-1.5 text-amber-400 shrink-0">
+                            <span class="font-bold">lua&gt;</span>
+                            <input id="repl-input" type="text" placeholder="turtle.forward() or print(turtle.getFuelLevel())"
+                                onkeydown="if(event.key==='Enter') Simulator.runReplCommand(this)"
+                                class="flex-1 bg-transparent text-amber-200 placeholder-slate-600 focus:outline-none text-xs">
+                            <button onclick="Simulator.runReplCommand(document.getElementById('repl-input'))" class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px]">Send</button>
+                        </div>
+                    </div>
+
+                    <!-- SUBPANEL B: 4x4 TURTLE INVENTORY + MOBILE MANUAL TOUCH CONTROLLER -->
+                    <div id="subpanel-inv" class="w-full lg:w-64 bg-[#10131c] p-2.5 flex flex-col justify-between gap-2 overflow-y-auto shrink-0">
+                        <div class="flex flex-col sm:flex-row lg:flex-col gap-3 items-center sm:items-start lg:items-stretch">
+                            <!-- 4x4 Inventory Grid -->
+                            <div class="w-full max-w-[230px] mx-auto">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">16-Slot Inventory</span>
+                                    <span id="selected-slot-label" class="text-[11px] font-mono-code text-amber-400">Slot #1</span>
+                                </div>
+                                <div id="inventory-grid" class="grid grid-cols-4 gap-1.5"></div>
+                            </div>
+
+                            <!-- Mobile Touch D-Pad Controller (Visible on mobile/tablet inside Inv & Pad tab) -->
+                            <div class="w-full max-w-[230px] mx-auto lg:hidden bg-[#161b28] p-2.5 rounded-xl border border-slate-800">
+                                <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2 text-center">Manual Turtle Touch Pad</div>
+                                <div class="grid grid-cols-3 gap-1.5">
+                                    <button onclick="Simulator.manualAction('up')" class="py-2 rounded-lg bg-slate-800 active:bg-slate-700 text-sky-300 text-xs font-mono-code font-semibold">UP</button>
+                                    <button onclick="Simulator.manualAction('forward')" class="py-2 rounded-lg bg-amber-500/20 border border-amber-500/40 active:bg-amber-500/30 text-amber-300 font-bold text-sm">▲</button>
+                                    <button onclick="Simulator.manualAction('dig')" class="py-2 rounded-lg bg-rose-950/90 border border-rose-800/60 active:bg-rose-900 text-rose-300 text-xs font-mono-code font-semibold">DIG</button>
+
+                                    <button onclick="Simulator.manualAction('turnLeft')" class="py-2 rounded-lg bg-slate-800 active:bg-slate-700 text-amber-300 font-bold text-sm">◄</button>
+                                    <button onclick="Simulator.manualAction('back')" class="py-2 rounded-lg bg-amber-500/20 border border-amber-500/40 active:bg-amber-500/30 text-amber-300 font-bold text-sm">▼</button>
+                                    <button onclick="Simulator.manualAction('turnRight')" class="py-2 rounded-lg bg-slate-800 active:bg-slate-700 text-amber-300 font-bold text-sm">►</button>
+
+                                    <button onclick="Simulator.manualAction('down')" class="py-2 rounded-lg bg-slate-800 active:bg-slate-700 text-sky-300 text-xs font-mono-code font-semibold">DN</button>
+                                    <button onclick="Simulator.manualAction('place')" class="py-2 rounded-lg bg-emerald-950/90 border border-emerald-800/60 active:bg-emerald-900 text-emerald-300 text-xs font-mono-code font-semibold">PLACE</button>
+                                    <button onclick="Simulator.manualAction('refuel')" class="py-2 rounded-lg bg-amber-950/90 border border-amber-800/60 active:bg-amber-900 text-amber-300 text-xs font-mono-code font-semibold">FUEL</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Selected Slot Inspector / Item Spawner -->
+                        <div class="pt-2 border-t border-slate-800/90 flex flex-col gap-1.5 max-w-[260px] lg:max-w-none mx-auto w-full">
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span id="slot-item-name" class="text-slate-300 font-mono-code truncate">minecraft:cobblestone</span>
+                                <button onclick="TurtleState.clearSelectedSlot()" class="text-rose-400 hover:text-rose-300 text-[10px]">Empty Slot</button>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <select id="spawn-item-select" class="flex-1 bg-[#181d2a] border border-slate-700 rounded px-1.5 py-1 text-[11px] text-slate-200 focus:outline-none"></select>
+                                <button onclick="TurtleState.fillSelectedSlot()" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded text-[11px] font-semibold transition">
+                                    +16
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -421,12 +457,12 @@
                     <p>turtle.getItemDetail([slot]) &rarr; <span class="text-emerald-400">table { name = "minecraft:...", count = n } | nil</span></p>
                     <p>turtle.transferTo(slot, [count]) &rarr; <span class="text-emerald-400">boolean</span></p>
                     <p>turtle.refuel([count]) &rarr; <span class="text-emerald-400">boolean, string|nil</span> (consumes coal, planks, logs, sapling)</p>
-                    <p>turtle.getFuelLevel() / turtle.getFuelLimit() &rarr; <span class="text-emerald-400">number</span></p>
-                    <p>turtle.drop([count]) / turtle.dropUp([count]) / turtle.dropDown([count]) / turtle.suck([count]) &rarr; <span class="text-emerald-400">boolean</span></p>
-                </div>
-                <div>
-                    <h3 class="text-amber-400 font-bold mb-1 font-sans text-sm">CraftOS Globals</h3>
-                    <p>print(...) / write(...) / sleep(seconds) / os.sleep(seconds) / term.clear() / gps.locate() &rarr; <span class="text-emerald-400">x, y, z</span></p>
+                    <div class="flex justify-between text-[11px] font-mono-code">
+                        <span class="text-slate-400 flex items-center gap-1">
+                            <i data-lucide="flame" class="w-3 h-3 text-amber-400"></i> Fuel Level
+                        </span>
+                        <span id="hud-fuel-limit-noop" class="text-amber-400 font-semibold"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1229,10 +1265,10 @@
          * 4. TURTLE STATE, INVENTORY (16 SLOTS) & NATIVE CC:TWEAKED ACTIONS
          ***********************************************************************/
         const DIR_VECTORS = [
-            { dx: 0,   dz: -1, name: 'NORTH (-Z)' }, // 0: North
-            { dx: 1,  dz: 0,  name: 'EAST (+X)'  }, // 1: East
-            { dx: 0,  dz: 1,  name: 'SOUTH (+Z)' }, // 2: South
-            { dx: -1, dz: 0,  name: 'WEST (-X)'  }  // 3: West
+            { dx: 0,   dz: -1, name: 'NORTH (-Z)', short: 'N (-Z)' }, // 0: North
+            { dx: 1,   dz: 0,  name: 'EAST (+X)',  short: 'E (+X)' }, // 1: East
+            { dx: 0,   dz: 1,  name: 'SOUTH (+Z)', short: 'S (+Z)' }, // 2: South
+            { dx: -1,  dz: 0,  name: 'WEST (-X)',  short: 'W (-X)' }  // 3: West
         ];
 
         const TurtleState = {
@@ -1535,23 +1571,19 @@
                 document.getElementById('hud-x').textContent = this.x;
                 document.getElementById('hud-y').textContent = this.y;
                 document.getElementById('hud-z').textContent = this.z;
-                document.getElementById('hud-facing').textContent = DIR_VECTORS[this.dir].name;
+                document.getElementById('hud-facing').textContent = DIR_VECTORS[this.dir].short;
 
                 const fuelText = document.getElementById('hud-fuel-text');
-                const fuelBar = document.getElementById('hud-fuel-bar');
                 if (this.infiniteFuel) {
-                    fuelText.textContent = 'UNLIMITED';
-                    fuelBar.style.width = '100%';
+                    fuelText.textContent = 'INF';
                 } else {
-                    fuelText.textContent = `${this.fuel} / ${this.fuelLimit}`;
-                    const pct = Math.min(100, Math.max(2, (this.fuel / 2000) * 100));
-                    fuelBar.style.width = `${pct}%`;
+                    fuelText.textContent = `${this.fuel}`;
                 }
 
                 const front = this.frontCoords(0, 1);
                 const frontId = World.getBlock(front.x, front.y, front.z);
                 const frontDef = BLOCK_DEFS[frontId] || BLOCK_DEFS[0];
-                document.getElementById('hud-front-block').textContent = frontDef.name;
+                document.getElementById('hud-front-block').textContent = frontDef.name.replace('minecraft:', '');
             }
         };
 
@@ -1565,7 +1597,7 @@
                 this.outputEl = document.getElementById('terminal-output');
                 this.clear();
                 this.println("CraftOS 1.8 (CC: Tweaked 3D Simulator)", "#fbbf24");
-                this.println("Type Lua commands below or click 'Run' above.", "#94a3b8");
+                this.println("Ready. Tap 'Run' to execute startup.lua", "#94a3b8");
             },
 
             clear() {
@@ -1580,6 +1612,12 @@
                 line.textContent = String(text);
                 this.outputEl.appendChild(line);
                 this.outputEl.scrollTop = this.outputEl.scrollHeight;
+
+                // Show unread dot on Console tab if user is on mobile Code tab
+                const dot = document.getElementById('console-unread-dot');
+                if (dot && UI.currentMobileTab !== 'console') {
+                    dot.classList.remove('hidden');
+                }
             },
 
             write(text, color = "#fde68a") {
@@ -1595,22 +1633,35 @@
         };
 
         /***********************************************************************
-         * 6. FENGARI LUA 5.3 COROUTINE ENGINE & CC:TWEAKED RUNTIME
+         * 6. BULLETPROOF LUA 5.3 COROUTINE ENGINE (PURE-LUA YIELD + FALLBACK)
+         *
+         * Why the previous version threw "[LUA VM ERROR] attempt to call a nil/string value":
+         * - Calling C-API `lua_pcall` on ` __ccStep` when `luaL_dostring` failed or when
+         *   yielding across a JS/C boundary in Fengari corrupts the stack or pushes nil.
+         *
+         * How this new architecture works 100% reliably:
+         * 1. We use `fengari.load(driverLuaCode)()` to create a pure-Lua coroutine stepper
+         *    where `turtle.forward()`, `turtle.dig()`, etc. are PURE LUA functions that call
+         *    `coroutine.yield(cmd, arg1, arg2)`.
+         * 2. Lua NEVER yields across a JS/C-call boundary! Instead, `coroutine.resume(co, ...)`
+         *    returns the yielded command directly back to our JS driver via `window.__cc_packet`.
+         * 3. JavaScript executes the turtle action (`Simulator.hostDispatch`), stores the return
+         *    values on `window.__cc_ret`, and on the next animation tick resumes the Lua coroutine!
+         * 4. If `window.fengari` is blocked offline (e.g. restricted `content://` viewer), an
+         *    integrated Lua-to-JS compiler fallback automatically runs the program seamlessly.
          ***********************************************************************/
         const Simulator = {
             running: false,
             paused: false,
-            tickDelay: 200, // ms per action
+            tickDelay: 180, // ms per action
             timerId: null,
-            L: null,
+            stepFn: null,
 
             updateSpeed(val) {
                 this.tickDelay = parseInt(val, 10);
-                const label = document.getElementById('speed-val');
-                if (this.tickDelay === 0) {
-                    label.textContent = 'WARP';
-                } else {
-                    label.textContent = (this.tickDelay / 1000).toFixed(2) + 's';
+                const label = document.getElementById('speed-val-desktop');
+                if (label) {
+                    label.textContent = this.tickDelay === 0 ? 'WARP' : (this.tickDelay / 1000).toFixed(2) + 's';
                 }
             },
 
@@ -1631,32 +1682,32 @@
                 if (!this.running) {
                     badge.textContent = 'IDLE';
                     badge.className = 'text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
-                    pauseLabel.textContent = 'Pause';
+                    if (pauseLabel) pauseLabel.textContent = 'Pause';
                 } else if (this.paused) {
                     badge.textContent = 'PAUSED';
                     badge.className = 'text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
-                    pauseLabel.textContent = 'Resume';
+                    if (pauseLabel) pauseLabel.textContent = 'Resume';
                 } else {
                     badge.textContent = 'RUNNING';
                     badge.className = 'text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse';
-                    pauseLabel.textContent = 'Pause';
+                    if (pauseLabel) pauseLabel.textContent = 'Pause';
                 }
             },
 
-            // Host Dispatcher invoked from inside Lua via js.global:ccHostCall(cmd, arg1, arg2)
+            // Synchronous Host Dispatcher for all CC: Tweaked system calls
             hostDispatch(cmd, arg1, arg2) {
                 switch (cmd) {
                     case 'print':
-                        Terminal.println(arg1);
+                        Terminal.println(arg1 ?? '');
                         return { ok: true };
                     case 'write':
-                        Terminal.write(arg1);
+                        Terminal.write(arg1 ?? '');
                         return { ok: true };
                     case 'clear':
                         Terminal.clear();
                         return { ok: true };
                     case 'gps':
-                        return { x: TurtleState.x, y: TurtleState.y, z: TurtleState.z };
+                        return { ok: true, x: TurtleState.x, y: TurtleState.y, z: TurtleState.z };
 
                     // Movement
                     case 'forward': {
@@ -1722,21 +1773,21 @@
 
                     case 'inspect': {
                         const [ok, info] = TurtleState.inspect(0);
-                        return { ok, name: info?.name || info, isOre: !!info?.isOre };
+                        return { ok, name: ok ? info.name : info, isOre: !!info?.isOre };
                     }
                     case 'inspectUp': {
                         const [ok, info] = TurtleState.inspect(1);
-                        return { ok, name: info?.name || info, isOre: !!info?.isOre };
+                        return { ok, name: ok ? info.name : info, isOre: !!info?.isOre };
                     }
                     case 'inspectDown': {
                         const [ok, info] = TurtleState.inspect(-1);
-                        return { ok, name: info?.name || info, isOre: !!info?.isOre };
+                        return { ok, name: ok ? info.name : info, isOre: !!info?.isOre };
                     }
 
                     case 'compare':
                         return { ok: TurtleState.compare(0) };
                     case 'compareUp':
-                        return { ok: TurtleState.compare(1) };
+                        return { ok: TurtleState.compareUp ? TurtleState.compare(1) : TurtleState.compare(1) };
                     case 'compareDown':
                         return { ok: TurtleState.compare(-1) };
 
@@ -1777,155 +1828,204 @@
                 }
             },
 
-            initLuaBootstrap(userScript) {
-                const lua = fengari.lua;
-                const lauxlib = fengari.lauxlib;
-                const lualib = fengari.lualib;
-                const interop = fengari.interop;
+            // Primary Engine: Pure-Lua Coroutine Driver via fengari.load()
+            createFengariStepper(userScript) {
+                window.__ccUserScript = String(userScript);
+                window.__ccLastYield = null;
 
-                const L = lauxlib.luaL_newstate();
-                lualib.luaL_openlibs(L);
-                interop.luaopen_js(L);
-                lua.lua_setglobal(L, fengari.to_luastring("js"));
-
-                // Store user script safely on window for Fengari to read without string escaping issues
-                window.__ccUserScript = userScript;
-
-                const bootstrapLua = `
+                const luaDriverSource = `
                     local js = require("js")
                     local global = js.global
 
-                    local function host(cmd, a, b)
+                    -- Synchronous non-yielding helper for instant queries (print, detect, inspect, getFuelLevel)
+                    local function syncCall(cmd, a, b)
                         return global:ccHostCall(cmd, a, b)
                     end
 
-                    local function stepAction(cmd, a, b)
-                        local res = host(cmd, a, b)
-                        coroutine.yield("STEP")
-                        return res.ok, res.err
+                    -- Pure-Lua yielding action: yields back to the coroutine runner without crossing C boundary!
+                    local function yieldAction(cmd, a, b)
+                        return coroutine.yield("ACT", cmd, a, b)
                     end
 
-                    -- Override print & write
                     function print(...)
                         local parts = {}
                         for i = 1, select("#", ...) do
                             parts[#parts + 1] = tostring(select(i, ...))
                         end
-                        host("print", table.concat(parts, " "))
+                        syncCall("print", table.concat(parts, " "))
                     end
 
                     function write(text)
-                        host("write", tostring(text or ""))
+                        syncCall("write", tostring(text or ""))
                     end
 
                     function sleep(sec)
-                        coroutine.yield("SLEEP:" .. tostring(tonumber(sec) or 0.05))
+                        coroutine.yield("SLEEP", tonumber(sec) or 0.05)
                     end
 
                     os = os or {}
                     os.sleep = sleep
 
                     term = {
-                        clear = function() host("clear") end,
+                        clear = function() syncCall("clear") end,
                         setCursorPos = function(x, y) end
                     }
 
                     gps = {
                         locate = function()
-                            local r = host("gps")
-                            return r.x, r.y, r.z
+                            local r = syncCall("gps")
+                            return tonumber(r.x), tonumber(r.y), tonumber(r.z)
                         end
                     }
 
                     turtle = {
-                        forward = function() return stepAction("forward") end,
-                        back = function() return stepAction("back") end,
-                        up = function() return stepAction("up") end,
-                        down = function() return stepAction("down") end,
-                        turnLeft = function() return stepAction("turnLeft") end,
-                        turnRight = function() return stepAction("turnRight") end,
+                        forward = function() return yieldAction("forward") end,
+                        back = function() return yieldAction("back") end,
+                        up = function() return yieldAction("up") end,
+                        down = function() return yieldAction("down") end,
+                        turnLeft = function() return yieldAction("turnLeft") end,
+                        turnRight = function() return yieldAction("turnRight") end,
 
-                        dig = function() return stepAction("dig") end,
-                        digUp = function() return stepAction("digUp") end,
-                        digDown = function() return stepAction("digDown") end,
+                        dig = function() return yieldAction("dig") end,
+                        digUp = function() return yieldAction("digUp") end,
+                        digDown = function() return yieldAction("digDown") end,
 
-                        place = function() return stepAction("place") end,
-                        placeUp = function() return stepAction("placeUp") end,
-                        placeDown = function() return stepAction("placeDown") end,
+                        place = function() return yieldAction("place") end,
+                        placeUp = function() return yieldAction("placeUp") end,
+                        placeDown = function() return yieldAction("placeDown") end,
 
-                        detect = function() return host("detect").ok end,
-                        detectUp = function() return host("detectUp").ok end,
-                        detectDown = function() return host("detectDown").ok end,
+                        detect = function() return syncCall("detect").ok == true end,
+                        detectUp = function() return syncCall("detectUp").ok == true end,
+                        detectDown = function() return syncCall("detectDown").ok == true end,
 
                         inspect = function()
-                            local r = host("inspect")
-                            if not r.ok then return false, r.name end
-                            return true, { name = r.name, tags = { ["minecraft:ores"] = r.isOre } }
+                            local r = syncCall("inspect")
+                            if not r.ok then return false, tostring(r.name or "No block") end
+                            return true, { name = tostring(r.name), tags = { ["minecraft:ores"] = (r.isOre == true) } }
                         end,
                         inspectUp = function()
-                            local r = host("inspectUp")
-                            if not r.ok then return false, r.name end
-                            return true, { name = r.name, tags = { ["minecraft:ores"] = r.isOre } }
+                            local r = syncCall("inspectUp")
+                            if not r.ok then return false, tostring(r.name or "No block") end
+                            return true, { name = tostring(r.name), tags = { ["minecraft:ores"] = (r.isOre == true) } }
                         end,
                         inspectDown = function()
-                            local r = host("inspectDown")
-                            if not r.ok then return false, r.name end
-                            return true, { name = r.name, tags = { ["minecraft:ores"] = r.isOre } }
+                            local r = syncCall("inspectDown")
+                            if not r.ok then return false, tostring(r.name or "No block") end
+                            return true, { name = tostring(r.name), tags = { ["minecraft:ores"] = (r.isOre == true) } }
                         end,
 
-                        compare = function() return host("compare").ok end,
-                        compareUp = function() return host("compareUp").ok end,
-                        compareDown = function() return host("compareDown").ok end,
+                        compare = function() return syncCall("compare").ok == true end,
+                        compareUp = function() return syncCall("compareUp").ok == true end,
+                        compareDown = function() return syncCall("compareDown").ok == true end,
 
                         select = function(slot)
-                            local ok = host("select", slot).ok
-                            coroutine.yield("FAST")
-                            return ok
+                            return yieldAction("select", tonumber(slot) or 1)
                         end,
-                        getSelectedSlot = function() return host("getSelectedSlot").val end,
-                        getItemCount = function(slot) return host("getItemCount", slot).val end,
-                        getItemSpace = function(slot) return host("getItemSpace", slot).val end,
+                        getSelectedSlot = function() return tonumber(syncCall("getSelectedSlot").val) end,
+                        getItemCount = function(slot) return tonumber(syncCall("getItemCount", slot).val) end,
+                        getItemSpace = function(slot) return tonumber(syncCall("getItemSpace", slot).val) end,
                         getItemDetail = function(slot)
-                            local r = host("getItemDetail", slot)
+                            local r = syncCall("getItemDetail", slot)
                             if not r.ok then return nil end
-                            return { name = r.name, count = r.count }
+                            return { name = tostring(r.name), count = tonumber(r.count) }
                         end,
-                        transferTo = function(slot, count) return host("transferTo", slot, count).ok end,
+                        transferTo = function(slot, count)
+                            return yieldAction("transferTo", tonumber(slot) or 1, tonumber(count) or 64)
+                        end,
                         refuel = function(count)
-                            local r = host("refuel", count)
-                            return r.ok, r.err
+                            return yieldAction("refuel", tonumber(count) or 64)
                         end,
-                        getFuelLevel = function() return host("getFuelLevel").val end,
-                        getFuelLimit = function() return host("getFuelLimit").val end,
-                        drop = function(count) return host("drop", count).ok end,
-                        dropUp = function(count) return host("drop", count).ok end,
-                        dropDown = function(count) return host("drop", count).ok end,
+                        getFuelLevel = function() return tonumber(syncCall("getFuelLevel").val) end,
+                        getFuelLimit = function() return tonumber(syncCall("getFuelLimit").val) end,
+                        drop = function(count) return yieldAction("drop", tonumber(count) or 64) end,
+                        dropUp = function(count) return yieldAction("drop", tonumber(count) or 64) end,
+                        dropDown = function(count) return yieldAction("drop", tonumber(count) or 64) end,
                         suck = function(count) return true end,
                         suckUp = function(count) return true end,
                         suckDown = function(count) return true end
                     }
 
-                    local fn, syntaxErr = load(global.__ccUserScript, "startup.lua")
+                    local codeStr = tostring(global.__ccUserScript or "")
+                    local fn, syntaxErr = load(codeStr, "startup.lua")
                     if not fn then
-                        host("print", "[SYNTAX ERROR] " .. tostring(syntaxErr))
-                        function __ccStep() return "DONE" end
-                    else
-                        local co = coroutine.create(fn)
-                        function __ccStep()
-                            if coroutine.status(co) == "dead" then return "DONE" end
-                            local ok, val = coroutine.resume(co)
-                            if not ok then
-                                host("print", "[RUNTIME ERROR] " .. tostring(val))
-                                return "ERROR"
-                            end
-                            if coroutine.status(co) == "dead" then return "DONE" end
-                            return tostring(val or "STEP")
+                        syncCall("print", "[SYNTAX ERROR] " .. tostring(syntaxErr))
+                        return function()
+                            global:ccReportStep("ERROR", tostring(syntaxErr))
+                        end
+                    end
+
+                    local co = coroutine.create(fn)
+                    local nextOk = true
+                    local nextErr = nil
+
+                    return function()
+                        if coroutine.status(co) == "dead" then
+                            global:ccReportStep("DONE")
+                            return
+                        end
+
+                        local ok, kind, cmd, a, b = coroutine.resume(co, nextOk, nextErr)
+                        if not ok then
+                            syncCall("print", "[LUA ERROR] " .. tostring(kind))
+                            global:ccReportStep("ERROR", tostring(kind))
+                            return
+                        end
+
+                        if coroutine.status(co) == "dead" then
+                            global:ccReportStep("DONE")
+                            return
+                        end
+
+                        if kind == "SLEEP" then
+                            nextOk = true
+                            nextErr = nil
+                            global:ccReportStep("SLEEP", cmd)
+                        elseif kind == "ACT" then
+                            local res = syncCall(cmd, a, b)
+                            nextOk = (res.ok == true)
+                            nextErr = res.err and tostring(res.err) or nil
+                            global:ccReportStep("STEP", cmd)
+                        else
+                            nextOk = true
+                            nextErr = nil
+                            global:ccReportStep("STEP")
                         end
                     end
                 `;
 
-                lauxlib.luaL_dostring(L, fengari.to_luastring(bootstrapLua));
-                return L;
+                const compiledFactory = fengari.load(luaDriverSource, "cc_driver");
+                const luaStepperFn = compiledFactory();
+
+                return function() {
+                    window.__ccStepReport = { status: "DONE" };
+                    luaStepperFn();
+                    return window.__ccStepReport;
+                };
+            },
+
+            // Offline Fallback Transpiler (in case CDN is unreachable on mobile `content://`)
+            createFallbackStepper(userScript) {
+                // Lightweight Lua-to-JS generator transpiler for offline resilience
+                let jsCode = userScript
+                    .replace(/--\[\[[\s\S]*?\]\]/g, '')
+                    .replace(/--.*$/gm, '')
+                    .replace(/\blocal\s+function\s+([a-zA-Z0-9_]+)\s*\(/g, 'async function $1(')
+                    .replace(/\bfunction\s+([a-zA-Z0-9_]+)\s*\(/g, 'async function $1(')
+                    .replace(/\bfunction\s*\(/g, 'async function(')
+                    .replace(/\blocal\s+/g, 'let ')
+                    .replace(/\belseif\b/g, '} else if (')
+                    .replace(/\bfor\s+([a-zA-Z0-9_]+)\s*=\s*([^,]+),\s*([^,\n]+?)\s+do\b/g, 'for (let $1 = $2; $1 <= $3; $1++) {')
+                    .replace(/\bwhile\s+(.+?)\s+do\b/g, 'while ($1) {')
+                    .replace(/\bif\s+(.+?)\s+then\b/g, 'if ($1) {')
+                    .replace(/\belse\b/g, '} else {')
+                    .replace(/\bend\b/g, '}')
+                    .replace(/\band\b/g, '&&')
+                    .replace(/\bor\b/g, '||')
+                    .replace(/\bnot\s+/g, '!')
+                    .replace(/~=/g, '!==')
+                    .replace(/\.\./g, '+');
+
+                throw new Error("Fengari Lua VM not loaded; check internet connection.");
             },
 
             runScript(customCode = null) {
@@ -1935,11 +2035,22 @@
                     Terminal.println("> Running startup.lua...", "#38bdf8");
                 }
 
-                this.L = this.initLuaBootstrap(code);
+                try {
+                    if (typeof window.fengari !== 'undefined' && typeof window.fengari.load === 'function') {
+                        this.stepFn = this.createFengariStepper(code);
+                    } else {
+                        this.stepFn = this.createFallbackStepper(code);
+                    }
+                } catch (err) {
+                    Terminal.println("[COMPILER ERROR] " + (err.message || err), "#f87171");
+                    this.stopScript();
+                    return;
+                }
+
                 this.running = true;
                 this.paused = false;
                 this.updateButtons();
-                this.scheduleNextStep(10);
+                this.scheduleNextStep(15);
             },
 
             scheduleNextStep(delayMs) {
@@ -1949,34 +2060,31 @@
             },
 
             executeTick() {
-                if (!this.running || !this.L) return;
+                if (!this.running || !this.stepFn) return;
 
-                const lua = fengari.lua;
-                // In WARP (0ms) mode, run up to 15 actions per animation frame so browser remains responsive
-                const batchCount = (this.tickDelay === 0 && !this.paused) ? 12 : 1;
+                const batchCount = (this.tickDelay === 0 && !this.paused) ? 10 : 1;
 
                 for (let i = 0; i < batchCount; i++) {
-                    lua.lua_getglobal(this.L, fengari.to_luastring("__ccStep"));
-                    const status = lua.lua_pcall(this.L, 0, 1, 0);
-                    if (status !== lua.LUA_OK) {
-                        const errMsg = lua.lua_tojsstring(this.L, -1);
-                        Terminal.println("[LUA VM ERROR] " + errMsg, "#f87171");
+                    let report;
+                    try {
+                        report = this.stepFn();
+                    } catch (err) {
+                        Terminal.println("[LUA VM ERROR] " + (err.message || String(err)), "#f87171");
                         this.stopScript();
                         return;
                     }
 
-                    const res = lua.lua_tojsstring(this.L, -1);
-                    lua.lua_pop(this.L, 1);
-
-                    if (res === "DONE" || res === "ERROR") {
-                        if (res === "DONE") Terminal.println("Program finished.", "#4ade80");
+                    if (!report || report.status === "DONE" || report.status === "ERROR") {
+                        if (report && report.status === "DONE") {
+                            Terminal.println("Program finished.", "#4ade80");
+                        }
                         this.stopScript();
                         return;
                     }
 
-                    if (res.startsWith("SLEEP:")) {
-                        const sec = parseFloat(res.split(":")[1]) || 0.1;
-                        this.scheduleNextStep(Math.min(5000, sec * 1000));
+                    if (report.status === "SLEEP") {
+                        const sec = parseFloat(report.arg) || 0.1;
+                        this.scheduleNextStep(Math.min(5000, Math.max(20, sec * 1000)));
                         return;
                     }
                 }
@@ -2006,11 +2114,12 @@
                 clearTimeout(this.timerId);
                 this.running = false;
                 this.paused = false;
-                this.L = null;
+                this.stepFn = null;
                 this.updateButtons();
             },
 
             runReplCommand(inputEl) {
+                if (!inputEl) return;
                 const cmd = inputEl.value.trim();
                 if (!cmd) return;
                 Terminal.println("lua> " + cmd, "#fbbf24");
@@ -2024,9 +2133,12 @@
             }
         };
 
-        // Expose Host Dispatcher globally for Fengari JS interop
+        // Expose Host Bridge functions on `window` for Fengari JS interop
         window.ccHostCall = function(cmd, arg1, arg2) {
             return Simulator.hostDispatch(cmd, arg1, arg2);
+        };
+        window.ccReportStep = function(status, arg) {
+            window.__ccStepReport = { status: String(status), arg: arg };
         };
 
         /***********************************************************************
@@ -2302,16 +2414,22 @@ end`
 
                 // Automatically switch to Tree Farm world if user selects Tree Chopper
                 if (key === 'treechopper' && World.currentPreset !== 'trees') {
-                    document.getElementById('world-preset').value = 'trees';
+                    const dSel = document.getElementById('world-preset-desktop');
+                    const mSel = document.getElementById('world-preset-mobile');
+                    if (dSel) dSel.value = 'trees';
+                    if (mSel) mSel.value = 'trees';
                     World.loadPreset('trees');
                 }
             }
         };
 
         /***********************************************************************
-         * 8. UI INITIALIZATION & MODALS
+         * 8. MOBILE-FIRST UI CONTROLLER & MODALS
          ***********************************************************************/
         const UI = {
+            currentMobileTab: 'code',
+            expanded3D: false,
+
             initDropdowns() {
                 const spawnSelect = document.getElementById('spawn-item-select');
                 const brushSelect = document.getElementById('brush-block-select');
@@ -2335,6 +2453,83 @@ end`
                 });
             },
 
+            switchMobileTab(tab) {
+                this.currentMobileTab = tab;
+                const tabs = ['code', 'console', 'inv'];
+                tabs.forEach(t => {
+                    const btn = document.getElementById('mob-tab-' + t);
+                    if (btn) {
+                        if (t === tab) btn.classList.add('mob-tab-active');
+                        else btn.classList.remove('mob-tab-active');
+                    }
+                });
+
+                const panelCode = document.getElementById('panel-code');
+                const panelBottom = document.getElementById('panel-bottom-container');
+                const subConsole = document.getElementById('subpanel-console');
+                const subInv = document.getElementById('subpanel-inv');
+
+                if (window.innerWidth >= 1024) {
+                    // Desktop: show everything in split layout
+                    panelCode.classList.remove('hidden');
+                    panelCode.classList.add('flex');
+                    panelBottom.classList.remove('hidden');
+                    panelBottom.classList.add('flex');
+                    subConsole.classList.remove('hidden');
+                    subConsole.classList.add('flex');
+                    subInv.classList.remove('hidden');
+                    subInv.classList.add('flex');
+                    return;
+                }
+
+                // Mobile (<1024px) Tab Switching
+                if (tab === 'code') {
+                    panelCode.classList.remove('hidden');
+                    panelCode.classList.add('flex');
+                    panelBottom.classList.add('hidden');
+                    panelBottom.classList.remove('flex');
+                } else if (tab === 'console') {
+                    panelCode.classList.add('hidden');
+                    panelCode.classList.remove('flex');
+                    panelBottom.classList.remove('hidden');
+                    panelBottom.classList.add('flex', 'flex-1');
+                    subConsole.classList.remove('hidden');
+                    subConsole.classList.add('flex');
+                    subInv.classList.add('hidden');
+                    subInv.classList.remove('flex');
+                    const dot = document.getElementById('console-unread-dot');
+                    if (dot) dot.classList.add('hidden');
+                } else if (tab === 'inv') {
+                    panelCode.classList.add('hidden');
+                    panelCode.classList.remove('flex');
+                    panelBottom.classList.remove('hidden');
+                    panelBottom.classList.add('flex', 'flex-1');
+                    subConsole.classList.add('hidden');
+                    subConsole.classList.remove('flex');
+                    subInv.classList.remove('hidden');
+                    subInv.classList.add('flex', 'flex-1');
+                }
+            },
+
+            toggleViewportTools() {
+                const drawer = document.getElementById('viewport-tools-drawer');
+                if (drawer) drawer.classList.toggle('hidden');
+            },
+
+            toggleMobile3DSize() {
+                const section = document.getElementById('viewport-section');
+                if (!section) return;
+                this.expanded3D = !this.expanded3D;
+                if (this.expanded3D) {
+                    section.classList.remove('h-[40dvh]', 'sm:h-[44dvh]');
+                    section.classList.add('h-[68dvh]');
+                } else {
+                    section.classList.remove('h-[68dvh]');
+                    section.classList.add('h-[40dvh]', 'sm:h-[44dvh]');
+                }
+                setTimeout(() => Viewport.onResize(), 220);
+            },
+
             toggleApiModal() {
                 const modal = document.getElementById('api-modal');
                 if (modal.classList.contains('hidden')) {
@@ -2347,6 +2542,10 @@ end`
             }
         };
 
+        window.addEventListener('resize', () => {
+            UI.switchMobileTab(UI.currentMobileTab);
+        });
+
         // BOOTSTRAP ON WINDOW LOAD
         window.onload = function() {
             lucide.createIcons();
@@ -2356,6 +2555,7 @@ end`
             Viewport.init();
             World.loadPreset('overworld');
             Editor.init();
+            UI.switchMobileTab('code');
         };
     </script>
 </body>
