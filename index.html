@@ -2,7 +2,7 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CC: Tweaked 3D Turtle Studio & Lua Simulator</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,8 +11,6 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <!-- Fengari Web (Lua 5.3 VM in JS) -->
     <script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -32,7 +30,6 @@
         .font-mono-code {
             font-family: 'JetBrains Mono', monospace;
         }
-        /* Custom Scrollbars */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -47,24 +44,20 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #434f6b;
         }
-        /* Pixelated rendering for procedural block icons */
         .pixelated {
             image-rendering: pixelated;
             image-rendering: crisp-edges;
         }
-        /* CraftOS CRT glow effect */
         .craftos-screen {
             background-color: #0d0f14;
             background-image: radial-gradient(rgba(251, 191, 36, 0.04) 1px, transparent 0);
             background-size: 16px 16px;
             box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.85);
         }
-        /* Active inventory slot gold ring */
         .slot-selected {
             border-color: #fbbf24 !important;
             box-shadow: 0 0 10px rgba(251, 191, 36, 0.45), inset 0 0 6px rgba(251, 191, 36, 0.25);
         }
-        /* Code editor line numbers sync */
         #code-editor {
             tab-size: 2;
             -moz-tab-size: 2;
@@ -73,7 +66,6 @@
         #line-numbers {
             line-height: 1.45rem;
         }
-        /* Mobile Tab Active State */
         .mob-tab-active {
             color: #fbbf24 !important;
             border-bottom: 2px solid #fbbf24 !important;
@@ -83,7 +75,7 @@
 </head>
 <body class="h-[100dvh] w-screen flex flex-col overflow-hidden bg-[#0b0d11]">
 
-    <!-- COMPACT RESPONSIVE TOP HEADER & TRANSPORT BAR -->
+    <!-- TOP HEADER & TRANSPORT BAR (All Crisp Inline SVGs) -->
     <header class="h-12 sm:h-14 bg-[#12151e] border-b border-slate-800 px-2.5 sm:px-4 flex items-center justify-between gap-2 shrink-0 z-30">
         <!-- Brand -->
         <div class="flex items-center gap-2 min-w-0">
@@ -101,26 +93,25 @@
 
         <!-- Execution Transport Controls -->
         <div class="flex items-center gap-1 sm:gap-1.5 bg-[#181c28] p-1 sm:p-1.5 rounded-xl border border-slate-800/90 shadow-lg shrink-0">
-            <button id="btn-run" onclick="Simulator.runScript()" class="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-semibold text-xs transition shadow">
-                <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+            <button id="btn-run" onclick="Simulator.runScript()" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-semibold text-xs transition shadow" title="Run Active Script">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                 <span>Run</span>
             </button>
-            <button id="btn-pause" onclick="Simulator.togglePause()" disabled class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-amber-300 font-medium text-xs transition">
-                <i data-lucide="pause" class="w-3.5 h-3.5"></i>
+            <button id="btn-pause" onclick="Simulator.togglePause()" disabled class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-amber-300 font-medium text-xs transition" title="Pause / Resume">
+                <svg class="w-3.5 h-3.5 stroke-current" fill="none" stroke-width="2.2" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
                 <span id="pause-label" class="hidden sm:inline">Pause</span>
             </button>
-            <button id="btn-step" onclick="Simulator.stepOnce()" disabled class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-sky-300 font-medium text-xs transition" title="Step single turtle action">
-                <i data-lucide="step-forward" class="w-3.5 h-3.5"></i>
+            <button id="btn-step" onclick="Simulator.stepOnce()" disabled class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-sky-300 font-medium text-xs transition" title="Step Single Action">
+                <svg class="w-3.5 h-3.5 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
                 <span class="hidden md:inline">Step</span>
             </button>
             <button id="btn-stop" onclick="Simulator.stopScript()" disabled class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 disabled:opacity-40 text-white font-medium text-xs transition" title="Stop Script">
-                <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i>
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
                 <span class="hidden md:inline">Stop</span>
             </button>
 
             <!-- Desktop Speed Slider -->
             <div class="hidden md:flex items-center gap-2 pl-2 border-l border-slate-700">
-                <i data-lucide="gauge" class="w-3.5 h-3.5 text-slate-400"></i>
                 <div class="flex flex-col w-24">
                     <div class="flex justify-between text-[9px] font-mono-code text-slate-300">
                         <span>Delay</span>
@@ -133,10 +124,9 @@
             </div>
         </div>
 
-        <!-- Desktop World Controls & API Button -->
+        <!-- World Reset & API Docs Buttons -->
         <div class="flex items-center gap-1.5 shrink-0">
             <div class="hidden lg:flex items-center gap-1 bg-[#181c28] px-2 py-1 rounded-lg border border-slate-800 text-xs">
-                <i data-lucide="globe" class="w-3.5 h-3.5 text-emerald-400"></i>
                 <select id="world-preset-desktop" onchange="World.loadPreset(this.value)" class="bg-transparent text-slate-200 font-medium focus:outline-none cursor-pointer pr-1">
                     <option value="overworld" class="bg-slate-900">Overworld Chunk (Ores)</option>
                     <option value="flat" class="bg-slate-900">Flat Grass &amp; Bedrock</option>
@@ -147,31 +137,29 @@
             </div>
 
             <button onclick="World.resetCurrentPreset()" class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition" title="Reset Chunk & Turtle">
-                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-amber-400"></i>
-                <span class="hidden xl:inline">Reset</span>
+                <svg class="w-3.5 h-3.5 text-amber-400 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                <span class="hidden sm:inline">Reset</span>
             </button>
 
             <button onclick="UI.toggleApiModal()" class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-mono-code transition" title="turtle.* API Reference">
-                <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+                <svg class="w-3.5 h-3.5 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                 <span class="hidden sm:inline">Docs</span>
             </button>
         </div>
     </header>
 
-    <!-- MAIN RESPONSIVE WORKSPACE:
-         On Mobile (<1024px): 3D Viewport stays on TOP (42% height, expandable), Tabbed Workspace on BOTTOM (58% height).
-         On Desktop (>=1024px): Left column IDE + Console/Inventory (45% width), Right column 3D Viewport (55% width). -->
-    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+    <!-- MAIN RESPONSIVE WORKSPACE -->
+    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative min-h-0">
 
-        <!-- 3D MINECRAFT CHUNK VIEWPORT (Order 1 on Mobile so it's always visible on top, Order 2 on Desktop) -->
-        <section id="viewport-section" class="order-1 lg:order-2 w-full lg:flex-1 h-[40dvh] sm:h-[44dvh] lg:h-full relative bg-[#090b10] overflow-hidden flex flex-col shrink-0 border-b lg:border-b-0 border-slate-800 transition-all duration-200">
+        <!-- 3D MINECRAFT CHUNK VIEWPORT (Top on Mobile, Right on Desktop) -->
+        <section id="viewport-section" class="order-1 lg:order-2 w-full lg:flex-1 h-[38dvh] sm:h-[42dvh] lg:h-full relative bg-[#090b10] overflow-hidden flex flex-col shrink-0 border-b lg:border-b-0 border-slate-800 transition-all duration-200">
 
             <div id="viewport-container" class="flex-1 relative w-full h-full cursor-crosshair overflow-hidden">
-                <!-- Three.js Canvas mounts here -->
+                <!-- Three.js WebGL Canvas mounts here -->
 
-                <!-- ULTRA-CLEAN TOP HUD BAR (Never obscures the 3D Turtle on Mobile!) -->
+                <!-- TOP HUD OVERLAY -->
                 <div class="absolute top-2 left-2 right-2 pointer-events-none flex flex-wrap items-center justify-between gap-1.5 z-10">
-                    <!-- Left Telemetry Pill: Coords, Facing, Fuel & Front Block -->
+                    <!-- Left Telemetry Pill -->
                     <div class="pointer-events-auto flex items-center gap-1.5 sm:gap-2 bg-[#111520]/85 backdrop-blur-md border border-slate-700/80 rounded-xl px-2.5 py-1.5 shadow-lg text-[11px] font-mono-code">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
                         <div class="flex items-center gap-1 text-white font-bold">
@@ -184,7 +172,7 @@
                         </span>
                         <div class="h-3.5 w-px bg-slate-700"></div>
                         <div class="flex items-center gap-1 text-amber-400 font-semibold" title="Turtle Fuel">
-                            <i data-lucide="flame" class="w-3 h-3 fill-amber-400/30"></i>
+                            <svg class="w-3.5 h-3.5 fill-amber-400/30 stroke-current" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
                             <span id="hud-fuel-text">1000</span>
                         </div>
                         <div class="hidden sm:flex items-center gap-1 pl-1.5 border-l border-slate-700 text-slate-300">
@@ -209,27 +197,22 @@
                         </button>
 
                         <!-- Toggle Layer / Voxel Brush Drawer -->
-                        <button onclick="UI.toggleViewportTools()" class="ml-0.5 p-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-sky-300 border border-slate-700 transition" title="Y-Cutaway & Voxel Tools">
-                            <i data-lucide="SlidersHorizontal" class="w-3.5 h-3.5"></i>
+                        <button onclick="UI.toggleViewportTools()" class="ml-0.5 p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 transition" title="Y-Cutaway & Voxel Tools">
+                            <svg class="w-3.5 h-3.5 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
                         </button>
 
                         <!-- Mobile Expand/Collapse 3D Viewport Height Button -->
-                        <button onclick="UI.toggleMobile3DSize()" id="btn-expand-3d" class="lg:hidden p-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-slate-700 transition" title="Expand / Shrink 3D View">
-                            <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                        <button onclick="UI.toggleMobile3DSize()" id="btn-expand-3d" class="lg:hidden p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 transition" title="Expand / Shrink 3D View">
+                            <svg class="w-3.5 h-3.5 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
                         </button>
                     </div>
                 </div>
 
-                <!-- COLLAPSIBLE VIEWPORT TOOLS POPOVER (Y-Cutaway, Voxel Brush, World Preset) -->
+                <!-- COLLAPSIBLE VIEWPORT TOOLS POPOVER -->
                 <div id="viewport-tools-drawer" class="hidden absolute top-12 right-2 z-20 bg-[#111520]/95 backdrop-blur-md border border-slate-700 rounded-xl p-3 shadow-2xl w-64 space-y-2.5 text-xs">
                     <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
-                        <span class="font-semibold text-white flex items-center gap-1.5">
-                            <i data-lucide="layers" class="w-3.5 h-3.5 text-sky-400"></i>
-                            Chunk &amp; Voxel Tools
-                        </span>
-                        <button onclick="UI.toggleViewportTools()" class="text-slate-400 hover:text-white">
-                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                        </button>
+                        <span class="font-semibold text-white">Chunk &amp; Voxel Tools</span>
+                        <button onclick="UI.toggleViewportTools()" class="text-slate-400 hover:text-white px-1">✕</button>
                     </div>
 
                     <!-- Y-Cutaway Slider -->
@@ -242,6 +225,16 @@
                             class="w-full accent-sky-400 h-1.5 bg-slate-700 rounded-lg cursor-pointer">
                     </div>
 
+                    <!-- Mobile Speed Slider -->
+                    <div class="space-y-1 md:hidden">
+                        <div class="flex justify-between text-[11px]">
+                            <span class="text-slate-300">Step Delay:</span>
+                            <strong id="speed-val-mobile" class="font-mono-code text-amber-400">0.18s</strong>
+                        </div>
+                        <input type="range" min="0" max="800" step="20" value="180" oninput="Simulator.updateSpeed(this.value)"
+                            class="w-full accent-amber-400 h-1.5 bg-slate-700 rounded-lg cursor-pointer">
+                    </div>
+
                     <!-- Voxel Paint Brush -->
                     <div class="space-y-1">
                         <label class="text-[11px] text-slate-300 block">Tap Block to Place (Shift=Break):</label>
@@ -249,7 +242,7 @@
                         </select>
                     </div>
 
-                    <!-- World Preset Switcher (handy on mobile) -->
+                    <!-- World Preset Switcher -->
                     <div class="space-y-1">
                         <label class="text-[11px] text-slate-300 block">World Chunk Preset:</label>
                         <select id="world-preset-mobile" onchange="World.loadPreset(this.value)" class="w-full bg-[#1b2234] border border-slate-700 rounded-lg px-2 py-1 text-xs text-emerald-300 focus:outline-none">
@@ -280,80 +273,86 @@
             </div>
         </section>
 
-        <!-- LEFT / BOTTOM WORKSPACE: CODE EDITOR, CRAFTOS CONSOLE & INVENTORY/PAD
-             (Order 2 on Mobile with clean Tabs, Order 1 on Desktop with split panels) -->
-        <section class="order-2 lg:order-1 flex-1 lg:flex-initial lg:w-[46%] xl:w-[44%] h-full flex flex-col bg-[#0e1017] lg:border-r border-slate-800 overflow-hidden">
+        <!-- LEFT / BOTTOM WORKSPACE: CODE EDITOR, CRAFTOS CONSOLE & INVENTORY/PAD -->
+        <section class="order-2 lg:order-1 flex-1 lg:flex-initial lg:w-[48%] xl:w-[45%] h-full flex flex-col bg-[#0e1017] lg:border-r border-slate-800 overflow-hidden min-h-0">
 
             <!-- MOBILE NAVIGATION TABS BAR (<1024px) -->
             <div class="flex lg:hidden bg-[#141822] border-b border-slate-800 shrink-0 text-xs font-medium">
                 <button onclick="UI.switchMobileTab('code')" id="mob-tab-code" class="flex-1 py-2.5 flex items-center justify-center gap-1.5 text-slate-400 mob-tab-active transition">
-                    <i data-lucide="code-2" class="w-3.5 h-3.5"></i>
                     <span>Lua Code</span>
                 </button>
                 <button onclick="UI.switchMobileTab('console')" id="mob-tab-console" class="flex-1 py-2.5 flex items-center justify-center gap-1.5 text-slate-400 transition relative">
-                    <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
                     <span>Console</span>
                     <span id="console-unread-dot" class="hidden w-2 h-2 rounded-full bg-amber-400"></span>
                 </button>
                 <button onclick="UI.switchMobileTab('inv')" id="mob-tab-inv" class="flex-1 py-2.5 flex items-center justify-center gap-1.5 text-slate-400 transition">
-                    <i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i>
                     <span>Inv &amp; Pad</span>
                 </button>
             </div>
 
             <!-- PANEL 1: LUA CODE EDITOR -->
             <div id="panel-code" class="flex-1 flex flex-col overflow-hidden min-h-0">
-                <!-- Editor Toolbar -->
-                <div class="h-11 bg-[#141822] border-b border-slate-800 px-2.5 sm:px-3 flex items-center justify-between gap-1.5 shrink-0 overflow-x-auto">
-                    <!-- Active File & VM Status -->
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <span class="flex items-center gap-1 text-xs font-mono-code text-amber-400 font-semibold">
-                            <i data-lucide="file-code" class="w-3.5 h-3.5 shrink-0"></i>
-                            <span id="active-filename-label" class="truncate max-w-[95px] sm:max-w-[140px]">tunnel3x3.lua</span>
-                        </span>
-                        <span id="save-status-pill" class="hidden sm:inline-block text-[9px] font-mono-code px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            SAVED
-                        </span>
-                        <span id="vm-status-badge" class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
-                            IDLE
-                        </span>
-                    </div>
-
-                    <!-- Unified File Selector Dropdown + File Management Actions -->
-                    <div class="flex items-center gap-1 min-w-0 shrink-0">
-                        <select id="script-preset" onchange="Editor.selectFile(this.value)" class="bg-[#1d2331] text-amber-300 border border-slate-700 rounded-lg px-2 py-1 text-xs font-medium focus:outline-none focus:border-amber-500 cursor-pointer truncate max-w-[145px] sm:max-w-[210px]">
+                <!-- Clean Two-Row Responsive Editor Toolbar (Never crushes dropdown or CLI args on mobile!) -->
+                <div class="bg-[#141822] border-b border-slate-800 px-2.5 py-1.5 flex flex-col gap-1.5 shrink-0">
+                    <!-- Row 1: File Selector Dropdown + File Management Buttons -->
+                    <div class="flex items-center justify-between gap-1.5">
+                        <select id="script-preset" onchange="Editor.selectFile(this.value)" class="flex-1 min-w-0 bg-[#1d2331] text-amber-300 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-amber-500 cursor-pointer truncate">
                         </select>
 
-                        <!-- New File Button -->
-                        <button onclick="Editor.openNewFileModal()" class="p-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 transition" title="Create New Lua File">
-                            <i data-lucide="file-plus-2" class="w-3.5 h-3.5"></i>
-                        </button>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <!-- New File (+) Button -->
+                            <button onclick="Editor.openNewFileModal()" class="px-2 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1 text-[11px] font-semibold" title="Create New Lua File">
+                                <svg class="w-3.5 h-3.5 stroke-current" fill="none" stroke-width="2.2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                <span class="hidden sm:inline">New</span>
+                            </button>
 
-                        <!-- Save Locally Button -->
-                        <button onclick="Editor.saveCurrentFile(true)" class="p-1.5 rounded-lg bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 transition" title="Save to Local Storage">
-                            <i data-lucide="save" class="w-3.5 h-3.5"></i>
-                        </button>
+                            <!-- Save Locally Button -->
+                            <button onclick="Editor.saveCurrentFile(true)" class="p-1.5 rounded-lg bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 transition" title="Save to Local Storage">
+                                <svg class="w-3.5 h-3.5 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            </button>
 
-                        <!-- Download .lua File Button -->
-                        <button onclick="Editor.downloadCurrentFile()" class="p-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition" title="Download .lua File">
-                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                        </button>
+                            <!-- Download .lua File Button -->
+                            <button onclick="Editor.downloadCurrentFile()" class="p-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition" title="Download .lua File">
+                                <svg class="w-3.5 h-3.5 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            </button>
 
-                        <!-- Upload / Import .lua File Button -->
-                        <button onclick="document.getElementById('lua-file-upload').click()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Import .lua File from Device">
-                            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                        </button>
-                        <input id="lua-file-upload" type="file" accept=".lua,.txt" class="hidden" onchange="Editor.importFileFromDisk(this)">
+                            <!-- Upload / Import .lua File Button -->
+                            <button onclick="document.getElementById('lua-file-upload').click()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Import .lua File from Device">
+                                <svg class="w-3.5 h-3.5 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            </button>
+                            <input id="lua-file-upload" type="file" accept=".lua,.txt" class="hidden" onchange="Editor.importFileFromDisk(this)">
 
-                        <!-- Delete Custom File Button (Only enabled for user-created files) -->
-                        <button id="btn-delete-file" onclick="Editor.openDeleteModal()" class="hidden p-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition" title="Delete Custom File">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        </button>
+                            <!-- Delete Custom File Button -->
+                            <button id="btn-delete-file" onclick="Editor.openDeleteModal()" class="hidden p-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition" title="Delete Custom File">
+                                <svg class="w-3.5 h-3.5 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Active File Status + Custom CLI Args Input Box -->
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span id="active-filename-label" class="text-xs font-mono-code text-amber-400 font-semibold truncate">tunnel3x3.lua</span>
+                            <span id="save-status-pill" class="text-[9px] font-mono-code px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                                PRESET
+                            </span>
+                            <span id="vm-status-badge" class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 shrink-0">
+                                IDLE
+                            </span>
+                        </div>
+
+                        <!-- Custom CLI Args Input Box -->
+                        <div class="flex items-center flex-1 max-w-[220px] bg-[#181d2a] border border-slate-700/90 rounded-lg px-2 py-1 focus-within:border-amber-500 transition" title="CLI Arguments passed to `...` and `arg` when clicking Run">
+                            <span class="text-[10px] font-mono-code text-amber-400/90 mr-1.5 select-none shrink-0">args:</span>
+                            <input id="cli-args-input" type="text" placeholder="e.g. 6 true"
+                                onkeydown="if(event.key==='Enter') Simulator.runScript()"
+                                class="w-full bg-transparent text-amber-200 placeholder-slate-500 font-mono-code text-xs focus:outline-none">
+                        </div>
                     </div>
                 </div>
 
                 <!-- Code Editor Area -->
-                <div class="flex-1 relative flex overflow-hidden bg-[#0c0e14]">
+                <div class="flex-1 relative flex overflow-hidden bg-[#0c0e14] min-h-0">
                     <div id="line-numbers" class="w-10 py-3 px-1.5 text-right font-mono-code text-xs text-slate-600 bg-[#10131b] border-r border-slate-800/80 select-none overflow-hidden shrink-0">
                         1
                     </div>
@@ -364,12 +363,11 @@
             </div>
 
             <!-- BOTTOM / TABBED PANELS: CRAFTOS CONSOLE + INVENTORY & MOBILE D-PAD -->
-            <div id="panel-bottom-container" class="hidden lg:flex lg:h-72 bg-[#12151e] border-t border-slate-800 flex-col shrink-0 overflow-hidden">
+            <div id="panel-bottom-container" class="hidden lg:flex lg:h-72 bg-[#12151e] border-t border-slate-800 flex-col shrink-0 overflow-hidden min-h-0">
                 <!-- Desktop Sub-header -->
                 <div class="hidden lg:flex h-8 bg-[#161a26] border-b border-slate-800 px-3 items-center justify-between text-xs shrink-0">
                     <span class="font-mono-code font-semibold text-amber-400 flex items-center gap-1.5">
-                        <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
-                        CraftOS 1.8 Console &amp; Turtle Inventory
+                        <span>&gt;_ CraftOS 1.8 Console &amp; Turtle Inventory</span>
                     </span>
                     <button onclick="Terminal.clear()" class="text-[11px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800 transition">
                         Clear Term
@@ -380,17 +378,17 @@
                     <!-- SUBPANEL A: CRAFTOS CONSOLE -->
                     <div id="subpanel-console" class="flex-1 craftos-screen flex flex-col p-2.5 font-mono-code text-xs overflow-hidden lg:border-r border-slate-800 min-h-0">
                         <div class="flex lg:hidden items-center justify-between pb-1.5 mb-1.5 border-b border-slate-800/80">
-                            <span class="text-[11px] text-amber-400 font-semibold">CraftOS 1.8 Terminal Output</span>
+                            <span class="text-[11px] text-amber-400 font-semibold">CraftOS 1.8 Shell (Run `<file> <args>`)</span>
                             <button onclick="Terminal.clear()" class="text-[10px] text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800">Clear</button>
                         </div>
                         <div id="terminal-output" class="flex-1 overflow-y-auto space-y-1 text-amber-100/90 pr-1 select-text"></div>
-                        <!-- Interactive Lua One-Liner Prompt -->
+                        <!-- Interactive CraftOS Shell & Lua Prompt -->
                         <div class="mt-1.5 pt-1.5 border-t border-slate-800/80 flex items-center gap-1.5 text-amber-400 shrink-0">
-                            <span class="font-bold">lua&gt;</span>
-                            <input id="repl-input" type="text" placeholder="turtle.forward() or print(turtle.getFuelLevel())"
+                            <span class="font-bold">&gt;</span>
+                            <input id="repl-input" type="text" placeholder="tunnel3x3 6  |  ls  |  help  |  turtle.forward()"
                                 onkeydown="if(event.key==='Enter') Simulator.runReplCommand(this)"
                                 class="flex-1 bg-transparent text-amber-200 placeholder-slate-600 focus:outline-none text-xs">
-                            <button onclick="Simulator.runReplCommand(document.getElementById('repl-input'))" class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px]">Send</button>
+                            <button onclick="Simulator.runReplCommand(document.getElementById('repl-input'))" class="px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-semibold">Exec</button>
                         </div>
                     </div>
 
@@ -406,7 +404,7 @@
                                 <div id="inventory-grid" class="grid grid-cols-4 gap-1.5"></div>
                             </div>
 
-                            <!-- Mobile Touch D-Pad Controller (Visible on mobile/tablet inside Inv & Pad tab) -->
+                            <!-- Mobile Touch D-Pad Controller -->
                             <div class="w-full max-w-[230px] mx-auto lg:hidden bg-[#161b28] p-2.5 rounded-xl border border-slate-800">
                                 <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2 text-center">Manual Turtle Touch Pad</div>
                                 <div class="grid grid-cols-3 gap-1.5">
@@ -448,45 +446,34 @@
     <div id="api-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-[#131722] border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
             <div class="px-5 py-3.5 bg-[#181d2b] border-b border-slate-800 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="book-open" class="w-4 h-4 text-amber-400"></i>
-                    <h2 class="font-bold text-sm text-white">CC: Tweaked Lua API Reference (Supported in Simulator)</h2>
-                </div>
-                <button onclick="UI.toggleApiModal()" class="text-slate-400 hover:text-white p-1">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+                <h2 class="font-bold text-sm text-white">CC: Tweaked Lua API Reference (Supported in Simulator)</h2>
+                <button onclick="UI.toggleApiModal()" class="text-slate-400 hover:text-white px-2 py-1 text-sm">✕</button>
             </div>
             <div class="p-5 overflow-y-auto space-y-4 text-xs leading-relaxed text-slate-300 font-mono-code">
+                <div>
+                    <h3 class="text-amber-400 font-bold mb-1 font-sans text-sm">CLI Arguments (`...`), Shell &amp; Virtual File System (`fs` / `io`)</h3>
+                    <p><span class="text-sky-300">local args = { ... }</span> or <span class="text-sky-300">arg[1], arg[2]</span> &rarr; Reads custom CLI arguments from the Console (e.g. <span class="text-amber-300">tunnel3x3 6</span>) or the toolbar <span class="text-amber-300">args:</span> input box.</p>
+                    <p>shell.run(program, ...) &rarr; <span class="text-emerald-400">boolean</span> (runs another saved file or preset with custom arguments)</p>
+                    <p>fs.open(path, mode) / io.open(path, mode) &rarr; <span class="text-emerald-400">handle { write, writeLine, readAll, readLine, close }</span> (creates or reads local `.lua` files directly from code!)</p>
+                    <p>fs.list() / fs.exists(path) / fs.delete(path) / loadfile(path) / dofile(path)</p>
+                </div>
                 <div>
                     <h3 class="text-amber-400 font-bold mb-1 font-sans text-sm">Movement &amp; Rotation</h3>
                     <p>turtle.forward() / turtle.back() / turtle.up() / turtle.down() &rarr; <span class="text-emerald-400">boolean, string|nil</span></p>
                     <p>turtle.turnLeft() / turtle.turnRight() &rarr; <span class="text-emerald-400">boolean</span></p>
                 </div>
                 <div>
-                    <h3 class="text-amber-400 font-bold mb-1 font-sans text-sm">Digging &amp; Placing</h3>
-                    <p>turtle.dig() / turtle.digUp() / turtle.digDown() &rarr; <span class="text-emerald-400">boolean, string|nil</span> (mines block &amp; collects drop in inventory)</p>
-                    <p>turtle.place() / turtle.placeUp() / turtle.placeDown() &rarr; <span class="text-emerald-400">boolean, string|nil</span> (places block from selected slot)</p>
-                </div>
-                <div>
-                    <h3 class="text-amber-400 font-bold mb-1 font-sans text-sm">Block Inspection &amp; Detection</h3>
-                    <p>turtle.detect() / turtle.detectUp() / turtle.detectDown() &rarr; <span class="text-emerald-400">boolean</span> (true if solid block)</p>
-                    <p>turtle.inspect() / turtle.inspectUp() / turtle.inspectDown() &rarr; <span class="text-emerald-400">boolean, table { name = "minecraft:...", tags = {...} }</span></p>
+                    <h3 class="text-amber-400 font-bold mb-1 font-sans text-sm">Digging, Placing &amp; Inspection</h3>
+                    <p>turtle.dig() / turtle.digUp() / turtle.digDown() &rarr; <span class="text-emerald-400">boolean, string|nil</span></p>
+                    <p>turtle.place() / turtle.placeUp() / turtle.placeDown() &rarr; <span class="text-emerald-400">boolean, string|nil</span></p>
+                    <p>turtle.detect() / turtle.detectUp() / turtle.detectDown() &rarr; <span class="text-emerald-400">boolean</span></p>
+                    <p>turtle.inspect() / turtle.inspectUp() / turtle.inspectDown() &rarr; <span class="text-emerald-400">boolean, table</span></p>
                     <p>turtle.compare() / turtle.compareUp() / turtle.compareDown() &rarr; <span class="text-emerald-400">boolean</span></p>
                 </div>
                 <div>
                     <h3 class="text-amber-400 font-bold mb-1 font-sans text-sm">Inventory &amp; Fuel System (16 Slots)</h3>
-                    <p>turtle.select(slotNum) &rarr; <span class="text-emerald-400">boolean</span> (1 to 16)</p>
-                    <p>turtle.getSelectedSlot() &rarr; <span class="text-emerald-400">number</span></p>
-                    <p>turtle.getItemCount([slot]) / turtle.getItemSpace([slot]) &rarr; <span class="text-emerald-400">number</span></p>
-                    <p>turtle.getItemDetail([slot]) &rarr; <span class="text-emerald-400">table { name = "minecraft:...", count = n } | nil</span></p>
-                    <p>turtle.transferTo(slot, [count]) &rarr; <span class="text-emerald-400">boolean</span></p>
-                    <p>turtle.refuel([count]) &rarr; <span class="text-emerald-400">boolean, string|nil</span> (consumes coal, planks, logs, sapling)</p>
-                    <div class="flex justify-between text-[11px] font-mono-code">
-                        <span class="text-slate-400 flex items-center gap-1">
-                            <i data-lucide="flame" class="w-3 h-3 text-amber-400"></i> Fuel Level
-                        </span>
-                        <span id="hud-fuel-limit-noop" class="text-amber-400 font-semibold"></span>
-                    </div>
+                    <p>turtle.select(slotNum) / turtle.getSelectedSlot() / turtle.getItemCount([slot]) / turtle.getItemDetail([slot])</p>
+                    <p>turtle.transferTo(slot, [count]) / turtle.refuel([count]) / turtle.getFuelLevel() / gps.locate()</p>
                 </div>
             </div>
         </div>
@@ -496,13 +483,8 @@
     <div id="new-file-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-[#131722] border border-slate-700 rounded-2xl max-w-md w-full flex flex-col shadow-2xl overflow-hidden">
             <div class="px-4 py-3 bg-[#181d2b] border-b border-slate-800 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="file-plus-2" class="w-4 h-4 text-emerald-400"></i>
-                    <h2 class="font-bold text-sm text-white">Create New Lua Script</h2>
-                </div>
-                <button onclick="Editor.closeNewFileModal()" class="text-slate-400 hover:text-white p-1">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
+                <h2 class="font-bold text-sm text-white">Create New Lua Script</h2>
+                <button onclick="Editor.closeNewFileModal()" class="text-slate-400 hover:text-white px-2">✕</button>
             </div>
             <div class="p-4 space-y-3 text-xs">
                 <div>
@@ -515,7 +497,7 @@
                 <div>
                     <label class="block text-slate-300 font-medium mb-1">Initial Template:</label>
                     <select id="new-file-template" class="w-full bg-[#0d1017] border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:outline-none">
-                        <option value="starter">Blank Starter Template</option>
+                        <option value="starter">Starter Template (with CLI Args `...`)</option>
                         <option value="duplicate">Clone Current Editor Code</option>
                     </select>
                 </div>
@@ -523,9 +505,8 @@
                     <button onclick="Editor.closeNewFileModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium">
                         Cancel
                     </button>
-                    <button onclick="Editor.confirmCreateNewFile()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold flex items-center gap-1">
-                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
-                        <span>Create &amp; Save</span>
+                    <button onclick="Editor.confirmCreateNewFile()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">
+                        Create &amp; Save
                     </button>
                 </div>
             </div>
@@ -536,13 +517,8 @@
     <div id="delete-file-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-[#131722] border border-slate-700 rounded-2xl max-w-sm w-full flex flex-col shadow-2xl overflow-hidden">
             <div class="px-4 py-3 bg-[#181d2b] border-b border-slate-800 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="trash-2" class="w-4 h-4 text-rose-400"></i>
-                    <h2 class="font-bold text-sm text-white">Delete Local File</h2>
-                </div>
-                <button onclick="Editor.closeDeleteModal()" class="text-slate-400 hover:text-white p-1">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
+                <h2 class="font-bold text-sm text-white">Delete Local File</h2>
+                <button onclick="Editor.closeDeleteModal()" class="text-slate-400 hover:text-white px-2">✕</button>
             </div>
             <div class="p-4 space-y-3 text-xs text-slate-300">
                 <p>Are you sure you want to delete <strong id="delete-file-name" class="text-amber-300 font-mono-code"></strong> from your browser's local storage?</p>
@@ -582,14 +558,10 @@
             15: { id: 15, name: 'minecraft:oak_planks',     label: 'Oak Planks',     solid: true, drop: 15, fuel: 15 }
         };
 
-        const NAME_TO_ID = {};
-        Object.values(BLOCK_DEFS).forEach(b => NAME_TO_ID[b.name] = b.id);
-
         const TextureFactory = {
             materials: {},
             icons: {},
 
-            // Deterministic pseudo-random helper for pixel art
             hash(x, y, seed) {
                 let n = Math.sin(x * 12.9898 + y * 78.233 + seed * 43.12) * 43758.5453;
                 return n - Math.floor(n);
@@ -635,7 +607,7 @@
                     [3,3],[4,3],[3,4], [10,4],[11,4],[11,5],
                     [5,9],[6,9],[6,10],[5,10], [11,11],[12,11],[11,12]
                 ];
-                coords.forEach(([x, y], i) => {
+                coords.forEach(([x, y]) => {
                     const ox = (x + seed) % 14 + 1;
                     const oy = (y + seed) % 14 + 1;
                     ctx.fillRect(ox, oy, 1, 1);
@@ -643,7 +615,6 @@
             },
 
             init() {
-                // 1. Grass Top, Side, Dirt
                 const dirtCanvas = this.createCanvas(ctx => this.fillNoise(ctx, '#79553a', 28, 2));
                 const grassTopCanvas = this.createCanvas(ctx => this.fillNoise(ctx, '#5ca038', 26, 1));
                 const grassSideCanvas = this.createCanvas(ctx => {
@@ -657,10 +628,7 @@
                     }
                 });
 
-                // 3. Stone
                 const stoneCanvas = this.createCanvas(ctx => this.fillNoise(ctx, '#7a7a7a', 24, 3));
-
-                // 4. Cobblestone
                 const cobbleCanvas = this.createCanvas(ctx => {
                     this.fillNoise(ctx, '#686868', 48, 4);
                     ctx.fillStyle = '#3f3f3f';
@@ -670,12 +638,10 @@
                     }
                 });
 
-                // 5, 6, 7. Ores
                 const coalOreCanvas = this.createCanvas(ctx => this.drawOreSpecks(ctx, '#1b1b1b', 1));
                 const ironOreCanvas = this.createCanvas(ctx => this.drawOreSpecks(ctx, '#d8af93', 3));
                 const diamondOreCanvas = this.createCanvas(ctx => this.drawOreSpecks(ctx, '#4aedd9', 6));
 
-                // 8. Oak Log
                 const logSideCanvas = this.createCanvas(ctx => {
                     for (let x = 0; x < 16; x++) {
                         for (let y = 0; y < 16; y++) {
@@ -693,12 +659,7 @@
                     ctx.strokeRect(4.5, 4.5, 7, 7);
                 });
 
-                // 9. Leaves
-                const leavesCanvas = this.createCanvas(ctx => {
-                    this.fillNoise(ctx, '#3b7d23', 38, 10);
-                });
-
-                // 10. Glass
+                const leavesCanvas = this.createCanvas(ctx => this.fillNoise(ctx, '#3b7d23', 38, 10));
                 const glassCanvas = this.createCanvas(ctx => {
                     ctx.clearRect(0, 0, 16, 16);
                     ctx.fillStyle = 'rgba(200, 235, 255, 0.18)';
@@ -711,7 +672,6 @@
                     ctx.fillRect(11, 11, 2, 1);
                 });
 
-                // 11. Chest
                 const chestSideCanvas = this.createCanvas(ctx => {
                     this.fillNoise(ctx, '#9c6b2e', 16, 11);
                     ctx.fillStyle = '#2a221b';
@@ -727,24 +687,17 @@
                     ctx.fillRect(7, 4, 2, 4);
                 });
 
-                // 12. Bedrock
                 const bedrockCanvas = this.createCanvas(ctx => this.fillNoise(ctx, '#333333', 65, 12));
-
-                // 13. Coal Block / Item
                 const coalCanvas = this.createCanvas(ctx => {
                     this.fillNoise(ctx, '#1e1e24', 22, 13);
                     ctx.fillStyle = '#383842';
                     ctx.fillRect(4, 4, 3, 3);
                 });
-
-                // 14. Sapling
                 const saplingCanvas = this.createCanvas(ctx => {
                     this.fillNoise(ctx, '#4ea72e', 30, 14);
                     ctx.fillStyle = '#6b4c2b';
                     ctx.fillRect(7, 10, 2, 6);
                 });
-
-                // 15. Oak Planks
                 const planksCanvas = this.createCanvas(ctx => {
                     this.fillNoise(ctx, '#a2824e', 20, 15);
                     ctx.fillStyle = '#7e6338';
@@ -754,7 +707,6 @@
                     ctx.fillRect(0, 15, 16, 1);
                 });
 
-                // Register Three.js Materials & 2D Icons
                 const makeMat = (canvas, opts = {}) => new THREE.MeshLambertMaterial({
                     map: this.canvasToTexture(canvas),
                     transparent: !!opts.transparent,
@@ -787,7 +739,6 @@
                 this.materials[14] = makeMat(saplingCanvas, { transparent: true, opacity: 0.9 });
                 this.materials[15] = makeMat(planksCanvas);
 
-                // Save DataURLs for 2D Inventory UI
                 const iconMap = {
                     1: grassSideCanvas, 2: dirtCanvas, 3: stoneCanvas, 4: cobbleCanvas,
                     5: coalOreCanvas, 6: ironOreCanvas, 7: diamondOreCanvas, 8: logSideCanvas,
@@ -798,7 +749,6 @@
                     this.icons[id] = iconMap[id].toDataURL();
                 });
 
-                // Draw Brand Icon on Header
                 const brandCanvas = document.getElementById('brand-turtle-icon');
                 if (brandCanvas) {
                     const bctx = brandCanvas.getContext('2d');
@@ -828,48 +778,47 @@
             turtleGroup: null,
             pickaxeMesh: null,
             blockGroup: null,
-            blockMeshes: new Map(), // key "x,y,z" -> Mesh
+            blockMeshes: new Map(),
             sharedBoxGeo: null,
             particles: [],
-            cameraMode: 'orbit', // 'orbit' | 'follow' | 'top' | 'fpv'
+            cameraMode: 'orbit',
             raycaster: new THREE.Raycaster(),
             mouse: new THREE.Vector2(),
             hoverBox: null,
 
-            // Visual animation interpolation state
-            visualPos: new THREE.Vector3(7, 5, 7),
-            targetPos: new THREE.Vector3(7, 5, 7),
+            visualPos: new THREE.Vector3(7, 6, 10),
+            targetPos: new THREE.Vector3(7, 6, 10),
             visualYaw: 0,
             targetYaw: 0,
             swingProgress: 0,
 
             init() {
                 const container = document.getElementById('viewport-container');
+                const w = Math.max(container.clientWidth, 300);
+                const h = Math.max(container.clientHeight, 220);
+
                 this.scene = new THREE.Scene();
                 this.scene.background = new THREE.Color(0x0b0e16);
                 this.scene.fog = new THREE.FogExp2(0x0b0e16, 0.018);
 
-                this.camera = new THREE.PerspectiveCamera(55, container.clientWidth / container.clientHeight, 0.1, 200);
-                this.camera.position.set(22, 18, 24);
+                this.camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 200);
+                this.camera.position.set(20, 16, 22);
 
                 this.renderer = new THREE.WebGLRenderer({ antialias: true });
-                this.renderer.setSize(container.clientWidth, container.clientHeight);
-                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                this.renderer.shadowMap.enabled = true;
+                this.renderer.setSize(w, h);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
                 container.appendChild(this.renderer.domElement);
 
-                // OrbitControls
                 this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-                this.controls.target.set(7.5, 4, 7.5);
+                this.controls.target.set(7.5, 5, 7.5);
                 this.controls.enableDamping = true;
                 this.controls.dampingFactor = 0.08;
                 this.controls.maxDistance = 60;
 
-                // Lighting
-                const ambient = new THREE.AmbientLight(0xdbeafe, 0.68);
+                const ambient = new THREE.AmbientLight(0xdbeafe, 0.72);
                 this.scene.add(ambient);
 
-                const sun = new THREE.DirectionalLight(0xfffbeb, 0.82);
+                const sun = new THREE.DirectionalLight(0xfffbeb, 0.85);
                 sun.position.set(25, 40, 20);
                 this.scene.add(sun);
 
@@ -877,17 +826,14 @@
                 backLight.position.set(-15, 20, -15);
                 this.scene.add(backLight);
 
-                // Chunk Boundary Grid Helper
                 const gridHelper = new THREE.GridHelper(CHUNK_SIZE, CHUNK_SIZE, 0x334155, 0x1e293b);
                 gridHelper.position.set(CHUNK_SIZE / 2 - 0.5, -0.5, CHUNK_SIZE / 2 - 0.5);
                 this.scene.add(gridHelper);
 
-                // Shared Geometry for Voxels
                 this.sharedBoxGeo = new THREE.BoxGeometry(1, 1, 1);
                 this.blockGroup = new THREE.Group();
                 this.scene.add(this.blockGroup);
 
-                // Selection Wireframe Highlight
                 const edgesGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(1.01, 1.01, 1.01));
                 this.hoverBox = new THREE.LineSegments(
                     edgesGeo,
@@ -896,33 +842,32 @@
                 this.hoverBox.visible = false;
                 this.scene.add(this.hoverBox);
 
-                // Build 3D CC: Tweaked Mining Turtle Mesh
                 this.buildTurtleModel();
-
-                // Interactive Mouse Events for Block Placement / Breaking
                 this.setupInteraction(container);
 
                 window.addEventListener('resize', () => this.onResize());
+                if (typeof ResizeObserver !== 'undefined') {
+                    const ro = new ResizeObserver(() => this.onResize());
+                    ro.observe(container);
+                }
+                setTimeout(() => this.onResize(), 80);
                 this.animate();
             },
 
             buildTurtleModel() {
                 this.turtleGroup = new THREE.Group();
 
-                // Main Yellow Computer Craft Chassis
                 const chassisGeo = new THREE.BoxGeometry(0.82, 0.82, 0.82);
                 const chassisMat = new THREE.MeshLambertMaterial({ color: 0xeab308 });
                 const chassis = new THREE.Mesh(chassisGeo, chassisMat);
                 this.turtleGroup.add(chassis);
 
-                // Dark Base Trim
                 const baseGeo = new THREE.BoxGeometry(0.84, 0.18, 0.84);
                 const baseMat = new THREE.MeshLambertMaterial({ color: 0xa16207 });
                 const baseMesh = new THREE.Mesh(baseGeo, baseMat);
                 baseMesh.position.y = -0.33;
                 this.turtleGroup.add(baseMesh);
 
-                // Front CRT Monitor Bezel & Screen (Facing -Z when yaw=0)
                 const bezelGeo = new THREE.BoxGeometry(0.64, 0.52, 0.06);
                 const bezelMat = new THREE.MeshLambertMaterial({ color: 0x1e293b });
                 const bezel = new THREE.Mesh(bezelGeo, bezelMat);
@@ -936,7 +881,6 @@
                 screen.rotation.y = Math.PI;
                 this.turtleGroup.add(screen);
 
-                // Glowing Prompt Cursor on Turtle Screen
                 const cursorGeo = new THREE.PlaneGeometry(0.14, 0.06);
                 const cursorMat = new THREE.MeshBasicMaterial({ color: 0x4ade80 });
                 const cursor = new THREE.Mesh(cursorGeo, cursorMat);
@@ -944,7 +888,6 @@
                 cursor.rotation.y = Math.PI;
                 this.turtleGroup.add(cursor);
 
-                // Direction Arrow on Top of Turtle so Top-Down view is unmistakable
                 const arrowShape = new THREE.Shape();
                 arrowShape.moveTo(0, 0.25);
                 arrowShape.lineTo(-0.18, -0.15);
@@ -957,7 +900,6 @@
                 arrowMesh.position.set(0, 0.42, 0);
                 this.turtleGroup.add(arrowMesh);
 
-                // Right-Side Diamond Pickaxe Attachment
                 this.pickaxeMesh = new THREE.Group();
                 this.pickaxeMesh.position.set(0.46, 0.0, -0.1);
 
@@ -975,7 +917,6 @@
 
                 this.turtleGroup.add(this.pickaxeMesh);
 
-                // Left-Side Redstone Modem Box
                 const modemGeo = new THREE.BoxGeometry(0.1, 0.42, 0.42);
                 const modemMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
                 const modem = new THREE.Mesh(modemGeo, modemMat);
@@ -1004,8 +945,7 @@
                 container.addEventListener('pointermove', e => {
                     const hits = getTarget(e);
                     if (hits.length > 0) {
-                        const hit = hits[0];
-                        this.hoverBox.position.copy(hit.object.position);
+                        this.hoverBox.position.copy(hits[0].object.position);
                         this.hoverBox.visible = true;
                     } else {
                         this.hoverBox.visible = false;
@@ -1013,7 +953,7 @@
                 });
 
                 container.addEventListener('pointerup', e => {
-                    if (Math.hypot(e.clientX - downX, e.clientY - downY) > 5) return; // Dragged camera
+                    if (Math.hypot(e.clientX - downX, e.clientY - downY) > 5) return;
                     const hits = getTarget(e);
                     if (hits.length === 0) return;
 
@@ -1021,14 +961,12 @@
                     const pos = hit.object.position;
 
                     if (e.shiftKey || e.button === 2) {
-                        // Break block
                         if (World.getBlock(pos.x, pos.y, pos.z) !== 12) {
                             this.spawnParticles(pos.x, pos.y, pos.z, World.getBlock(pos.x, pos.y, pos.z));
                             World.setBlock(pos.x, pos.y, pos.z, 0);
                             TurtleState.updateHUD();
                         }
                     } else if (e.button === 0) {
-                        // Place block adjacent to clicked face
                         const normal = hit.face.normal;
                         const nx = Math.round(pos.x + normal.x);
                         const ny = Math.round(pos.y + normal.y);
@@ -1044,7 +982,7 @@
             },
 
             spawnParticles(x, y, z, blockId) {
-                const count = 14;
+                const count = 12;
                 const mat = Array.isArray(TextureFactory.materials[blockId])
                     ? TextureFactory.materials[blockId][0]
                     : (TextureFactory.materials[blockId] || TextureFactory.materials[3]);
@@ -1063,7 +1001,7 @@
                         vx: (Math.random() - 0.5) * 0.08,
                         vy: Math.random() * 0.09 + 0.02,
                         vz: (Math.random() - 0.5) * 0.08,
-                        life: 25
+                        life: 24
                     });
                 }
             },
@@ -1075,29 +1013,27 @@
             setCameraMode(mode) {
                 this.cameraMode = mode;
                 document.querySelectorAll('.cam-btn').forEach(btn => {
-                    btn.className = 'cam-btn px-2.5 py-1 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition';
+                    btn.className = 'cam-btn px-2 py-1 rounded-lg text-[11px] font-medium text-slate-300 hover:bg-slate-800 transition';
                 });
                 const activeBtn = document.getElementById('cam-' + mode);
                 if (activeBtn) {
-                    activeBtn.className = 'cam-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-500 text-slate-950 font-semibold transition';
+                    activeBtn.className = 'cam-btn px-2 py-1 rounded-lg text-[11px] font-semibold bg-amber-500 text-slate-950 transition';
                 }
 
                 if (mode === 'top') {
-                    this.camera.position.set(7.5, 28, 7.51);
+                    this.camera.position.set(7.5, 26, 7.51);
                     this.controls.target.set(7.5, 4, 7.5);
                 } else if (mode === 'orbit') {
-                    this.camera.position.set(22, 18, 24);
+                    this.camera.position.set(20, 16, 22);
                     this.controls.target.copy(this.visualPos);
                 }
             },
 
             syncTurtleTarget(instant = false) {
                 this.targetPos.set(TurtleState.x, TurtleState.y, TurtleState.z);
-                // Facing: 0=North(-Z, yaw=0), 1=East(+X, yaw=-PI/2), 2=South(+Z, yaw=PI), 3=West(-X, yaw=PI/2)
                 const yawMap = [0, -Math.PI / 2, Math.PI, Math.PI / 2];
                 const desiredYaw = yawMap[TurtleState.dir];
 
-                // Shortest angular delta
                 let diff = desiredYaw - (this.targetYaw % (Math.PI * 2));
                 if (diff > Math.PI) diff -= Math.PI * 2;
                 if (diff < -Math.PI) diff += Math.PI * 2;
@@ -1111,16 +1047,18 @@
 
             onResize() {
                 const container = document.getElementById('viewport-container');
-                if (!container) return;
-                this.camera.aspect = container.clientWidth / container.clientHeight;
+                if (!container || !this.renderer) return;
+                const w = container.clientWidth;
+                const h = container.clientHeight;
+                if (w <= 0 || h <= 0) return;
+                this.camera.aspect = w / h;
                 this.camera.updateProjectionMatrix();
-                this.renderer.setSize(container.clientWidth, container.clientHeight);
+                this.renderer.setSize(w, h);
             },
 
             animate() {
                 requestAnimationFrame(() => this.animate());
 
-                // Smoothly interpolate turtle position & rotation
                 this.visualPos.lerp(this.targetPos, 0.25);
                 this.visualYaw += (this.targetYaw - this.visualYaw) * 0.25;
 
@@ -1129,7 +1067,6 @@
                     this.turtleGroup.rotation.y = this.visualYaw;
                 }
 
-                // Animate Pickaxe Swing
                 if (this.swingProgress > 0) {
                     this.swingProgress = Math.max(0, this.swingProgress - 0.1);
                     this.pickaxeMesh.rotation.x = -Math.sin(this.swingProgress * Math.PI) * 1.2;
@@ -1137,13 +1074,12 @@
                     this.pickaxeMesh.rotation.x = 0;
                 }
 
-                // Update Particles
                 for (let i = this.particles.length - 1; i >= 0; i--) {
                     const p = this.particles[i];
                     p.mesh.position.x += p.vx;
                     p.mesh.position.y += p.vy;
                     p.mesh.position.z += p.vz;
-                    p.vy -= 0.005; // gravity
+                    p.vy -= 0.005;
                     p.life--;
                     p.mesh.scale.multiplyScalar(0.95);
                     if (p.life <= 0) {
@@ -1153,7 +1089,6 @@
                     }
                 }
 
-                // Camera Mode Updates
                 if (this.cameraMode === 'follow') {
                     const backOffset = new THREE.Vector3(0, 3.5, 5.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.visualYaw);
                     const desiredCam = this.visualPos.clone().add(backOffset);
@@ -1226,7 +1161,8 @@
 
             setSliceY(maxY) {
                 this.sliceY = maxY;
-                document.getElementById('slice-label').textContent = `Y ≤ ${maxY}`;
+                const el = document.getElementById('slice-label');
+                if (el) el.textContent = `Y ≤ ${maxY}`;
                 Viewport.blockMeshes.forEach((mesh) => {
                     mesh.visible = (mesh.position.y <= maxY);
                 });
@@ -1257,31 +1193,33 @@
                 this.currentPreset = presetName;
                 this.clearAll();
 
+                const dSel = document.getElementById('world-preset-desktop');
+                const mSel = document.getElementById('world-preset-mobile');
+                if (dSel) dSel.value = presetName;
+                if (mSel) mSel.value = presetName;
+
                 if (presetName === 'overworld') {
                     for (let x = 0; x < CHUNK_SIZE; x++) {
                         for (let z = 0; z < CHUNK_SIZE; z++) {
-                            this.setBlock(x, 0, z, 12); // Bedrock
+                            this.setBlock(x, 0, z, 12);
                             for (let y = 1; y <= 5; y++) {
-                                // Procedural ore veins
-                                let id = 3; // Stone
+                                let id = 3;
                                 const r = TextureFactory.hash(x * 3 + y, z * 3 - y, y * 7);
-                                if (y <= 2 && r > 0.90) id = 7; // Diamond ore
-                                else if (r > 0.82) id = 6; // Iron ore
-                                else if (r > 0.72) id = 5; // Coal ore
+                                if (y <= 2 && r > 0.90) id = 7;
+                                else if (r > 0.82) id = 6;
+                                else if (r > 0.72) id = 5;
                                 this.setBlock(x, y, z, id);
                             }
-                            this.setBlock(x, 6, z, 2); // Dirt
-                            this.setBlock(x, 7, z, 1); // Grass
+                            this.setBlock(x, 6, z, 2);
+                            this.setBlock(x, 7, z, 1);
                         }
                     }
-                    // Add an exposed cliff cut-out & ore vein right in front of the turtle for branch mining
                     for (let x = 5; x <= 9; x++) {
                         for (let z = 8; z <= 14; z++) {
                             this.setBlock(x, 7, z, 0);
                             this.setBlock(x, 6, z, 0);
                         }
                     }
-                    // Guarantee a rich connected ore cluster at (7, 5, 5..3) for Vein Miner testing
                     this.setBlock(7, 5, 5, 7);
                     this.setBlock(7, 5, 4, 7);
                     this.setBlock(8, 5, 4, 7);
@@ -1325,12 +1263,11 @@
                             }
                         }
                     }
-                    // Internal walls
                     for (let x = 3; x < 12; x++) {
                         this.setBlock(x, 2, 10, 3);
                         this.setBlock(x, 2, 6, 3);
                     }
-                    this.setBlock(7, 2, 3, 7); // Diamond prize
+                    this.setBlock(7, 2, 3, 7);
                     TurtleState.reset(7, 2, 13, 0);
 
                 } else if (presetName === 'void') {
@@ -1355,21 +1292,21 @@
          * 4. TURTLE STATE, INVENTORY (16 SLOTS) & NATIVE CC:TWEAKED ACTIONS
          ***********************************************************************/
         const DIR_VECTORS = [
-            { dx: 0,   dz: -1, name: 'NORTH (-Z)', short: 'N (-Z)' }, // 0: North
-            { dx: 1,   dz: 0,  name: 'EAST (+X)',  short: 'E (+X)' }, // 1: East
-            { dx: 0,   dz: 1,  name: 'SOUTH (+Z)', short: 'S (+Z)' }, // 2: South
-            { dx: -1,  dz: 0,  name: 'WEST (-X)',  short: 'W (-X)' }  // 3: West
+            { dx: 0,   dz: -1, name: 'NORTH (-Z)', short: 'N (-Z)' },
+            { dx: 1,   dz: 0,  name: 'EAST (+X)',  short: 'E (+X)' },
+            { dx: 0,   dz: 1,  name: 'SOUTH (+Z)', short: 'S (+Z)' },
+            { dx: -1,  dz: 0,  name: 'WEST (-X)',  short: 'W (-X)' }
         ];
 
         const TurtleState = {
             x: 7,
             y: 6,
             z: 10,
-            dir: 0, // 0=North, 1=East, 2=South, 3=West
+            dir: 0,
             fuel: 1000,
             fuelLimit: 20000,
             infiniteFuel: false,
-            selectedSlot: 1, // 1-indexed (1..16)
+            selectedSlot: 1,
             inventory: Array.from({ length: 16 }, () => ({ id: 0, count: 0 })),
 
             reset(x, y, z, dir) {
@@ -1380,12 +1317,11 @@
                 this.fuel = 1000;
                 this.selectedSlot = 1;
 
-                // Default Starter Kit in Inventory
                 this.inventory = Array.from({ length: 16 }, () => ({ id: 0, count: 0 }));
-                this.inventory[0] = { id: 4,  count: 64 }; // Slot 1: 64 Cobblestone
-                this.inventory[1] = { id: 15, count: 64 }; // Slot 2: 64 Oak Planks
-                this.inventory[2] = { id: 13, count: 16 }; // Slot 3: 16 Coal
-                this.inventory[3] = { id: 14, count: 8  }; // Slot 4: 8 Oak Saplings
+                this.inventory[0] = { id: 4,  count: 64 };
+                this.inventory[1] = { id: 15, count: 64 };
+                this.inventory[2] = { id: 13, count: 16 };
+                this.inventory[3] = { id: 14, count: 8  };
 
                 Viewport.syncTurtleTarget(true);
                 this.renderInventoryUI();
@@ -1409,7 +1345,6 @@
 
             addItemToInventory(blockId, amount = 1) {
                 if (!blockId || blockId === 0) return true;
-                // Try stacking in existing slots starting from selectedSlot
                 for (let i = 0; i < 16; i++) {
                     const idx = (this.selectedSlot - 1 + i) % 16;
                     const slot = this.inventory[idx];
@@ -1423,7 +1358,6 @@
                         }
                     }
                 }
-                // Try empty slots
                 for (let i = 0; i < 16; i++) {
                     const idx = (this.selectedSlot - 1 + i) % 16;
                     const slot = this.inventory[idx];
@@ -1438,7 +1372,6 @@
                 return false;
             },
 
-            // --- MOVEMENT API ---
             move(offsetY, step = 1) {
                 if (!this.consumeFuel()) return [false, "Out of fuel"];
                 const target = this.frontCoords(offsetY, step);
@@ -1464,7 +1397,6 @@
                 return [true, null];
             },
 
-            // --- DIGGING API ---
             dig(offsetY = 0) {
                 const target = this.frontCoords(offsetY, 1);
                 if (!World.inBounds(target.x, target.y, target.z)) return [false, "Nothing to dig here"];
@@ -1481,7 +1413,6 @@
                 return [true, null];
             },
 
-            // --- PLACING API ---
             place(offsetY = 0) {
                 const slot = this.inventory[this.selectedSlot - 1];
                 if (!slot || slot.id === 0 || slot.count <= 0) {
@@ -1502,7 +1433,6 @@
                 return [true, null];
             },
 
-            // --- INSPECTION & DETECTION API ---
             detect(offsetY = 0) {
                 const target = this.frontCoords(offsetY, 1);
                 const id = World.getBlock(target.x, target.y, target.z);
@@ -1525,7 +1455,6 @@
                 return id === slot.id;
             },
 
-            // --- INVENTORY & FUEL API ---
             select(slotNum) {
                 const n = Math.floor(Number(slotNum));
                 if (isNaN(n) || n < 1 || n > 16) return false;
@@ -1539,7 +1468,7 @@
                 if (!slot || slot.id === 0 || slot.count <= 0) return [false, "No items to combust"];
                 const def = BLOCK_DEFS[slot.id];
                 if (!def || !def.fuel || def.fuel <= 0) return [false, "Items not combustible"];
-                if (count === 0) return [true, null]; // CC test combustibility check
+                if (count === 0) return [true, null];
 
                 const useCount = Math.min(slot.count, Math.max(1, Math.floor(count)));
                 this.fuel = Math.min(this.fuelLimit, this.fuel + useCount * def.fuel);
@@ -1588,7 +1517,6 @@
                 return true;
             },
 
-            // --- UI HELPERS ---
             renderInventoryUI() {
                 const grid = document.getElementById('inventory-grid');
                 if (!grid) return;
@@ -1606,7 +1534,6 @@
                         this.renderInventoryUI();
                     };
 
-                    // Slot index corner
                     const numSpan = document.createElement('span');
                     numSpan.className = 'absolute top-0.5 left-1 text-[9px] font-mono-code text-slate-500';
                     numSpan.textContent = i + 1;
@@ -1627,15 +1554,18 @@
                     grid.appendChild(btn);
                 }
 
-                document.getElementById('selected-slot-label').textContent = `Slot #${this.selectedSlot}`;
+                const selLabel = document.getElementById('selected-slot-label');
+                if (selLabel) selLabel.textContent = `Slot #${this.selectedSlot}`;
                 const activeSlot = this.inventory[this.selectedSlot - 1];
                 const nameEl = document.getElementById('slot-item-name');
-                if (activeSlot && activeSlot.id !== 0 && activeSlot.count > 0) {
-                    nameEl.textContent = `${BLOCK_DEFS[activeSlot.id].name} (x${activeSlot.count})`;
-                    nameEl.className = 'text-amber-300 font-mono-code truncate';
-                } else {
-                    nameEl.textContent = 'Empty Slot';
-                    nameEl.className = 'text-slate-500 font-mono-code truncate';
+                if (nameEl) {
+                    if (activeSlot && activeSlot.id !== 0 && activeSlot.count > 0) {
+                        nameEl.textContent = `${BLOCK_DEFS[activeSlot.id].name} (x${activeSlot.count})`;
+                        nameEl.className = 'text-amber-300 font-mono-code truncate';
+                    } else {
+                        nameEl.textContent = 'Empty Slot';
+                        nameEl.className = 'text-slate-500 font-mono-code truncate';
+                    }
                 }
             },
 
@@ -1664,16 +1594,15 @@
                 document.getElementById('hud-facing').textContent = DIR_VECTORS[this.dir].short;
 
                 const fuelText = document.getElementById('hud-fuel-text');
-                if (this.infiniteFuel) {
-                    fuelText.textContent = 'INF';
-                } else {
-                    fuelText.textContent = `${this.fuel}`;
+                if (fuelText) {
+                    fuelText.textContent = this.infiniteFuel ? 'INF' : `${this.fuel}`;
                 }
 
                 const front = this.frontCoords(0, 1);
                 const frontId = World.getBlock(front.x, front.y, front.z);
                 const frontDef = BLOCK_DEFS[frontId] || BLOCK_DEFS[0];
-                document.getElementById('hud-front-block').textContent = frontDef.name.replace('minecraft:', '');
+                const frontEl = document.getElementById('hud-front-block');
+                if (frontEl) frontEl.textContent = frontDef.name.replace('minecraft:', '');
             }
         };
 
@@ -1687,30 +1616,25 @@
                 this.outputEl = document.getElementById('terminal-output');
                 this.clear();
                 this.println("CraftOS 1.8 (CC: Tweaked 3D Simulator)", "#fbbf24");
-                this.println("Ready. Tap 'Run' to execute startup.lua", "#94a3b8");
+                this.println("Run files with custom args: 'tunnel3x3 6' or 'help'", "#94a3b8");
             },
 
             clear() {
                 if (this.outputEl) this.outputEl.innerHTML = '';
             },
 
-            println(text, color = "#fde68a") {
+            println(text, color = '#fde68a') {
                 if (!this.outputEl) return;
-                const line = document.createElement('div');
-                line.style.color = color;
-                line.className = 'whitespace-pre-wrap break-words leading-snug';
-                line.textContent = String(text);
-                this.outputEl.appendChild(line);
+                const div = document.createElement('div');
+                div.style.color = color;
+                div.className = 'whitespace-pre-wrap break-words leading-relaxed';
+                div.textContent = String(text);
+                this.outputEl.appendChild(div);
                 this.outputEl.scrollTop = this.outputEl.scrollHeight;
-
-                // Show unread dot on Console tab if user is on mobile Code tab
-                const dot = document.getElementById('console-unread-dot');
-                if (dot && UI.currentMobileTab !== 'console') {
-                    dot.classList.remove('hidden');
-                }
+                UI.notifyConsoleOutput();
             },
 
-            write(text, color = "#fde68a") {
+            write(text, color = '#fde68a') {
                 if (!this.outputEl) return;
                 let last = this.outputEl.lastElementChild;
                 if (!last) {
@@ -1719,72 +1643,47 @@
                 }
                 last.textContent += String(text);
                 this.outputEl.scrollTop = this.outputEl.scrollHeight;
+                UI.notifyConsoleOutput();
             }
         };
 
         /***********************************************************************
-         * 6. BULLETPROOF LUA 5.3 COROUTINE ENGINE (PURE-LUA YIELD + FALLBACK)
-         *
-         * Why the previous version threw "[LUA VM ERROR] attempt to call a nil/string value":
-         * - Calling C-API `lua_pcall` on ` __ccStep` when `luaL_dostring` failed or when
-         *   yielding across a JS/C boundary in Fengari corrupts the stack or pushes nil.
-         *
-         * How this new architecture works 100% reliably:
-         * 1. We use `fengari.load(driverLuaCode)()` to create a pure-Lua coroutine stepper
-         *    where `turtle.forward()`, `turtle.dig()`, etc. are PURE LUA functions that call
-         *    `coroutine.yield(cmd, arg1, arg2)`.
-         * 2. Lua NEVER yields across a JS/C-call boundary! Instead, `coroutine.resume(co, ...)`
-         *    returns the yielded command directly back to our JS driver via `window.__cc_packet`.
-         * 3. JavaScript executes the turtle action (`Simulator.hostDispatch`), stores the return
-         *    values on `window.__cc_ret`, and on the next animation tick resumes the Lua coroutine!
-         * 4. If `window.fengari` is blocked offline (e.g. restricted `content://` viewer), an
-         *    integrated Lua-to-JS compiler fallback automatically runs the program seamlessly.
+         * 6. PURE-LUA 5.3 COROUTINE VM + CLI ARGS (`...`) + VIRTUAL FS (`fs`)
          ***********************************************************************/
+        window.ccHostCall = function(cmd, arg1, arg2) {
+            return Simulator.hostDispatch(String(cmd), arg1, arg2);
+        };
+
+        window.ccReportStep = function(status, payload) {
+            window.__ccStepReport = { status: String(status), payload };
+        };
+
         const Simulator = {
             running: false,
             paused: false,
-            tickDelay: 180, // ms per action
+            tickDelay: 180,
             timerId: null,
             stepFn: null,
 
+            tokenizeCommand(inputStr) {
+                const tokens = [];
+                const re = /[^\s"']+|"([^"]*)"|'([^']*)'/g;
+                let match;
+                while ((match = re.exec(String(inputStr || '').trim())) !== null) {
+                    tokens.push(match[1] !== undefined ? match[1] : (match[2] !== undefined ? match[2] : match[0]));
+                }
+                return tokens;
+            },
+
             updateSpeed(val) {
                 this.tickDelay = parseInt(val, 10);
-                const label = document.getElementById('speed-val-desktop');
-                if (label) {
-                    label.textContent = this.tickDelay === 0 ? 'WARP' : (this.tickDelay / 1000).toFixed(2) + 's';
-                }
+                const text = this.tickDelay === 0 ? 'WARP' : (this.tickDelay / 1000).toFixed(2) + 's';
+                const labelD = document.getElementById('speed-val-desktop');
+                const labelM = document.getElementById('speed-val-mobile');
+                if (labelD) labelD.textContent = text;
+                if (labelM) labelM.textContent = text;
             },
 
-            toggleInfiniteFuel(checked) {
-                TurtleState.infiniteFuel = checked;
-                TurtleState.updateHUD();
-            },
-
-            updateButtons() {
-                document.getElementById('btn-run').disabled = this.running;
-                document.getElementById('btn-pause').disabled = !this.running;
-                document.getElementById('btn-step').disabled = !(this.running && this.paused);
-                document.getElementById('btn-stop').disabled = !this.running;
-
-                const badge = document.getElementById('vm-status-badge');
-                const pauseLabel = document.getElementById('pause-label');
-
-                if (!this.running) {
-                    badge.textContent = 'IDLE';
-                    badge.className = 'text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
-                    if (pauseLabel) pauseLabel.textContent = 'Pause';
-                } else if (this.paused) {
-                    badge.textContent = 'PAUSED';
-                    badge.className = 'text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
-                    if (pauseLabel) pauseLabel.textContent = 'Resume';
-                } else {
-                    badge.textContent = 'RUNNING';
-                    badge.className = 'text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse';
-                    if (pauseLabel) pauseLabel.textContent = 'Pause';
-                }
-            },
-
-            // Synchronous Host Dispatcher for all CC: Tweaked system calls
             hostDispatch(cmd, arg1, arg2) {
                 switch (cmd) {
                     case 'print':
@@ -1797,9 +1696,8 @@
                         Terminal.clear();
                         return { ok: true };
                     case 'gps':
-                        return { ok: true, x: TurtleState.x, y: TurtleState.y, z: TurtleState.z };
+                        return { x: TurtleState.x, y: TurtleState.y, z: TurtleState.z };
 
-                    // Movement
                     case 'forward': {
                         const [ok, err] = TurtleState.move(0, 1);
                         return { ok, err };
@@ -1825,7 +1723,6 @@
                         return { ok, err };
                     }
 
-                    // Digging
                     case 'dig': {
                         const [ok, err] = TurtleState.dig(0);
                         return { ok, err };
@@ -1839,7 +1736,6 @@
                         return { ok, err };
                     }
 
-                    // Placing
                     case 'place': {
                         const [ok, err] = TurtleState.place(0);
                         return { ok, err };
@@ -1853,7 +1749,6 @@
                         return { ok, err };
                     }
 
-                    // Detection & Inspection
                     case 'detect':
                         return { ok: TurtleState.detect(0) };
                     case 'detectUp':
@@ -1863,41 +1758,41 @@
 
                     case 'inspect': {
                         const [ok, info] = TurtleState.inspect(0);
-                        return { ok, name: ok ? info.name : info, isOre: !!info?.isOre };
+                        return { ok, name: ok ? info.name : info, isOre: ok ? info.isOre : false };
                     }
                     case 'inspectUp': {
                         const [ok, info] = TurtleState.inspect(1);
-                        return { ok, name: ok ? info.name : info, isOre: !!info?.isOre };
+                        return { ok, name: ok ? info.name : info, isOre: ok ? info.isOre : false };
                     }
                     case 'inspectDown': {
                         const [ok, info] = TurtleState.inspect(-1);
-                        return { ok, name: ok ? info.name : info, isOre: !!info?.isOre };
+                        return { ok, name: ok ? info.name : info, isOre: ok ? info.isOre : false };
                     }
 
                     case 'compare':
                         return { ok: TurtleState.compare(0) };
                     case 'compareUp':
-                        return { ok: TurtleState.compareUp ? TurtleState.compare(1) : TurtleState.compare(1) };
+                        return { ok: TurtleState.compare(1) };
                     case 'compareDown':
                         return { ok: TurtleState.compare(-1) };
 
-                    // Inventory & Fuel
                     case 'select':
                         return { ok: TurtleState.select(arg1) };
                     case 'getSelectedSlot':
                         return { val: TurtleState.selectedSlot };
                     case 'getItemCount': {
-                        const s = arg1 ? Math.floor(Number(arg1)) - 1 : TurtleState.selectedSlot - 1;
-                        return { val: TurtleState.inventory[s]?.count || 0 };
+                        const s = arg1 ? Math.floor(Number(arg1)) : TurtleState.selectedSlot;
+                        const slot = TurtleState.inventory[s - 1];
+                        return { val: (slot && slot.id !== 0) ? slot.count : 0 };
                     }
                     case 'getItemSpace': {
-                        const s = arg1 ? Math.floor(Number(arg1)) - 1 : TurtleState.selectedSlot - 1;
-                        const cnt = TurtleState.inventory[s]?.count || 0;
-                        return { val: Math.max(0, 64 - cnt) };
+                        const s = arg1 ? Math.floor(Number(arg1)) : TurtleState.selectedSlot;
+                        const slot = TurtleState.inventory[s - 1];
+                        return { val: (slot && slot.id !== 0) ? (64 - slot.count) : 64 };
                     }
                     case 'getItemDetail': {
-                        const s = arg1 ? Math.floor(Number(arg1)) - 1 : TurtleState.selectedSlot - 1;
-                        const slot = TurtleState.inventory[s];
+                        const s = arg1 ? Math.floor(Number(arg1)) : TurtleState.selectedSlot;
+                        const slot = TurtleState.inventory[s - 1];
                         if (!slot || slot.id === 0 || slot.count <= 0) return { ok: false };
                         return { ok: true, name: BLOCK_DEFS[slot.id].name, count: slot.count };
                     }
@@ -1908,31 +1803,54 @@
                         return { ok, err };
                     }
                     case 'getFuelLevel':
-                        return { val: TurtleState.infiniteFuel ? 999999 : TurtleState.fuel };
+                        return { val: TurtleState.fuel };
                     case 'getFuelLimit':
                         return { val: TurtleState.fuelLimit };
                     case 'drop':
                         return { ok: TurtleState.drop(arg1 ?? 64) };
+
+                    case 'fsRead': {
+                        const found = Editor.resolveScriptByName(arg1);
+                        if (!found) return { ok: false };
+                        return { ok: true, content: found.code, filename: found.filename };
+                    }
+                    case 'fsWrite': {
+                        const fname = Editor.writeVirtualFile(arg1, String(arg2 ?? ''), false);
+                        return { ok: !!fname, filename: fname };
+                    }
+                    case 'fsAppend': {
+                        const fname = Editor.writeVirtualFile(arg1, String(arg2 ?? ''), true);
+                        return { ok: !!fname, filename: fname };
+                    }
+                    case 'fsExists': {
+                        const found = Editor.resolveScriptByName(arg1);
+                        return { ok: !!found };
+                    }
+                    case 'fsDelete': {
+                        const ok = Editor.deleteVirtualFile(arg1);
+                        return { ok };
+                    }
+                    case 'fsList': {
+                        return { ok: true, list: Editor.listVirtualFiles().join('\n') };
+                    }
                     default:
                         return { ok: true };
                 }
             },
 
-            // Primary Engine: Pure-Lua Coroutine Driver via fengari.load()
-            createFengariStepper(userScript) {
+            createFengariStepper(userScript, argsArray = [], progName = "startup.lua") {
                 window.__ccUserScript = String(userScript);
-                window.__ccLastYield = null;
+                window.__ccUserArgs = Array.isArray(argsArray) ? argsArray.map(String) : [];
+                window.__ccProgName = String(progName || "startup.lua");
 
                 const luaDriverSource = `
                     local js = require("js")
                     local global = js.global
 
-                    -- Synchronous non-yielding helper for instant queries (print, detect, inspect, getFuelLevel)
                     local function syncCall(cmd, a, b)
                         return global:ccHostCall(cmd, a, b)
                     end
 
-                    -- Pure-Lua yielding action: yields back to the coroutine runner without crossing C boundary!
                     local function yieldAction(cmd, a, b)
                         return coroutine.yield("ACT", cmd, a, b)
                     end
@@ -1965,6 +1883,133 @@
                         locate = function()
                             local r = syncCall("gps")
                             return tonumber(r.x), tonumber(r.y), tonumber(r.z)
+                        end
+                    }
+
+                    fs = {
+                        exists = function(path)
+                            return syncCall("fsExists", tostring(path or "")).ok == true
+                        end,
+                        delete = function(path)
+                            return syncCall("fsDelete", tostring(path or "")).ok == true
+                        end,
+                        list = function()
+                            local raw = tostring(syncCall("fsList").list or "")
+                            local out = {}
+                            for line in string.gmatch(raw, "[^\\n]+") do
+                                out[#out + 1] = line
+                            end
+                            return out
+                        end,
+                        open = function(path, mode)
+                            mode = tostring(mode or "r")
+                            path = tostring(path or "file.lua")
+                            if mode == "r" then
+                                local r = syncCall("fsRead", path)
+                                if not r.ok then return nil, "File not found" end
+                                local content = tostring(r.content or "")
+                                local lines = {}
+                                for line in string.gmatch(content .. "\\n", "(.-)\\n") do
+                                    lines[#lines + 1] = line
+                                end
+                                local idx = 1
+                                return {
+                                    readAll = function() return content end,
+                                    readLine = function()
+                                        if idx > #lines then return nil end
+                                        local l = lines[idx]
+                                        idx = idx + 1
+                                        return l
+                                    end,
+                                    read = function(_, fmt)
+                                        if fmt == "*a" or fmt == "a" then return content end
+                                        if idx > #lines then return nil end
+                                        local l = lines[idx]
+                                        idx = idx + 1
+                                        return l
+                                    end,
+                                    close = function() return true end
+                                }
+                            elseif mode == "w" or mode == "a" then
+                                local buf = {}
+                                local isAppend = (mode == "a")
+                                local function flush()
+                                    local text = table.concat(buf, "")
+                                    buf = {}
+                                    syncCall(isAppend and "fsAppend" or "fsWrite", path, text)
+                                    isAppend = true
+                                end
+                                return {
+                                    write = function(first, second)
+                                        local text = (second ~= nil) and second or first
+                                        buf[#buf + 1] = tostring(text or "")
+                                        return true
+                                    end,
+                                    writeLine = function(first, second)
+                                        local text = (second ~= nil) and second or first
+                                        buf[#buf + 1] = tostring(text or "") .. "\\n"
+                                        return true
+                                    end,
+                                    flush = flush,
+                                    close = function()
+                                        flush()
+                                        return true
+                                    end
+                                }
+                            end
+                            return nil, "Unsupported mode"
+                        end
+                    }
+
+                    io = io or {}
+                    io.open = fs.open
+
+                    function loadfile(filename)
+                        local r = syncCall("fsRead", tostring(filename or ""))
+                        if not r.ok then
+                            return nil, "File not found: " .. tostring(filename)
+                        end
+                        return load(tostring(r.content), "@" .. tostring(r.filename))
+                    end
+
+                    function dofile(filename, ...)
+                        local fn, err = loadfile(filename)
+                        if not fn then error(err, 2) end
+                        return fn(...)
+                    end
+
+                    shell = {
+                        getRunningProgram = function()
+                            return tostring(global.__ccProgName or "startup.lua")
+                        end,
+                        run = function(...)
+                            local parts = {}
+                            for i = 1, select("#", ...) do
+                                parts[#parts + 1] = tostring(select(i, ...))
+                            end
+                            local fullCmd = table.concat(parts, " ")
+                            local tokens = {}
+                            for tok in string.gmatch(fullCmd, "%S+") do
+                                tokens[#tokens + 1] = tok
+                            end
+                            if #tokens == 0 then return false end
+                            local targetProg = tokens[1]
+                            local subArgs = {}
+                            for i = 2, #tokens do
+                                subArgs[#subArgs + 1] = tokens[i]
+                            end
+                            local fn, err = loadfile(targetProg)
+                            if not fn then
+                                print("[shell.run] " .. tostring(err))
+                                return false
+                            end
+                            local prevArg = arg
+                            arg = { [0] = targetProg }
+                            for i = 1, #subArgs do arg[i] = subArgs[i] end
+                            local unpackFn = table.unpack or unpack
+                            fn(unpackFn(subArgs, 1, #subArgs))
+                            arg = prevArg
+                            return true
                         end
                     }
 
@@ -2035,8 +2080,18 @@
                         suckDown = function(count) return true end
                     }
 
+                    local jsArgs = global.__ccUserArgs
+                    local cliArgs = {}
+                    local argCount = tonumber(jsArgs and jsArgs.length) or 0
+                    arg = { [0] = tostring(global.__ccProgName or "startup.lua") }
+                    for i = 0, argCount - 1 do
+                        local val = tostring(jsArgs[i])
+                        cliArgs[i + 1] = val
+                        arg[i + 1] = val
+                    end
+
                     local codeStr = tostring(global.__ccUserScript or "")
-                    local fn, syntaxErr = load(codeStr, "startup.lua")
+                    local fn, syntaxErr = load(codeStr, "@" .. tostring(global.__ccProgName or "startup.lua"))
                     if not fn then
                         syncCall("print", "[SYNTAX ERROR] " .. tostring(syntaxErr))
                         return function()
@@ -2045,6 +2100,7 @@
                     end
 
                     local co = coroutine.create(fn)
+                    local isFirstResume = true
                     local nextOk = true
                     local nextErr = nil
 
@@ -2054,7 +2110,15 @@
                             return
                         end
 
-                        local ok, kind, cmd, a, b = coroutine.resume(co, nextOk, nextErr)
+                        local ok, kind, cmd, a, b
+                        if isFirstResume then
+                            isFirstResume = false
+                            local unpackFn = table.unpack or unpack
+                            ok, kind, cmd, a, b = coroutine.resume(co, unpackFn(cliArgs, 1, argCount))
+                        else
+                            ok, kind, cmd, a, b = coroutine.resume(co, nextOk, nextErr)
+                        end
+
                         if not ok then
                             syncCall("print", "[LUA ERROR] " .. tostring(kind))
                             global:ccReportStep("ERROR", tostring(kind))
@@ -2093,49 +2157,37 @@
                 };
             },
 
-            // Offline Fallback Transpiler (in case CDN is unreachable on mobile `content://`)
-            createFallbackStepper(userScript) {
-                // Lightweight Lua-to-JS generator transpiler for offline resilience
-                let jsCode = userScript
-                    .replace(/--\[\[[\s\S]*?\]\]/g, '')
-                    .replace(/--.*$/gm, '')
-                    .replace(/\blocal\s+function\s+([a-zA-Z0-9_]+)\s*\(/g, 'async function $1(')
-                    .replace(/\bfunction\s+([a-zA-Z0-9_]+)\s*\(/g, 'async function $1(')
-                    .replace(/\bfunction\s*\(/g, 'async function(')
-                    .replace(/\blocal\s+/g, 'let ')
-                    .replace(/\belseif\b/g, '} else if (')
-                    .replace(/\bfor\s+([a-zA-Z0-9_]+)\s*=\s*([^,]+),\s*([^,\n]+?)\s+do\b/g, 'for (let $1 = $2; $1 <= $3; $1++) {')
-                    .replace(/\bwhile\s+(.+?)\s+do\b/g, 'while ($1) {')
-                    .replace(/\bif\s+(.+?)\s+then\b/g, 'if ($1) {')
-                    .replace(/\belse\b/g, '} else {')
-                    .replace(/\bend\b/g, '}')
-                    .replace(/\band\b/g, '&&')
-                    .replace(/\bor\b/g, '||')
-                    .replace(/\bnot\s+/g, '!')
-                    .replace(/~=/g, '!==')
-                    .replace(/\.\./g, '+');
-
-                throw new Error("Fengari Lua VM not loaded; check internet connection.");
-            },
-
-            runScript(customCode = null) {
+            runScript(customCode = null, customArgs = null, customProgName = null) {
                 this.stopScript();
                 if (customCode === null && typeof Editor !== 'undefined') {
                     Editor.saveCurrentFile(false);
                 }
                 const code = customCode !== null ? customCode : document.getElementById('code-editor').value;
-                if (customCode === null) {
-                    const activeName = (typeof Editor !== 'undefined' && Editor.getActiveDisplayFileName)
-                        ? Editor.getActiveDisplayFileName()
-                        : 'startup.lua';
-                    Terminal.println(`> Running ${activeName}...`, "#38bdf8");
+
+                let argsArray = [];
+                if (Array.isArray(customArgs)) {
+                    argsArray = customArgs;
+                } else if (customCode === null) {
+                    const argsInput = document.getElementById('cli-args-input');
+                    if (argsInput && argsInput.value.trim()) {
+                        argsArray = this.tokenizeCommand(argsInput.value.trim());
+                    }
+                }
+
+                const activeName = customProgName || ((typeof Editor !== 'undefined' && Editor.getActiveDisplayFileName)
+                    ? Editor.getActiveDisplayFileName()
+                    : 'startup.lua');
+
+                if (customCode === null || customProgName !== null) {
+                    const argStr = argsArray.length > 0 ? (' ' + argsArray.join(' ')) : '';
+                    Terminal.println(`> Running ${activeName}${argStr}...`, "#38bdf8");
                 }
 
                 try {
                     if (typeof window.fengari !== 'undefined' && typeof window.fengari.load === 'function') {
-                        this.stepFn = this.createFengariStepper(code);
+                        this.stepFn = this.createFengariStepper(code, argsArray, activeName);
                     } else {
-                        this.stepFn = this.createFallbackStepper(code);
+                        throw new Error("Fengari Lua 5.3 VM is still loading or offline.");
                     }
                 } catch (err) {
                     Terminal.println("[COMPILER ERROR] " + (err.message || err), "#f87171");
@@ -2149,78 +2201,230 @@
                 this.scheduleNextStep(15);
             },
 
-            scheduleNextStep(delayMs) {
+            scheduleNextStep(customDelay = null) {
                 if (!this.running || this.paused) return;
-                clearTimeout(this.timerId);
-                this.timerId = setTimeout(() => this.executeTick(), delayMs);
+                const d = customDelay !== null ? customDelay : this.tickDelay;
+                this.timerId = setTimeout(() => this.executeTick(), d);
             },
 
             executeTick() {
                 if (!this.running || !this.stepFn) return;
 
-                const batchCount = (this.tickDelay === 0 && !this.paused) ? 10 : 1;
-
-                for (let i = 0; i < batchCount; i++) {
-                    let report;
-                    try {
-                        report = this.stepFn();
-                    } catch (err) {
-                        Terminal.println("[LUA VM ERROR] " + (err.message || String(err)), "#f87171");
-                        this.stopScript();
-                        return;
-                    }
-
-                    if (!report || report.status === "DONE" || report.status === "ERROR") {
-                        if (report && report.status === "DONE") {
-                            Terminal.println("Program finished.", "#4ade80");
-                        }
-                        this.stopScript();
-                        return;
-                    }
-
-                    if (report.status === "SLEEP") {
-                        const sec = parseFloat(report.arg) || 0.1;
-                        this.scheduleNextStep(Math.min(5000, Math.max(20, sec * 1000)));
-                        return;
-                    }
+                let report;
+                try {
+                    report = this.stepFn();
+                } catch (err) {
+                    Terminal.println("[RUNTIME ERROR] " + (err.message || err), "#f87171");
+                    this.stopScript();
+                    return;
                 }
 
-                if (this.running && !this.paused) {
-                    this.scheduleNextStep(Math.max(16, this.tickDelay));
+                if (!report || report.status === 'DONE') {
+                    Terminal.println("Program finished.", "#4ade80");
+                    this.stopScript();
+                    return;
+                }
+
+                if (report.status === 'ERROR') {
+                    this.stopScript();
+                    return;
+                }
+
+                if (report.status === 'SLEEP') {
+                    const sec = Number(report.payload) || 0.1;
+                    const ms = Math.min(5000, Math.max(20, sec * 1000));
+                    if (!this.paused) this.scheduleNextStep(ms);
+                    return;
+                }
+
+                if (!this.paused) {
+                    this.scheduleNextStep();
                 }
             },
 
             togglePause() {
                 if (!this.running) return;
                 this.paused = !this.paused;
-                this.updateButtons();
                 if (!this.paused) {
-                    this.scheduleNextStep(20);
-                } else {
+                    this.scheduleNextStep();
+                } else if (this.timerId) {
                     clearTimeout(this.timerId);
                 }
+                this.updateButtons();
             },
 
             stepOnce() {
-                if (!this.running || !this.paused) return;
+                if (!this.running) {
+                    this.runScript();
+                    this.paused = true;
+                    if (this.timerId) clearTimeout(this.timerId);
+                    this.updateButtons();
+                    return;
+                }
+                this.paused = true;
+                if (this.timerId) clearTimeout(this.timerId);
+                this.updateButtons();
                 this.executeTick();
             },
 
             stopScript() {
-                clearTimeout(this.timerId);
                 this.running = false;
                 this.paused = false;
+                if (this.timerId) {
+                    clearTimeout(this.timerId);
+                    this.timerId = null;
+                }
                 this.stepFn = null;
                 this.updateButtons();
             },
 
+            updateButtons() {
+                const btnRun = document.getElementById('btn-run');
+                const btnPause = document.getElementById('btn-pause');
+                const btnStep = document.getElementById('btn-step');
+                const btnStop = document.getElementById('btn-stop');
+                const badge = document.getElementById('vm-status-badge');
+                const pauseLabel = document.getElementById('pause-label');
+
+                btnPause.disabled = !this.running;
+                btnStop.disabled = !this.running;
+                btnStep.disabled = false;
+
+                if (!this.running) {
+                    badge.textContent = 'IDLE';
+                    badge.className = 'text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 shrink-0';
+                    if (pauseLabel) pauseLabel.textContent = 'Pause';
+                    btnRun.disabled = false;
+                } else if (this.paused) {
+                    badge.textContent = 'PAUSED';
+                    badge.className = 'text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0';
+                    if (pauseLabel) pauseLabel.textContent = 'Resume';
+                } else {
+                    badge.textContent = 'RUNNING';
+                    badge.className = 'text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse shrink-0';
+                    if (pauseLabel) pauseLabel.textContent = 'Pause';
+                }
+            },
+
             runReplCommand(inputEl) {
                 if (!inputEl) return;
-                const cmd = inputEl.value.trim();
-                if (!cmd) return;
-                Terminal.println("lua> " + cmd, "#fbbf24");
+                const rawCmd = inputEl.value.trim();
+                if (!rawCmd) return;
+                Terminal.println("> " + rawCmd, "#fbbf24");
                 inputEl.value = '';
-                this.runScript(cmd);
+
+                const tokens = this.tokenizeCommand(rawCmd);
+                if (tokens.length === 0) return;
+
+                const cmd0 = tokens[0];
+                const cmdLower = cmd0.toLowerCase();
+
+                if (cmdLower === 'help' || cmdLower === '?') {
+                    Terminal.println("CraftOS 1.8 Shell & CLI Reference:", "#38bdf8");
+                    Terminal.println("  <file> [args...]   Run any saved or preset file with custom args", "#e2e8f0");
+                    Terminal.println("                     Example: tunnel3x3 6   or   my_miner.lua 10 true", "#a7f3d0");
+                    Terminal.println("  run <file> [args]  Explicitly run a script with CLI arguments", "#e2e8f0");
+                    Terminal.println("  ls / dir           List all saved local & preset Lua files", "#e2e8f0");
+                    Terminal.println("  edit <file>        Open or create <file>.lua in the code editor", "#e2e8f0");
+                    Terminal.println("  cat <file>         Print the source code of <file>", "#e2e8f0");
+                    Terminal.println("  rm <file>          Delete a saved local file", "#e2e8f0");
+                    Terminal.println("  clear / cls        Clear terminal output", "#e2e8f0");
+                    Terminal.println("  reboot             Reset world chunk & turtle", "#e2e8f0");
+                    return;
+                }
+
+                if (cmdLower === 'clear' || cmdLower === 'cls') {
+                    Terminal.clear();
+                    return;
+                }
+
+                if (cmdLower === 'reboot' || cmdLower === 'reset') {
+                    World.resetCurrentPreset();
+                    return;
+                }
+
+                if (cmdLower === 'ls' || cmdLower === 'dir') {
+                    const userFiles = Object.keys(Editor.userFiles).sort();
+                    const presets = Object.values(PRESET_META).map(p => p.filename);
+                    Terminal.println("Saved Local Files (localStorage):", "#4ade80");
+                    if (userFiles.length === 0) {
+                        Terminal.println("  (none yet - use '+ New' button or fs.open() in Lua)", "#94a3b8");
+                    } else {
+                        Terminal.println("  " + userFiles.join("   "), "#a7f3d0");
+                    }
+                    Terminal.println("Built-in Programs:", "#fbbf24");
+                    Terminal.println("  " + presets.join("   "), "#fde68a");
+                    return;
+                }
+
+                if (cmdLower === 'cat' || cmdLower === 'type') {
+                    if (!tokens[1]) {
+                        Terminal.println("Usage: cat <filename>", "#f87171");
+                        return;
+                    }
+                    const found = Editor.resolveScriptByName(tokens[1]);
+                    if (!found) {
+                        Terminal.println(`File not found: ${tokens[1]}`, "#f87171");
+                        return;
+                    }
+                    Terminal.println(`--- ${found.filename} ---`, "#38bdf8");
+                    Terminal.println(found.code, "#cbd5e1");
+                    return;
+                }
+
+                if (cmdLower === 'edit') {
+                    if (!tokens[1]) {
+                        Terminal.println("Usage: edit <filename>", "#f87171");
+                        return;
+                    }
+                    const found = Editor.resolveScriptByName(tokens[1]);
+                    if (found) {
+                        Editor.selectFile(found.key);
+                        UI.switchMobileTab('code');
+                        Terminal.println(`Opened '${found.filename}' in Code Editor.`, "#4ade80");
+                    } else {
+                        const newName = Editor.writeVirtualFile(tokens[1], `-- ${tokens[1]}\nlocal args = { ... }\nprint("Args received:", table.concat(args, ", "))\n`, false);
+                        Editor.selectFile('user:' + newName);
+                        UI.switchMobileTab('code');
+                        Terminal.println(`Created & opened '${newName}' in Code Editor.`, "#4ade80");
+                    }
+                    return;
+                }
+
+                if (cmdLower === 'rm' || cmdLower === 'delete') {
+                    if (!tokens[1]) {
+                        Terminal.println("Usage: rm <filename>", "#f87171");
+                        return;
+                    }
+                    if (Editor.deleteVirtualFile(tokens[1])) {
+                        Terminal.println(`Deleted local file '${tokens[1]}'.`, "#4ade80");
+                    } else {
+                        Terminal.println(`Could not delete '${tokens[1]}' (not a saved local file).`, "#f87171");
+                    }
+                    return;
+                }
+
+                if (cmdLower === 'run' && tokens.length >= 2) {
+                    const target = Editor.resolveScriptByName(tokens[1]);
+                    if (!target) {
+                        Terminal.println(`No such program: ${tokens[1]}`, "#f87171");
+                        return;
+                    }
+                    const cliArgs = tokens.slice(2);
+                    this.runScript(target.code, cliArgs, target.filename);
+                    return;
+                }
+
+                if (!rawCmd.includes('(') && !rawCmd.includes('=')) {
+                    const target = Editor.resolveScriptByName(cmd0);
+                    if (target) {
+                        const cliArgs = tokens.slice(1);
+                        this.runScript(target.code, cliArgs, target.filename);
+                        return;
+                    }
+                }
+
+                this.runScript(rawCmd, [], "lua_repl");
             },
 
             manualAction(actionName) {
@@ -2229,29 +2433,15 @@
             }
         };
 
-        // Expose Host Bridge functions on `window` for Fengari JS interop
-        window.ccHostCall = function(cmd, arg1, arg2) {
-            return Simulator.hostDispatch(cmd, arg1, arg2);
-        };
-        window.ccReportStep = function(status, arg) {
-            window.__ccStepReport = { status: String(status), arg: arg };
-        };
-
         /***********************************************************************
-         * 7. CODE EDITOR, LOCAL STORAGE FILE SYSTEM & 5 PRESET SCRIPTS
+         * 7. COMPLETE BUILT-IN LUA PRESETS & LOCAL FILE STORAGE MANAGER
          ***********************************************************************/
-        const PRESET_META = {
-            tunnel3x3:   { title: "1. 3x3 Tunnel Bore (Branch Miner)", filename: "tunnel3x3.lua" },
-            quarry4x4:   { title: "2. Quarry Excavator (4x4 Layer)",   filename: "quarry4x4.lua" },
-            tower:       { title: "3. Watchtower / Wall Builder",      filename: "tower.lua" },
-            veinminer:   { title: "4. Recursive Ore Vein Miner",       filename: "veinminer.lua" },
-            treechopper: { title: "5. Tree Chopper & Replanter",       filename: "treechopper.lua" }
-        };
-
         const PRESET_SCRIPTS = {
-            tunnel3x3: `-- 1. 3x3 Tunnel Bore (Branch Miner)
--- Excavates a 3-wide, 3-high tunnel forward for N steps
-local length = 4
+            tunnel3x3: `-- 1. 3x3 Tunnel Bore (Supports Custom CLI Args!)
+-- Run in Console:  tunnel3x3 6
+-- Or type '6' in the 'args:' box above and click Run!
+local args = { ... }
+local length = tonumber(args[1]) or 4
 
 local function digColumn()
   turtle.dig()
@@ -2260,21 +2450,24 @@ local function digColumn()
   turtle.digDown()
 end
 
-print("Starting 3x3 Tunnel Bore (" .. length .. "m)...")
+print("=== 3x3 Tunnel Bore ===")
+if #args > 0 then
+  print("Custom CLI Arg: length = " .. length)
+else
+  print("Default length = " .. length .. " (Try 'tunnel3x3 6' in Console!)")
+end
 
 for step = 1, length do
   print("Excavating slice " .. step .. "/" .. length)
   -- Center column
   digColumn()
-
   -- Left column
   turtle.turnLeft()
   turtle.dig()
   turtle.forward()
   turtle.digUp()
   turtle.digDown()
-
-  -- Return to center & dig Right column
+  -- Return to center & dig right column
   turtle.back()
   turtle.turnRight()
   turtle.turnRight()
@@ -2282,34 +2475,59 @@ for step = 1, length do
   turtle.forward()
   turtle.digUp()
   turtle.digDown()
-
-  -- Return to center & face forward
+  -- Face forward in center
   turtle.back()
   turtle.turnLeft()
 end
 
 print("3x3 Tunnel Complete! Fuel left: " .. turtle.getFuelLevel())`,
 
-            quarry4x4: `-- 2. 4x4 Quarry Excavator
--- Digs a 4x4 pit downward for 2 layers
-local size = 4
-local layers = 2
+            file_args_demo: `-- 2. Create Lua File & Run with Custom Args Demo
+-- Creates 'custom_walk.lua' in localStorage and runs it with CLI args!
+local args = { ... }
+local steps = tonumber(args[1]) or 3
+local placeBlock = (args[2] ~= "false")
 
-print("Starting 4x4 Quarry (" .. layers .. " layers)...")
+print("Writing 'custom_walk.lua' via fs.open()...")
+local f = fs.open("custom_walk.lua", "w")
+f.writeLine("-- Auto-generated script saved in localStorage!")
+f.writeLine("local args = { ... }")
+f.writeLine("local dist = tonumber(args[1]) or 3")
+f.writeLine("local doPlace = (args[2] == 'true')")
+f.writeLine("print('[custom_walk] dist=' .. dist .. ', place=' .. tostring(doPlace))")
+f.writeLine("turtle.select(1)")
+f.writeLine("for i = 1, dist do")
+f.writeLine("  if turtle.detect() then turtle.dig() end")
+f.writeLine("  turtle.forward()")
+f.writeLine("  if doPlace then turtle.placeDown() end")
+f.writeLine("end")
+f.close()
 
-for d = 1, layers do
-  print("Mining layer " .. d)
+print("File 'custom_walk.lua' saved to Local Files dropdown!")
+print("Now calling shell.run('custom_walk.lua', " .. steps .. ", " .. tostring(placeBlock) .. ")...")
+shell.run("custom_walk.lua", steps, tostring(placeBlock))
+print("Tip: Open Console and type:  custom_walk 4 true")`,
+
+            quarry4x4: `-- 3. Quarry Excavator (Supports Custom CLI Args: size & depth)
+-- Example in Console:  quarry4x4 4 2
+local args = { ... }
+local size = tonumber(args[1]) or 3
+local layers = tonumber(args[2]) or 2
+
+print("Starting " .. size .. "x" .. size .. " Quarry for " .. layers .. " layers...")
+
+for layer = 1, layers do
+  print("Mining Layer #" .. layer)
   turtle.digDown()
   turtle.down()
 
-  for row = 1, size do
-    for col = 1, size - 1 do
+  for r = 1, size do
+    for c = 1, size - 1 do
       turtle.dig()
       turtle.forward()
     end
-
-    if row < size then
-      if row % 2 == 1 then
+    if r < size then
+      if r % 2 == 1 then
         turtle.turnRight()
         turtle.dig()
         turtle.forward()
@@ -2322,68 +2540,48 @@ for d = 1, layers do
       end
     end
   end
-  -- Orient for next layer
+  turtle.turnRight()
   turtle.turnRight()
 end
 
-print("Quarry finished! Climbing back up...")
-for d = 1, layers do
+print("Quarry complete! Remaining Fuel: " .. turtle.getFuelLevel())`,
+
+            tower: `-- 4. Watchtower Builder (Uses Cobblestone in Slot 1)
+-- Supports Custom CLI Args: height (e.g. 'tower 4' in Console)
+local args = { ... }
+local height = tonumber(args[1]) or 3
+
+print("Building 3x3 Watchtower (Height: " .. height .. ")...")
+turtle.select(1)
+
+for h = 1, height do
   turtle.up()
-end`,
-
-            tower: `-- 3. Watchtower / Wall Perimeter Builder
--- Builds a 4x4 stone battlements tower using Slot #1 & #2
-print("Building 4x4 Fortified Watchtower...")
-
-local function selectBuildingBlock()
-  for s = 1, 16 do
-    if turtle.getItemCount(s) > 0 then
-      local detail = turtle.getItemDetail(s)
-      if detail and (detail.name == "minecraft:cobblestone" or detail.name == "minecraft:oak_planks") then
-        turtle.select(s)
-        return true
-      end
-    end
-  end
-  return false
-end
-
-for height = 1, 3 do
-  turtle.up()
-  print("Constructing wall tier " .. height)
+  print("Constructing wall ring #" .. h)
   for side = 1, 4 do
-    for step = 1, 3 do
-      if selectBuildingBlock() then
-        turtle.placeDown()
-      end
+    for s = 1, 2 do
+      turtle.placeDown()
       turtle.forward()
     end
     turtle.turnRight()
   end
 end
 
-print("Watchtower complete!")`,
+print("Tower complete!")`,
 
-            veinminer: `-- 4. Recursive Ore Vein Miner (turtle.inspect)
--- Digs into the cliff & recursively mines connected ores!
-local TARGET_ORES = {
-  ["minecraft:coal_ore"] = true,
-  ["minecraft:iron_ore"] = true,
-  ["minecraft:diamond_ore"] = true
-}
+            veinminer: `-- 5. Recursive 3D Ore Vein Miner
+-- Digs into the cliff ahead and recursively mines connected ores!
+local function isOreBlock(ok, data)
+  if not ok or not data or not data.name then return false end
+  return string.find(data.name, "ore") ~= nil
+end
 
 local minedCount = 0
 
-local function isOre(ok, data)
-  return ok and data and TARGET_ORES[data.name] == true
-end
-
 local function mineVein()
-  -- Check all 4 horizontal directions
-  for dir = 1, 4 do
-    if isOre(turtle.inspect()) then
-      local _, info = turtle.inspect()
-      print("Found ore: " .. info.name)
+  for turn = 1, 4 do
+    local ok, data = turtle.inspect()
+    if isOreBlock(ok, data) then
+      print("Found " .. data.name .. "!")
       turtle.dig()
       if turtle.forward() then
         minedCount = minedCount + 1
@@ -2394,8 +2592,9 @@ local function mineVein()
     turtle.turnRight()
   end
 
-  -- Check Up
-  if isOre(turtle.inspectUp()) then
+  local okU, dataU = turtle.inspectUp()
+  if isOreBlock(okU, dataU) then
+    print("Found Up: " .. dataU.name)
     turtle.digUp()
     if turtle.up() then
       minedCount = minedCount + 1
@@ -2404,8 +2603,9 @@ local function mineVein()
     end
   end
 
-  -- Check Down
-  if isOre(turtle.inspectDown()) then
+  local okD, dataD = turtle.inspectDown()
+  if isOreBlock(okD, dataD) then
+    print("Found Down: " .. dataD.name)
     turtle.digDown()
     if turtle.down() then
       minedCount = minedCount + 1
@@ -2415,93 +2615,88 @@ local function mineVein()
   end
 end
 
-print("Advancing to cliffside & scanning for ore veins...")
-turtle.down()
+print("Advancing into cliff to locate ore vein...")
 for i = 1, 5 do
   turtle.dig()
   turtle.forward()
   mineVein()
 end
+print("Vein mining finished! Total ores harvested: " .. minedCount)`,
 
-print("Vein mining complete! Total ores extracted: " .. minedCount)`,
+            treefarm: `-- 6. Lumberjack Tree Chopper & Replanter
+-- Tip: Switch World Preset to 'Oak Tree Farm' for 3 ready trees!
+print("Searching for Oak Tree ahead...")
 
-            treechopper: `-- 5. Tree Chopper & Automatic Replanter
--- Approaches an Oak Tree, harvests trunk, and plants sapling
-print("Searching for tree in front...")
-
--- Approach tree if 1 block away
-if not turtle.detect() then
-  turtle.forward()
+while not turtle.detect() do
+  if not turtle.forward() then break end
 end
 
 local ok, block = turtle.inspect()
 if ok and block.name == "minecraft:oak_log" then
-  print("Oak Tree detected! Harvesting trunk...")
+  print("Felling tree trunk...")
+  local height = 0
   turtle.dig()
   turtle.forward()
 
-  local height = 0
-  while true do
-    local upOk, upBlock = turtle.inspectUp()
-    if upOk and upBlock.name == "minecraft:oak_log" then
-      turtle.digUp()
-      turtle.up()
-      height = height + 1
-    else
-      break
-    end
+  while turtle.detectUp() do
+    turtle.digUp()
+    turtle.up()
+    height = height + 1
   end
 
-  print("Felled " .. (height + 1) .. " logs! Descending...")
   for i = 1, height do
     turtle.down()
   end
 
   turtle.back()
-
-  -- Replant sapling from Slot 4 if available
-  for s = 1, 16 do
-    local d = turtle.getItemDetail(s)
-    if d and d.name == "minecraft:oak_sapling" then
-      turtle.select(s)
-      turtle.place()
-      print("Oak Sapling replanted!")
-      break
-    end
+  turtle.select(4) -- Slot 4 holds Oak Saplings
+  if turtle.place() then
+    print("Replanted Oak Sapling!")
   end
 else
-  print("No oak_log directly ahead. Try loading 'Oak Tree Farm' world preset!")
+  print("No Oak Log directly in front. Try 'Oak Tree Farm' preset!")
 end`
         };
 
-        const STORAGE_KEY_FILES = 'cc_tweaked_studio_user_files_v1';
-        const STORAGE_KEY_ACTIVE = 'cc_tweaked_studio_active_file_v1';
+        const PRESET_META = {
+            tunnel3x3:      { label: '1. 3×3 Tunnel Bore (CLI Args)',         filename: 'tunnel3x3.lua',      world: 'overworld' },
+            file_args_demo: { label: '2. Create File & Run Args Demo',        filename: 'file_args_demo.lua', world: 'overworld' },
+            quarry4x4:      { label: '3. Quarry Excavator (CLI Args)',        filename: 'quarry4x4.lua',      world: 'overworld' },
+            tower:          { label: '4. Watchtower Builder (CLI Args)',      filename: 'tower.lua',          world: 'flat' },
+            veinminer:      { label: '5. Recursive 3D Ore Vein Miner',        filename: 'veinminer.lua',      world: 'overworld' },
+            treefarm:       { label: '6. Tree Chopper & Replanter',           filename: 'treefarm.lua',       world: 'trees' }
+        };
+
+        const STORAGE_KEY_FILES = 'cc_tweaked_studio_user_files_v2';
+        const STORAGE_KEY_ACTIVE = 'cc_tweaked_studio_active_key_v2';
 
         const Editor = {
             textarea: null,
             lineNums: null,
-            userFiles: {}, // { "my_script.lua": "-- lua code..." }
-            currentKey: 'preset:tunnel3x3', // 'preset:...' or 'user:filename.lua'
-            saveTimeout: null,
+            userFiles: {},
+            currentKey: 'preset:tunnel3x3',
 
             init() {
                 this.textarea = document.getElementById('code-editor');
                 this.lineNums = document.getElementById('line-numbers');
 
-                // Load saved user files from localStorage
                 this.loadFromLocalStorage();
+                this.renderDropdown();
 
                 this.textarea.addEventListener('input', () => {
                     this.updateLineNumbers();
-                    this.scheduleAutoSave();
+                    this.autoSaveOnInput();
                 });
-
                 this.textarea.addEventListener('scroll', () => {
                     this.lineNums.scrollTop = this.textarea.scrollTop;
                 });
 
-                // Support Tab key indentation and Ctrl+S / Cmd+S shortcut
-                this.textarea.addEventListener('keydown', (e) => {
+                this.textarea.addEventListener('keydown', e => {
+                    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                        e.preventDefault();
+                        this.saveCurrentFile(true);
+                        return;
+                    }
                     if (e.key === 'Tab') {
                         e.preventDefault();
                         const start = this.textarea.selectionStart;
@@ -2509,22 +2704,21 @@ end`
                         this.textarea.value = this.textarea.value.substring(0, start) + "  " + this.textarea.value.substring(end);
                         this.textarea.selectionStart = this.textarea.selectionEnd = start + 2;
                         this.updateLineNumbers();
-                        this.scheduleAutoSave();
-                    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-                        e.preventDefault();
-                        this.saveCurrentFile(true);
+                        this.autoSaveOnInput();
                     }
                 });
 
-                this.renderDropdown();
-
-                // Restore last active file or default to tunnel3x3
-                const savedActive = localStorage.getItem(STORAGE_KEY_ACTIVE);
-                if (savedActive && (savedActive.startsWith('preset:') || (savedActive.startsWith('user:') && this.userFiles[savedActive.slice(5)] !== undefined))) {
-                    this.selectFile(savedActive);
+                if (this.currentKey.startsWith('user:')) {
+                    const fname = this.currentKey.slice(5);
+                    if (!this.userFiles[fname]) this.currentKey = 'preset:tunnel3x3';
+                } else if (this.currentKey.startsWith('preset:')) {
+                    const pKey = this.currentKey.slice(7);
+                    if (!PRESET_SCRIPTS[pKey]) this.currentKey = 'preset:tunnel3x3';
                 } else {
-                    this.selectFile('preset:tunnel3x3');
+                    this.currentKey = 'preset:tunnel3x3';
                 }
+
+                this.selectFile(this.currentKey, true);
             },
 
             loadFromLocalStorage() {
@@ -2536,8 +2730,12 @@ end`
                             this.userFiles = parsed;
                         }
                     }
-                } catch (err) {
-                    this.userFiles = {};
+                    const savedActive = localStorage.getItem(STORAGE_KEY_ACTIVE);
+                    if (savedActive) {
+                        this.currentKey = savedActive;
+                    }
+                } catch (e) {
+                    console.warn("localStorage unavailable:", e);
                 }
             },
 
@@ -2545,53 +2743,18 @@ end`
                 try {
                     localStorage.setItem(STORAGE_KEY_FILES, JSON.stringify(this.userFiles));
                     localStorage.setItem(STORAGE_KEY_ACTIVE, this.currentKey);
-                } catch (err) {
-                    Terminal.println("[STORAGE WARNING] Could not write to localStorage.", "#f87171");
+                } catch (e) {
+                    console.warn("Failed to save to localStorage:", e);
                 }
             },
 
-            renderDropdown() {
-                const select = document.getElementById('script-preset');
-                if (!select) return;
-                select.innerHTML = '';
-
-                // Group 1: User Local Storage Files (if any)
-                const userNames = Object.keys(this.userFiles).sort();
-                if (userNames.length > 0) {
-                    const userGroup = document.createElement('optgroup');
-                    userGroup.label = '💾 Saved Local Files';
-                    userGroup.className = 'bg-slate-950 text-emerald-400';
-                    userNames.forEach(fname => {
-                        const opt = document.createElement('option');
-                        opt.value = 'user:' + fname;
-                        opt.textContent = '📄 ' + fname;
-                        opt.className = 'bg-slate-900 text-emerald-300';
-                        userGroup.appendChild(opt);
-                    });
-                    select.appendChild(userGroup);
+            sanitizeFileName(name) {
+                let clean = String(name || '').trim().replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+                if (!clean) clean = 'script.lua';
+                if (!clean.toLowerCase().endsWith('.lua')) {
+                    clean += '.lua';
                 }
-
-                // Group 2: Built-In Presets
-                const presetGroup = document.createElement('optgroup');
-                presetGroup.label = '📦 Built-in Turtle Presets';
-                presetGroup.className = 'bg-slate-950 text-amber-400';
-                Object.keys(PRESET_META).forEach(k => {
-                    const opt = document.createElement('option');
-                    opt.value = 'preset:' + k;
-                    opt.textContent = PRESET_META[k].title;
-                    opt.className = 'bg-slate-900 text-amber-200';
-                    presetGroup.appendChild(opt);
-                });
-                select.appendChild(presetGroup);
-
-                // Action Option: + Create New File...
-                const actionOpt = document.createElement('option');
-                actionOpt.value = '__create_new__';
-                actionOpt.textContent = '➕ Create New Lua File...';
-                actionOpt.className = 'bg-emerald-950 text-emerald-300 font-bold';
-                select.appendChild(actionOpt);
-
-                select.value = this.currentKey;
+                return clean;
             },
 
             getActiveDisplayFileName() {
@@ -2602,245 +2765,222 @@ end`
                 return PRESET_META[pKey]?.filename || 'startup.lua';
             },
 
-            updateToolbarState() {
-                const fname = this.getActiveDisplayFileName();
-                const labelEl = document.getElementById('active-filename-label');
-                if (labelEl) labelEl.textContent = fname;
-
-                const delBtn = document.getElementById('btn-delete-file');
-                if (delBtn) {
-                    if (this.currentKey.startsWith('user:')) {
-                        delBtn.classList.remove('hidden');
-                    } else {
-                        delBtn.classList.add('hidden');
-                    }
-                }
-
+            renderDropdown() {
                 const select = document.getElementById('script-preset');
-                if (select && select.value !== this.currentKey) {
-                    select.value = this.currentKey;
+                if (!select) return;
+                select.innerHTML = '';
+
+                const createOpt = document.createElement('option');
+                createOpt.value = '__new__';
+                createOpt.textContent = '➕ Create New Lua File...';
+                createOpt.className = 'bg-slate-900 text-emerald-400 font-semibold';
+                select.appendChild(createOpt);
+
+                const userNames = Object.keys(this.userFiles).sort();
+                if (userNames.length > 0) {
+                    const userGroup = document.createElement('optgroup');
+                    userGroup.label = '💾 Saved Local Files (Browser Storage)';
+                    userGroup.className = 'bg-slate-950 text-sky-300';
+                    userNames.forEach(fname => {
+                        const opt = document.createElement('option');
+                        opt.value = 'user:' + fname;
+                        opt.textContent = '📄 ' + fname;
+                        opt.className = 'bg-slate-900 text-white';
+                        userGroup.appendChild(opt);
+                    });
+                    select.appendChild(userGroup);
                 }
+
+                const presetGroup = document.createElement('optgroup');
+                presetGroup.label = '📦 Built-in Turtle Presets';
+                presetGroup.className = 'bg-slate-950 text-amber-300';
+                Object.keys(PRESET_META).forEach(pKey => {
+                    const opt = document.createElement('option');
+                    opt.value = 'preset:' + pKey;
+                    opt.textContent = PRESET_META[pKey].label;
+                    opt.className = 'bg-slate-900 text-amber-200';
+                    presetGroup.appendChild(opt);
+                });
+                select.appendChild(presetGroup);
+
+                select.value = this.currentKey;
             },
 
-            setSaveBadge(status) {
-                const pill = document.getElementById('save-status-pill');
-                if (!pill) return;
-                if (status === 'saving') {
-                    pill.textContent = 'MODIFIED';
-                    pill.className = 'hidden sm:inline-block text-[9px] font-mono-code px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30';
-                } else if (status === 'saved') {
-                    pill.textContent = this.currentKey.startsWith('user:') ? 'LOCAL SAVED' : 'PRESET';
-                    pill.className = 'hidden sm:inline-block text-[9px] font-mono-code px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-                }
-            },
-
-            scheduleAutoSave() {
-                this.setSaveBadge('saving');
-                clearTimeout(this.saveTimeout);
-                this.saveTimeout = setTimeout(() => {
-                    if (this.currentKey.startsWith('user:')) {
-                        const fname = this.currentKey.slice(5);
-                        this.userFiles[fname] = this.textarea.value;
-                        this.persistToLocalStorage();
-                        this.setSaveBadge('saved');
-                    }
-                }, 400);
-            },
-
-            selectFile(value) {
-                if (value === '__create_new__') {
-                    const select = document.getElementById('script-preset');
-                    if (select) select.value = this.currentKey;
+            selectFile(value, skipWorldReload = false) {
+                if (value === '__new__') {
+                    this.renderDropdown();
                     this.openNewFileModal();
                     return;
-                }
-
-                // Auto-save outgoing user file before switching
-                if (this.currentKey && this.currentKey.startsWith('user:')) {
-                    const prevName = this.currentKey.slice(5);
-                    if (this.userFiles[prevName] !== undefined) {
-                        this.userFiles[prevName] = this.textarea.value;
-                    }
-                }
-
-                // Normalize legacy preset key calls
-                if (!value.startsWith('preset:') && !value.startsWith('user:')) {
-                    value = 'preset:' + value;
                 }
 
                 this.currentKey = value;
                 this.persistToLocalStorage();
 
+                const nameLabel = document.getElementById('active-filename-label');
+                const delBtn = document.getElementById('btn-delete-file');
+                const savePill = document.getElementById('save-status-pill');
+
                 if (value.startsWith('user:')) {
                     const fname = value.slice(5);
                     this.textarea.value = this.userFiles[fname] ?? '';
+                    if (nameLabel) nameLabel.textContent = fname;
+                    if (delBtn) delBtn.classList.remove('hidden');
+                    if (savePill) {
+                        savePill.textContent = 'LOCAL';
+                        savePill.className = 'text-[9px] font-mono-code px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 shrink-0';
+                    }
                 } else {
                     const pKey = value.replace('preset:', '');
-                    this.textarea.value = PRESET_SCRIPTS[pKey] || '';
+                    this.textarea.value = PRESET_SCRIPTS[pKey] || PRESET_SCRIPTS.tunnel3x3;
+                    if (nameLabel) nameLabel.textContent = PRESET_META[pKey]?.filename || 'startup.lua';
+                    if (delBtn) delBtn.classList.add('hidden');
+                    if (savePill) {
+                        savePill.textContent = 'PRESET';
+                        savePill.className = 'text-[9px] font-mono-code px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0';
+                    }
 
-                    // Automatically switch to Tree Farm world if user selects Tree Chopper
-                    if (pKey === 'treechopper' && World.currentPreset !== 'trees') {
-                        const dSel = document.getElementById('world-preset-desktop');
-                        const mSel = document.getElementById('world-preset-mobile');
-                        if (dSel) dSel.value = 'trees';
-                        if (mSel) mSel.value = 'trees';
-                        World.loadPreset('trees');
+                    if (!skipWorldReload && PRESET_META[pKey]?.world) {
+                        World.loadPreset(PRESET_META[pKey].world);
                     }
                 }
 
-                this.updateLineNumbers();
-                this.updateToolbarState();
-                this.setSaveBadge('saved');
-            },
-
-            // Backwards compatibility alias
-            loadPreset(key) {
-                this.selectFile(key);
-            },
-
-            sanitizeFileName(rawName) {
-                let name = String(rawName || '').trim().replace(/[^a-zA-Z0-9_\-\.]/g, '_');
-                if (!name) return '';
-                if (!name.toLowerCase().endsWith('.lua')) {
-                    name += '.lua';
-                }
-                return name;
-            },
-
-            openNewFileModal(defaultTemplate = 'starter', suggestedName = '') {
-                const modal = document.getElementById('new-file-modal');
-                const input = document.getElementById('new-file-name-input');
-                const tmpl = document.getElementById('new-file-template');
-                const err = document.getElementById('new-file-error');
-
-                if (err) err.classList.add('hidden');
-                if (tmpl) tmpl.value = defaultTemplate;
-
-                const nextNum = Object.keys(this.userFiles).length + 1;
-                if (input) {
-                    input.value = suggestedName || `program_${nextNum}.lua`;
-                }
-
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    setTimeout(() => {
-                        if (input) {
-                            input.focus();
-                            input.select();
-                        }
-                    }, 50);
-                }
-            },
-
-            closeNewFileModal() {
-                const modal = document.getElementById('new-file-modal');
-                if (modal) {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                }
-            },
-
-            confirmCreateNewFile() {
-                const input = document.getElementById('new-file-name-input');
-                const tmpl = document.getElementById('new-file-template');
-                const err = document.getElementById('new-file-error');
-
-                const fname = this.sanitizeFileName(input ? input.value : '');
-                if (!fname || fname === '.lua') {
-                    if (err) {
-                        err.textContent = 'Please enter a valid file name.';
-                        err.classList.remove('hidden');
-                    }
-                    return;
-                }
-
-                let initialCode = '';
-                if (tmpl && tmpl.value === 'duplicate') {
-                    initialCode = this.textarea.value;
-                } else {
-                    initialCode = `-- ${fname}\n-- Custom CC: Tweaked Turtle Program\n\nprint("Running ${fname}...")\n\nfor i = 1, 4 do\n  if turtle.detect() then\n    turtle.dig()\n  end\n  turtle.forward()\nend\n\nprint("Done! Fuel remaining: " .. turtle.getFuelLevel())\n`;
-                }
-
-                this.userFiles[fname] = initialCode;
-                this.currentKey = 'user:' + fname;
-                this.persistToLocalStorage();
                 this.renderDropdown();
-                this.selectFile(this.currentKey);
-                this.closeNewFileModal();
-
-                Terminal.println(`[Saved] Created local file '${fname}'`, "#4ade80");
+                this.updateLineNumbers();
             },
 
-            saveCurrentFile(notify = true) {
+            autoSaveOnInput() {
+                const savePill = document.getElementById('save-status-pill');
                 if (this.currentKey.startsWith('user:')) {
                     const fname = this.currentKey.slice(5);
                     this.userFiles[fname] = this.textarea.value;
                     this.persistToLocalStorage();
-                    this.setSaveBadge('saved');
-                    if (notify) {
-                        Terminal.println(`[Saved] '${fname}' saved to local storage.`, "#4ade80");
+                    if (savePill) {
+                        savePill.textContent = 'SAVED';
+                        savePill.className = 'text-[9px] font-mono-code px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0';
                     }
-                } else {
-                    // Current file is a built-in preset -> prompt user to save as a custom local file copy
-                    const baseName = this.getActiveDisplayFileName().replace('.lua', '_custom.lua');
-                    this.openNewFileModal('duplicate', baseName);
+                } else if (savePill) {
+                    savePill.textContent = 'EDITED';
+                    savePill.className = 'text-[9px] font-mono-code px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0';
+                }
+            },
+
+            saveCurrentFile(notifyInConsole = true) {
+                if (this.currentKey.startsWith('user:')) {
+                    const fname = this.currentKey.slice(5);
+                    this.userFiles[fname] = this.textarea.value;
+                    this.persistToLocalStorage();
+                    if (notifyInConsole) {
+                        Terminal.println(`[Saved] '${fname}' saved to localStorage.`, "#4ade80");
+                    }
+                } else if (notifyInConsole) {
+                    const suggested = 'custom_' + this.getActiveDisplayFileName();
+                    this.openNewFileModal(suggested, 'duplicate');
                 }
             },
 
             downloadCurrentFile() {
-                const fname = this.getActiveDisplayFileName();
+                this.saveCurrentFile(false);
+                const filename = this.getActiveDisplayFileName();
                 const content = this.textarea.value;
                 const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = fname;
+                a.download = filename;
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(() => {
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                 }, 100);
-                Terminal.println(`[Download] Exported '${fname}' (${content.length} bytes)`, "#fbbf24");
+                Terminal.println(`[Download] Exported '${filename}'.`, "#38bdf8");
             },
 
             importFileFromDisk(inputEl) {
-                const file = inputEl?.files?.[0];
+                const file = inputEl.files && inputEl.files[0];
                 if (!file) return;
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const content = String(e.target?.result || '');
+                    const content = String(e.target.result || '');
                     const fname = this.sanitizeFileName(file.name);
                     this.userFiles[fname] = content;
                     this.currentKey = 'user:' + fname;
                     this.persistToLocalStorage();
                     this.renderDropdown();
                     this.selectFile(this.currentKey);
-                    Terminal.println(`[Imported] Loaded '${fname}' into local storage.`, "#38bdf8");
+                    Terminal.println(`[Imported] Loaded '${fname}' into local storage.`, "#4ade80");
                 };
                 reader.readAsText(file);
                 inputEl.value = '';
             },
 
+            openNewFileModal(defaultName = '', defaultTemplate = 'starter') {
+                const modal = document.getElementById('new-file-modal');
+                const input = document.getElementById('new-file-name-input');
+                const tpl = document.getElementById('new-file-template');
+                const err = document.getElementById('new-file-error');
+
+                err.classList.add('hidden');
+                const nextNum = Object.keys(this.userFiles).length + 1;
+                input.value = defaultName || `program_${nextNum}.lua`;
+                tpl.value = defaultTemplate;
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                setTimeout(() => {
+                    input.focus();
+                    input.select();
+                }, 40);
+            },
+
+            closeNewFileModal() {
+                const modal = document.getElementById('new-file-modal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            },
+
+            confirmCreateNewFile() {
+                const input = document.getElementById('new-file-name-input');
+                const tpl = document.getElementById('new-file-template').value;
+                const err = document.getElementById('new-file-error');
+
+                const rawName = input.value.trim();
+                if (!rawName) {
+                    err.textContent = 'Please enter a valid file name.';
+                    err.classList.remove('hidden');
+                    return;
+                }
+
+                const fname = this.sanitizeFileName(rawName);
+                let initialCode = '';
+                if (tpl === 'duplicate') {
+                    initialCode = this.textarea.value;
+                } else {
+                    initialCode = `-- ${fname} (Saved in Local Storage)\n-- Run in Console with custom args:  ${fname.replace('.lua', '')} 5 true\nlocal args = { ... }\nlocal steps = tonumber(args[1]) or 3\n\nprint("Running ${fname} with steps = " .. steps)\n\nfor i = 1, steps do\n  if turtle.detect() then\n    turtle.dig()\n  end\n  turtle.forward()\nend\n\nprint("Done! Fuel remaining: " .. turtle.getFuelLevel())\n`;
+                }
+
+                this.userFiles[fname] = initialCode;
+                this.currentKey = 'user:' + fname;
+                this.persistToLocalStorage();
+                this.renderDropdown();
+                this.selectFile(this.currentKey, true);
+                this.closeNewFileModal();
+                Terminal.println(`[Created] Saved '${fname}' to local storage.`, "#4ade80");
+            },
+
             openDeleteModal() {
                 if (!this.currentKey.startsWith('user:')) return;
                 const fname = this.currentKey.slice(5);
-                const label = document.getElementById('delete-file-name');
-                if (label) label.textContent = fname;
+                document.getElementById('delete-file-name').textContent = fname;
                 const modal = document.getElementById('delete-file-modal');
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                }
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
             },
 
             closeDeleteModal() {
                 const modal = document.getElementById('delete-file-modal');
-                if (modal) {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                }
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
             },
 
             confirmDeleteFile() {
@@ -2859,6 +2999,79 @@ end`
                 Terminal.println(`[Deleted] Removed '${fname}' from local storage.`, "#f87171");
             },
 
+            resolveScriptByName(rawName) {
+                if (!rawName) return null;
+                const clean = String(rawName).trim().replace(/^\/+/, '');
+                if (!clean) return null;
+                const withLua = clean.toLowerCase().endsWith('.lua') ? clean : (clean + '.lua');
+                const withoutLua = clean.replace(/\.lua$/i, '');
+
+                if (this.userFiles[clean] !== undefined) {
+                    return { key: 'user:' + clean, filename: clean, code: this.userFiles[clean], isUser: true };
+                }
+                if (this.userFiles[withLua] !== undefined) {
+                    return { key: 'user:' + withLua, filename: withLua, code: this.userFiles[withLua], isUser: true };
+                }
+                for (const k of Object.keys(this.userFiles)) {
+                    if (k.toLowerCase() === withLua.toLowerCase() || k.replace(/\.lua$/i, '').toLowerCase() === withoutLua.toLowerCase()) {
+                        return { key: 'user:' + k, filename: k, code: this.userFiles[k], isUser: true };
+                    }
+                }
+
+                for (const [pKey, meta] of Object.entries(PRESET_META)) {
+                    if (pKey.toLowerCase() === withoutLua.toLowerCase() || meta.filename.toLowerCase() === withLua.toLowerCase()) {
+                        const code = (this.currentKey === 'preset:' + pKey) ? this.textarea.value : PRESET_SCRIPTS[pKey];
+                        return { key: 'preset:' + pKey, filename: meta.filename, code, isUser: false };
+                    }
+                }
+
+                if (withoutLua.toLowerCase() === 'startup') {
+                    return {
+                        key: this.currentKey,
+                        filename: this.getActiveDisplayFileName(),
+                        code: this.textarea.value,
+                        isUser: this.currentKey.startsWith('user:')
+                    };
+                }
+
+                return null;
+            },
+
+            writeVirtualFile(rawName, content, append = false) {
+                const fname = this.sanitizeFileName(String(rawName || '').replace(/^\/+/, ''));
+                if (!fname) return null;
+                const existing = this.userFiles[fname] || '';
+                this.userFiles[fname] = append ? (existing + content) : content;
+                this.persistToLocalStorage();
+                this.renderDropdown();
+
+                if (this.currentKey === 'user:' + fname && this.textarea) {
+                    this.textarea.value = this.userFiles[fname];
+                    this.updateLineNumbers();
+                }
+                return fname;
+            },
+
+            deleteVirtualFile(rawName) {
+                const found = this.resolveScriptByName(rawName);
+                if (!found || !found.isUser) return false;
+                delete this.userFiles[found.filename];
+                if (this.currentKey === found.key) {
+                    const rem = Object.keys(this.userFiles);
+                    this.currentKey = rem.length > 0 ? ('user:' + rem[0]) : 'preset:tunnel3x3';
+                    this.selectFile(this.currentKey);
+                }
+                this.persistToLocalStorage();
+                this.renderDropdown();
+                return true;
+            },
+
+            listVirtualFiles() {
+                const userList = Object.keys(this.userFiles).sort();
+                const presetList = Object.values(PRESET_META).map(m => m.filename);
+                return [...new Set([...userList, ...presetList])];
+            },
+
             updateLineNumbers() {
                 const lines = this.textarea.value.split('\n').length;
                 let html = '';
@@ -2870,139 +3083,115 @@ end`
         };
 
         /***********************************************************************
-         * 8. MOBILE-FIRST UI CONTROLLER & MODALS
+         * 8. UI HELPERS, MOBILE TABS & INITIALIZATION
          ***********************************************************************/
         const UI = {
-            currentMobileTab: 'code',
-            expanded3D: false,
+            activeMobileTab: 'code',
+            mobile3DExpanded: false,
 
-            initDropdowns() {
-                const spawnSelect = document.getElementById('spawn-item-select');
+            initSelectDropdowns() {
                 const brushSelect = document.getElementById('brush-block-select');
+                const spawnSelect = document.getElementById('spawn-item-select');
 
                 Object.values(BLOCK_DEFS).forEach(def => {
                     if (def.id === 0) return;
                     const opt1 = document.createElement('option');
                     opt1.value = def.id;
-                    opt1.textContent = def.label;
-                    opt1.className = 'bg-slate-900';
-                    spawnSelect.appendChild(opt1);
+                    opt1.textContent = `${def.label} (${def.name.replace('minecraft:', '')})`;
+                    if (def.id === 4) opt1.selected = true;
+                    brushSelect.appendChild(opt1);
 
-                    if (!def.unbreakable && def.id !== 13) {
-                        const opt2 = document.createElement('option');
-                        opt2.value = def.id;
-                        opt2.textContent = def.label;
-                        opt2.className = 'bg-slate-900';
-                        if (def.id === 4) opt2.selected = true;
-                        brushSelect.appendChild(opt2);
-                    }
+                    const opt2 = opt1.cloneNode(true);
+                    if (def.id === 4) opt2.selected = true;
+                    spawnSelect.appendChild(opt2);
                 });
             },
 
-            switchMobileTab(tab) {
-                this.currentMobileTab = tab;
-                const tabs = ['code', 'console', 'inv'];
-                tabs.forEach(t => {
-                    const btn = document.getElementById('mob-tab-' + t);
-                    if (btn) {
-                        if (t === tab) btn.classList.add('mob-tab-active');
-                        else btn.classList.remove('mob-tab-active');
-                    }
-                });
+            toggleApiModal() {
+                const modal = document.getElementById('api-modal');
+                modal.classList.toggle('hidden');
+                modal.classList.toggle('flex');
+            },
 
+            toggleViewportTools() {
+                const drawer = document.getElementById('viewport-tools-drawer');
+                drawer.classList.toggle('hidden');
+            },
+
+            toggleMobile3DSize() {
+                const vp = document.getElementById('viewport-section');
+                this.mobile3DExpanded = !this.mobile3DExpanded;
+                if (this.mobile3DExpanded) {
+                    vp.classList.remove('h-[38dvh]', 'sm:h-[42dvh]');
+                    vp.classList.add('h-[66dvh]');
+                } else {
+                    vp.classList.remove('h-[66dvh]');
+                    vp.classList.add('h-[38dvh]', 'sm:h-[42dvh]');
+                }
+                setTimeout(() => Viewport.onResize(), 220);
+            },
+
+            switchMobileTab(tab) {
+                this.activeMobileTab = tab;
                 const panelCode = document.getElementById('panel-code');
                 const panelBottom = document.getElementById('panel-bottom-container');
                 const subConsole = document.getElementById('subpanel-console');
                 const subInv = document.getElementById('subpanel-inv');
 
+                ['code', 'console', 'inv'].forEach(t => {
+                    const btn = document.getElementById('mob-tab-' + t);
+                    if (btn) btn.classList.toggle('mob-tab-active', t === tab);
+                });
+
                 if (window.innerWidth >= 1024) {
-                    // Desktop: show everything in split layout
                     panelCode.classList.remove('hidden');
-                    panelCode.classList.add('flex');
                     panelBottom.classList.remove('hidden');
                     panelBottom.classList.add('flex');
                     subConsole.classList.remove('hidden');
-                    subConsole.classList.add('flex');
                     subInv.classList.remove('hidden');
-                    subInv.classList.add('flex');
                     return;
                 }
 
-                // Mobile (<1024px) Tab Switching
                 if (tab === 'code') {
                     panelCode.classList.remove('hidden');
-                    panelCode.classList.add('flex');
                     panelBottom.classList.add('hidden');
-                    panelBottom.classList.remove('flex');
+                    panelBottom.classList.remove('flex', 'flex-1');
                 } else if (tab === 'console') {
                     panelCode.classList.add('hidden');
-                    panelCode.classList.remove('flex');
                     panelBottom.classList.remove('hidden');
                     panelBottom.classList.add('flex', 'flex-1');
                     subConsole.classList.remove('hidden');
-                    subConsole.classList.add('flex');
                     subInv.classList.add('hidden');
-                    subInv.classList.remove('flex');
-                    const dot = document.getElementById('console-unread-dot');
-                    if (dot) dot.classList.add('hidden');
+                    document.getElementById('console-unread-dot')?.classList.add('hidden');
                 } else if (tab === 'inv') {
                     panelCode.classList.add('hidden');
-                    panelCode.classList.remove('flex');
                     panelBottom.classList.remove('hidden');
                     panelBottom.classList.add('flex', 'flex-1');
                     subConsole.classList.add('hidden');
-                    subConsole.classList.remove('flex');
                     subInv.classList.remove('hidden');
-                    subInv.classList.add('flex', 'flex-1');
                 }
             },
 
-            toggleViewportTools() {
-                const drawer = document.getElementById('viewport-tools-drawer');
-                if (drawer) drawer.classList.toggle('hidden');
-            },
-
-            toggleMobile3DSize() {
-                const section = document.getElementById('viewport-section');
-                if (!section) return;
-                this.expanded3D = !this.expanded3D;
-                if (this.expanded3D) {
-                    section.classList.remove('h-[40dvh]', 'sm:h-[44dvh]');
-                    section.classList.add('h-[68dvh]');
-                } else {
-                    section.classList.remove('h-[68dvh]');
-                    section.classList.add('h-[40dvh]', 'sm:h-[44dvh]');
-                }
-                setTimeout(() => Viewport.onResize(), 220);
-            },
-
-            toggleApiModal() {
-                const modal = document.getElementById('api-modal');
-                if (modal.classList.contains('hidden')) {
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                } else {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
+            notifyConsoleOutput() {
+                if (window.innerWidth < 1024 && this.activeMobileTab !== 'console') {
+                    document.getElementById('console-unread-dot')?.classList.remove('hidden');
                 }
             }
         };
 
         window.addEventListener('resize', () => {
-            UI.switchMobileTab(UI.currentMobileTab);
+            UI.switchMobileTab(UI.activeMobileTab);
         });
 
-        // BOOTSTRAP ON WINDOW LOAD
-        window.onload = function() {
-            lucide.createIcons();
+        window.addEventListener('DOMContentLoaded', () => {
             TextureFactory.init();
-            UI.initDropdowns();
+            UI.initSelectDropdowns();
             Terminal.init();
             Viewport.init();
             World.loadPreset('overworld');
             Editor.init();
             UI.switchMobileTab('code');
-        };
+        });
     </script>
 </body>
 </html>
