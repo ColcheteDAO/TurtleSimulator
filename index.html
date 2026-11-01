@@ -304,27 +304,51 @@
             <!-- PANEL 1: LUA CODE EDITOR -->
             <div id="panel-code" class="flex-1 flex flex-col overflow-hidden min-h-0">
                 <!-- Editor Toolbar -->
-                <div class="h-10 bg-[#141822] border-b border-slate-800 px-3 flex items-center justify-between gap-2 shrink-0">
-                    <div class="flex items-center gap-2 shrink-0">
+                <div class="h-11 bg-[#141822] border-b border-slate-800 px-2.5 sm:px-3 flex items-center justify-between gap-1.5 shrink-0 overflow-x-auto">
+                    <!-- Active File & VM Status -->
+                    <div class="flex items-center gap-1.5 shrink-0">
                         <span class="flex items-center gap-1 text-xs font-mono-code text-amber-400 font-semibold">
-                            <i data-lucide="file-code" class="w-3.5 h-3.5"></i>
-                            <span class="hidden sm:inline">startup.lua</span>
+                            <i data-lucide="file-code" class="w-3.5 h-3.5 shrink-0"></i>
+                            <span id="active-filename-label" class="truncate max-w-[95px] sm:max-w-[140px]">tunnel3x3.lua</span>
+                        </span>
+                        <span id="save-status-pill" class="hidden sm:inline-block text-[9px] font-mono-code px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            SAVED
                         </span>
                         <span id="vm-status-badge" class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
                             IDLE
                         </span>
                     </div>
 
-                    <!-- Preset Scripts Dropdown -->
-                    <div class="flex items-center gap-1.5 min-w-0 flex-1 sm:flex-initial justify-end">
-                        <span class="text-[11px] text-slate-400 hidden sm:inline shrink-0">Preset:</span>
-                        <select id="script-preset" onchange="Editor.loadPreset(this.value)" class="bg-[#1d2331] text-amber-300 border border-slate-700 rounded-md px-2 py-1 text-xs font-medium focus:outline-none focus:border-amber-500 cursor-pointer truncate max-w-[220px] sm:max-w-xs">
-                            <option value="tunnel3x3">1. 3x3 Tunnel Bore (Branch Miner)</option>
-                            <option value="quarry4x4">2. Quarry Excavator (4x4 Layer)</option>
-                            <option value="tower">3. Watchtower / Wall Builder</option>
-                            <option value="veinminer">4. Recursive Ore Vein Miner</option>
-                            <option value="treechopper">5. Tree Chopper &amp; Replanter</option>
+                    <!-- Unified File Selector Dropdown + File Management Actions -->
+                    <div class="flex items-center gap-1 min-w-0 shrink-0">
+                        <select id="script-preset" onchange="Editor.selectFile(this.value)" class="bg-[#1d2331] text-amber-300 border border-slate-700 rounded-lg px-2 py-1 text-xs font-medium focus:outline-none focus:border-amber-500 cursor-pointer truncate max-w-[145px] sm:max-w-[210px]">
                         </select>
+
+                        <!-- New File Button -->
+                        <button onclick="Editor.openNewFileModal()" class="p-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 transition" title="Create New Lua File">
+                            <i data-lucide="file-plus-2" class="w-3.5 h-3.5"></i>
+                        </button>
+
+                        <!-- Save Locally Button -->
+                        <button onclick="Editor.saveCurrentFile(true)" class="p-1.5 rounded-lg bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 transition" title="Save to Local Storage">
+                            <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                        </button>
+
+                        <!-- Download .lua File Button -->
+                        <button onclick="Editor.downloadCurrentFile()" class="p-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition" title="Download .lua File">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                        </button>
+
+                        <!-- Upload / Import .lua File Button -->
+                        <button onclick="document.getElementById('lua-file-upload').click()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Import .lua File from Device">
+                            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <input id="lua-file-upload" type="file" accept=".lua,.txt" class="hidden" onchange="Editor.importFileFromDisk(this)">
+
+                        <!-- Delete Custom File Button (Only enabled for user-created files) -->
+                        <button id="btn-delete-file" onclick="Editor.openDeleteModal()" class="hidden p-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition" title="Delete Custom File">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -463,6 +487,72 @@
                         </span>
                         <span id="hud-fuel-limit-noop" class="text-amber-400 font-semibold"></span>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW / DUPLICATE LUA FILE MODAL -->
+    <div id="new-file-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-[#131722] border border-slate-700 rounded-2xl max-w-md w-full flex flex-col shadow-2xl overflow-hidden">
+            <div class="px-4 py-3 bg-[#181d2b] border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="file-plus-2" class="w-4 h-4 text-emerald-400"></i>
+                    <h2 class="font-bold text-sm text-white">Create New Lua Script</h2>
+                </div>
+                <button onclick="Editor.closeNewFileModal()" class="text-slate-400 hover:text-white p-1">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="p-4 space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-300 font-medium mb-1">File Name (.lua):</label>
+                    <input id="new-file-name-input" type="text" placeholder="e.g. miner_v2.lua"
+                        onkeydown="if(event.key==='Enter') Editor.confirmCreateNewFile()"
+                        class="w-full bg-[#0d1017] border border-slate-700 focus:border-amber-400 rounded-lg px-3 py-2 text-white font-mono-code focus:outline-none">
+                    <p id="new-file-error" class="hidden text-rose-400 text-[11px] mt-1"></p>
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-medium mb-1">Initial Template:</label>
+                    <select id="new-file-template" class="w-full bg-[#0d1017] border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:outline-none">
+                        <option value="starter">Blank Starter Template</option>
+                        <option value="duplicate">Clone Current Editor Code</option>
+                    </select>
+                </div>
+                <div class="pt-2 flex items-center justify-end gap-2">
+                    <button onclick="Editor.closeNewFileModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium">
+                        Cancel
+                    </button>
+                    <button onclick="Editor.confirmCreateNewFile()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold flex items-center gap-1">
+                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                        <span>Create &amp; Save</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DELETE FILE CONFIRMATION MODAL -->
+    <div id="delete-file-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-[#131722] border border-slate-700 rounded-2xl max-w-sm w-full flex flex-col shadow-2xl overflow-hidden">
+            <div class="px-4 py-3 bg-[#181d2b] border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="trash-2" class="w-4 h-4 text-rose-400"></i>
+                    <h2 class="font-bold text-sm text-white">Delete Local File</h2>
+                </div>
+                <button onclick="Editor.closeDeleteModal()" class="text-slate-400 hover:text-white p-1">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="p-4 space-y-3 text-xs text-slate-300">
+                <p>Are you sure you want to delete <strong id="delete-file-name" class="text-amber-300 font-mono-code"></strong> from your browser's local storage?</p>
+                <div class="pt-2 flex items-center justify-end gap-2">
+                    <button onclick="Editor.closeDeleteModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium">
+                        Cancel
+                    </button>
+                    <button onclick="Editor.confirmDeleteFile()" class="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-semibold">
+                        Delete File
+                    </button>
                 </div>
             </div>
         </div>
@@ -2030,9 +2120,15 @@
 
             runScript(customCode = null) {
                 this.stopScript();
+                if (customCode === null && typeof Editor !== 'undefined') {
+                    Editor.saveCurrentFile(false);
+                }
                 const code = customCode !== null ? customCode : document.getElementById('code-editor').value;
                 if (customCode === null) {
-                    Terminal.println("> Running startup.lua...", "#38bdf8");
+                    const activeName = (typeof Editor !== 'undefined' && Editor.getActiveDisplayFileName)
+                        ? Editor.getActiveDisplayFileName()
+                        : 'startup.lua';
+                    Terminal.println(`> Running ${activeName}...`, "#38bdf8");
                 }
 
                 try {
@@ -2142,8 +2238,16 @@
         };
 
         /***********************************************************************
-         * 7. CODE EDITOR & 5 PRESET CC:TWEAKED SCRIPTS
+         * 7. CODE EDITOR, LOCAL STORAGE FILE SYSTEM & 5 PRESET SCRIPTS
          ***********************************************************************/
+        const PRESET_META = {
+            tunnel3x3:   { title: "1. 3x3 Tunnel Bore (Branch Miner)", filename: "tunnel3x3.lua" },
+            quarry4x4:   { title: "2. Quarry Excavator (4x4 Layer)",   filename: "quarry4x4.lua" },
+            tower:       { title: "3. Watchtower / Wall Builder",      filename: "tower.lua" },
+            veinminer:   { title: "4. Recursive Ore Vein Miner",       filename: "veinminer.lua" },
+            treechopper: { title: "5. Tree Chopper & Replanter",       filename: "treechopper.lua" }
+        };
+
         const PRESET_SCRIPTS = {
             tunnel3x3: `-- 1. 3x3 Tunnel Bore (Branch Miner)
 -- Excavates a 3-wide, 3-high tunnel forward for N steps
@@ -2370,20 +2474,33 @@ else
 end`
         };
 
+        const STORAGE_KEY_FILES = 'cc_tweaked_studio_user_files_v1';
+        const STORAGE_KEY_ACTIVE = 'cc_tweaked_studio_active_file_v1';
+
         const Editor = {
             textarea: null,
             lineNums: null,
+            userFiles: {}, // { "my_script.lua": "-- lua code..." }
+            currentKey: 'preset:tunnel3x3', // 'preset:...' or 'user:filename.lua'
+            saveTimeout: null,
 
             init() {
                 this.textarea = document.getElementById('code-editor');
                 this.lineNums = document.getElementById('line-numbers');
 
-                this.textarea.addEventListener('input', () => this.updateLineNumbers());
+                // Load saved user files from localStorage
+                this.loadFromLocalStorage();
+
+                this.textarea.addEventListener('input', () => {
+                    this.updateLineNumbers();
+                    this.scheduleAutoSave();
+                });
+
                 this.textarea.addEventListener('scroll', () => {
                     this.lineNums.scrollTop = this.textarea.scrollTop;
                 });
 
-                // Support Tab key indentation
+                // Support Tab key indentation and Ctrl+S / Cmd+S shortcut
                 this.textarea.addEventListener('keydown', (e) => {
                     if (e.key === 'Tab') {
                         e.preventDefault();
@@ -2392,10 +2509,354 @@ end`
                         this.textarea.value = this.textarea.value.substring(0, start) + "  " + this.textarea.value.substring(end);
                         this.textarea.selectionStart = this.textarea.selectionEnd = start + 2;
                         this.updateLineNumbers();
+                        this.scheduleAutoSave();
+                    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                        e.preventDefault();
+                        this.saveCurrentFile(true);
                     }
                 });
 
-                this.loadPreset('tunnel3x3');
+                this.renderDropdown();
+
+                // Restore last active file or default to tunnel3x3
+                const savedActive = localStorage.getItem(STORAGE_KEY_ACTIVE);
+                if (savedActive && (savedActive.startsWith('preset:') || (savedActive.startsWith('user:') && this.userFiles[savedActive.slice(5)] !== undefined))) {
+                    this.selectFile(savedActive);
+                } else {
+                    this.selectFile('preset:tunnel3x3');
+                }
+            },
+
+            loadFromLocalStorage() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY_FILES);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (parsed && typeof parsed === 'object') {
+                            this.userFiles = parsed;
+                        }
+                    }
+                } catch (err) {
+                    this.userFiles = {};
+                }
+            },
+
+            persistToLocalStorage() {
+                try {
+                    localStorage.setItem(STORAGE_KEY_FILES, JSON.stringify(this.userFiles));
+                    localStorage.setItem(STORAGE_KEY_ACTIVE, this.currentKey);
+                } catch (err) {
+                    Terminal.println("[STORAGE WARNING] Could not write to localStorage.", "#f87171");
+                }
+            },
+
+            renderDropdown() {
+                const select = document.getElementById('script-preset');
+                if (!select) return;
+                select.innerHTML = '';
+
+                // Group 1: User Local Storage Files (if any)
+                const userNames = Object.keys(this.userFiles).sort();
+                if (userNames.length > 0) {
+                    const userGroup = document.createElement('optgroup');
+                    userGroup.label = '💾 Saved Local Files';
+                    userGroup.className = 'bg-slate-950 text-emerald-400';
+                    userNames.forEach(fname => {
+                        const opt = document.createElement('option');
+                        opt.value = 'user:' + fname;
+                        opt.textContent = '📄 ' + fname;
+                        opt.className = 'bg-slate-900 text-emerald-300';
+                        userGroup.appendChild(opt);
+                    });
+                    select.appendChild(userGroup);
+                }
+
+                // Group 2: Built-In Presets
+                const presetGroup = document.createElement('optgroup');
+                presetGroup.label = '📦 Built-in Turtle Presets';
+                presetGroup.className = 'bg-slate-950 text-amber-400';
+                Object.keys(PRESET_META).forEach(k => {
+                    const opt = document.createElement('option');
+                    opt.value = 'preset:' + k;
+                    opt.textContent = PRESET_META[k].title;
+                    opt.className = 'bg-slate-900 text-amber-200';
+                    presetGroup.appendChild(opt);
+                });
+                select.appendChild(presetGroup);
+
+                // Action Option: + Create New File...
+                const actionOpt = document.createElement('option');
+                actionOpt.value = '__create_new__';
+                actionOpt.textContent = '➕ Create New Lua File...';
+                actionOpt.className = 'bg-emerald-950 text-emerald-300 font-bold';
+                select.appendChild(actionOpt);
+
+                select.value = this.currentKey;
+            },
+
+            getActiveDisplayFileName() {
+                if (this.currentKey.startsWith('user:')) {
+                    return this.currentKey.slice(5);
+                }
+                const pKey = this.currentKey.replace('preset:', '');
+                return PRESET_META[pKey]?.filename || 'startup.lua';
+            },
+
+            updateToolbarState() {
+                const fname = this.getActiveDisplayFileName();
+                const labelEl = document.getElementById('active-filename-label');
+                if (labelEl) labelEl.textContent = fname;
+
+                const delBtn = document.getElementById('btn-delete-file');
+                if (delBtn) {
+                    if (this.currentKey.startsWith('user:')) {
+                        delBtn.classList.remove('hidden');
+                    } else {
+                        delBtn.classList.add('hidden');
+                    }
+                }
+
+                const select = document.getElementById('script-preset');
+                if (select && select.value !== this.currentKey) {
+                    select.value = this.currentKey;
+                }
+            },
+
+            setSaveBadge(status) {
+                const pill = document.getElementById('save-status-pill');
+                if (!pill) return;
+                if (status === 'saving') {
+                    pill.textContent = 'MODIFIED';
+                    pill.className = 'hidden sm:inline-block text-[9px] font-mono-code px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30';
+                } else if (status === 'saved') {
+                    pill.textContent = this.currentKey.startsWith('user:') ? 'LOCAL SAVED' : 'PRESET';
+                    pill.className = 'hidden sm:inline-block text-[9px] font-mono-code px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+                }
+            },
+
+            scheduleAutoSave() {
+                this.setSaveBadge('saving');
+                clearTimeout(this.saveTimeout);
+                this.saveTimeout = setTimeout(() => {
+                    if (this.currentKey.startsWith('user:')) {
+                        const fname = this.currentKey.slice(5);
+                        this.userFiles[fname] = this.textarea.value;
+                        this.persistToLocalStorage();
+                        this.setSaveBadge('saved');
+                    }
+                }, 400);
+            },
+
+            selectFile(value) {
+                if (value === '__create_new__') {
+                    const select = document.getElementById('script-preset');
+                    if (select) select.value = this.currentKey;
+                    this.openNewFileModal();
+                    return;
+                }
+
+                // Auto-save outgoing user file before switching
+                if (this.currentKey && this.currentKey.startsWith('user:')) {
+                    const prevName = this.currentKey.slice(5);
+                    if (this.userFiles[prevName] !== undefined) {
+                        this.userFiles[prevName] = this.textarea.value;
+                    }
+                }
+
+                // Normalize legacy preset key calls
+                if (!value.startsWith('preset:') && !value.startsWith('user:')) {
+                    value = 'preset:' + value;
+                }
+
+                this.currentKey = value;
+                this.persistToLocalStorage();
+
+                if (value.startsWith('user:')) {
+                    const fname = value.slice(5);
+                    this.textarea.value = this.userFiles[fname] ?? '';
+                } else {
+                    const pKey = value.replace('preset:', '');
+                    this.textarea.value = PRESET_SCRIPTS[pKey] || '';
+
+                    // Automatically switch to Tree Farm world if user selects Tree Chopper
+                    if (pKey === 'treechopper' && World.currentPreset !== 'trees') {
+                        const dSel = document.getElementById('world-preset-desktop');
+                        const mSel = document.getElementById('world-preset-mobile');
+                        if (dSel) dSel.value = 'trees';
+                        if (mSel) mSel.value = 'trees';
+                        World.loadPreset('trees');
+                    }
+                }
+
+                this.updateLineNumbers();
+                this.updateToolbarState();
+                this.setSaveBadge('saved');
+            },
+
+            // Backwards compatibility alias
+            loadPreset(key) {
+                this.selectFile(key);
+            },
+
+            sanitizeFileName(rawName) {
+                let name = String(rawName || '').trim().replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+                if (!name) return '';
+                if (!name.toLowerCase().endsWith('.lua')) {
+                    name += '.lua';
+                }
+                return name;
+            },
+
+            openNewFileModal(defaultTemplate = 'starter', suggestedName = '') {
+                const modal = document.getElementById('new-file-modal');
+                const input = document.getElementById('new-file-name-input');
+                const tmpl = document.getElementById('new-file-template');
+                const err = document.getElementById('new-file-error');
+
+                if (err) err.classList.add('hidden');
+                if (tmpl) tmpl.value = defaultTemplate;
+
+                const nextNum = Object.keys(this.userFiles).length + 1;
+                if (input) {
+                    input.value = suggestedName || `program_${nextNum}.lua`;
+                }
+
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    setTimeout(() => {
+                        if (input) {
+                            input.focus();
+                            input.select();
+                        }
+                    }, 50);
+                }
+            },
+
+            closeNewFileModal() {
+                const modal = document.getElementById('new-file-modal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            },
+
+            confirmCreateNewFile() {
+                const input = document.getElementById('new-file-name-input');
+                const tmpl = document.getElementById('new-file-template');
+                const err = document.getElementById('new-file-error');
+
+                const fname = this.sanitizeFileName(input ? input.value : '');
+                if (!fname || fname === '.lua') {
+                    if (err) {
+                        err.textContent = 'Please enter a valid file name.';
+                        err.classList.remove('hidden');
+                    }
+                    return;
+                }
+
+                let initialCode = '';
+                if (tmpl && tmpl.value === 'duplicate') {
+                    initialCode = this.textarea.value;
+                } else {
+                    initialCode = `-- ${fname}\n-- Custom CC: Tweaked Turtle Program\n\nprint("Running ${fname}...")\n\nfor i = 1, 4 do\n  if turtle.detect() then\n    turtle.dig()\n  end\n  turtle.forward()\nend\n\nprint("Done! Fuel remaining: " .. turtle.getFuelLevel())\n`;
+                }
+
+                this.userFiles[fname] = initialCode;
+                this.currentKey = 'user:' + fname;
+                this.persistToLocalStorage();
+                this.renderDropdown();
+                this.selectFile(this.currentKey);
+                this.closeNewFileModal();
+
+                Terminal.println(`[Saved] Created local file '${fname}'`, "#4ade80");
+            },
+
+            saveCurrentFile(notify = true) {
+                if (this.currentKey.startsWith('user:')) {
+                    const fname = this.currentKey.slice(5);
+                    this.userFiles[fname] = this.textarea.value;
+                    this.persistToLocalStorage();
+                    this.setSaveBadge('saved');
+                    if (notify) {
+                        Terminal.println(`[Saved] '${fname}' saved to local storage.`, "#4ade80");
+                    }
+                } else {
+                    // Current file is a built-in preset -> prompt user to save as a custom local file copy
+                    const baseName = this.getActiveDisplayFileName().replace('.lua', '_custom.lua');
+                    this.openNewFileModal('duplicate', baseName);
+                }
+            },
+
+            downloadCurrentFile() {
+                const fname = this.getActiveDisplayFileName();
+                const content = this.textarea.value;
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fname;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+                Terminal.println(`[Download] Exported '${fname}' (${content.length} bytes)`, "#fbbf24");
+            },
+
+            importFileFromDisk(inputEl) {
+                const file = inputEl?.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const content = String(e.target?.result || '');
+                    const fname = this.sanitizeFileName(file.name);
+                    this.userFiles[fname] = content;
+                    this.currentKey = 'user:' + fname;
+                    this.persistToLocalStorage();
+                    this.renderDropdown();
+                    this.selectFile(this.currentKey);
+                    Terminal.println(`[Imported] Loaded '${fname}' into local storage.`, "#38bdf8");
+                };
+                reader.readAsText(file);
+                inputEl.value = '';
+            },
+
+            openDeleteModal() {
+                if (!this.currentKey.startsWith('user:')) return;
+                const fname = this.currentKey.slice(5);
+                const label = document.getElementById('delete-file-name');
+                if (label) label.textContent = fname;
+                const modal = document.getElementById('delete-file-modal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            },
+
+            closeDeleteModal() {
+                const modal = document.getElementById('delete-file-modal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            },
+
+            confirmDeleteFile() {
+                if (!this.currentKey.startsWith('user:')) return;
+                const fname = this.currentKey.slice(5);
+                delete this.userFiles[fname];
+
+                const remainingUser = Object.keys(this.userFiles);
+                const nextKey = remainingUser.length > 0 ? ('user:' + remainingUser[0]) : 'preset:tunnel3x3';
+
+                this.currentKey = nextKey;
+                this.persistToLocalStorage();
+                this.renderDropdown();
+                this.selectFile(nextKey);
+                this.closeDeleteModal();
+                Terminal.println(`[Deleted] Removed '${fname}' from local storage.`, "#f87171");
             },
 
             updateLineNumbers() {
@@ -2405,21 +2866,6 @@ end`
                     html += i + '<br>';
                 }
                 this.lineNums.innerHTML = html;
-            },
-
-            loadPreset(key) {
-                if (!PRESET_SCRIPTS[key]) return;
-                this.textarea.value = PRESET_SCRIPTS[key];
-                this.updateLineNumbers();
-
-                // Automatically switch to Tree Farm world if user selects Tree Chopper
-                if (key === 'treechopper' && World.currentPreset !== 'trees') {
-                    const dSel = document.getElementById('world-preset-desktop');
-                    const mSel = document.getElementById('world-preset-mobile');
-                    if (dSel) dSel.value = 'trees';
-                    if (mSel) mSel.value = 'trees';
-                    World.loadPreset('trees');
-                }
             }
         };
 
