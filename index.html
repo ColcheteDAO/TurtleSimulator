@@ -393,19 +393,24 @@
                     </div>
 
                     <!-- SUBPANEL B: 4x4 TURTLE INVENTORY + MOBILE MANUAL TOUCH CONTROLLER -->
-                    <div id="subpanel-inv" class="w-full lg:w-64 bg-[#10131c] p-2.5 flex flex-col justify-between gap-2 overflow-y-auto shrink-0">
+                    <div id="subpanel-inv" class="w-full lg:w-72 bg-[#10131c] p-2.5 flex flex-col justify-between gap-2 overflow-y-auto shrink-0">
                         <div class="flex flex-col sm:flex-row lg:flex-col gap-3 items-center sm:items-start lg:items-stretch">
                             <!-- 4x4 Inventory Grid -->
-                            <div class="w-full max-w-[230px] mx-auto">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">16-Slot Inventory</span>
-                                    <span id="selected-slot-label" class="text-[11px] font-mono-code text-amber-400">Slot #1</span>
+                            <div class="w-full max-w-[240px] mx-auto">
+                                <div class="flex items-center justify-between mb-1.5 gap-1">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Inventory</span>
+                                        <span id="selected-slot-label" class="text-[11px] font-mono-code font-bold text-amber-400">Slot #1</span>
+                                    </div>
+                                    <button onclick="TurtleState.openInventoryEditorModal()" class="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] font-semibold transition flex items-center gap-1" title="Open Visual Item Picker & Slot Editor">
+                                        <span>+ Edit / Add</span>
+                                    </button>
                                 </div>
                                 <div id="inventory-grid" class="grid grid-cols-4 gap-1.5"></div>
                             </div>
 
                             <!-- Mobile Touch D-Pad Controller -->
-                            <div class="w-full max-w-[230px] mx-auto lg:hidden bg-[#161b28] p-2.5 rounded-xl border border-slate-800">
+                            <div class="w-full max-w-[240px] mx-auto lg:hidden bg-[#161b28] p-2.5 rounded-xl border border-slate-800">
                                 <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2 text-center">Manual Turtle Touch Pad</div>
                                 <div class="grid grid-cols-3 gap-1.5">
                                     <button onclick="Simulator.manualAction('up')" class="py-2 rounded-lg bg-slate-800 active:bg-slate-700 text-sky-300 text-xs font-mono-code font-semibold">UP</button>
@@ -423,17 +428,33 @@
                             </div>
                         </div>
 
-                        <!-- Selected Slot Inspector / Item Spawner -->
+                        <!-- Compact Inline Slot Item Editor -->
                         <div class="pt-2 border-t border-slate-800/90 flex flex-col gap-1.5 max-w-[260px] lg:max-w-none mx-auto w-full">
-                            <div class="flex items-center justify-between text-[11px]">
+                            <div class="flex items-center justify-between text-[11px] gap-1">
                                 <span id="slot-item-name" class="text-slate-300 font-mono-code truncate">minecraft:cobblestone</span>
-                                <button onclick="TurtleState.clearSelectedSlot()" class="text-rose-400 hover:text-rose-300 text-[10px]">Empty Slot</button>
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <button onclick="TurtleState.refuelFromSelectedSlot()" class="text-amber-400 hover:text-amber-300 text-[10px] font-semibold" title="Refuel Turtle from this slot">Refuel</button>
+                                    <span class="text-slate-700">|</span>
+                                    <button onclick="TurtleState.clearSelectedSlot()" class="text-rose-400 hover:text-rose-300 text-[10px]" title="Empty Selected Slot">Clear</button>
+                                </div>
                             </div>
+
+                            <!-- Item Selector + Custom Quantity Input -->
                             <div class="flex items-center gap-1">
-                                <select id="spawn-item-select" class="flex-1 bg-[#181d2a] border border-slate-700 rounded px-1.5 py-1 text-[11px] text-slate-200 focus:outline-none"></select>
-                                <button onclick="TurtleState.fillSelectedSlot()" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded text-[11px] font-semibold transition">
-                                    +16
+                                <select id="spawn-item-select" onchange="TurtleState.onQuickItemSelectChange(this.value)" class="flex-1 min-w-0 bg-[#181d2a] border border-slate-700 rounded px-1.5 py-1 text-[11px] text-slate-200 focus:outline-none focus:border-amber-500"></select>
+                                <input id="spawn-item-count" type="number" min="1" max="64" value="64" class="w-11 bg-[#181d2a] border border-slate-700 rounded px-1 py-1 text-[11px] text-center font-mono-code text-amber-300 focus:outline-none" title="Stack Count (1-64)">
+                                <button onclick="TurtleState.setSlotFromQuickBar()" class="px-2 py-1 bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 rounded text-[11px] font-semibold transition shrink-0" title="Set item & count in selected slot">
+                                    Set
                                 </button>
+                            </div>
+
+                            <!-- Quick Stack Adjustment & Kit Buttons -->
+                            <div class="grid grid-cols-5 gap-1 text-[10px] font-mono-code">
+                                <button onclick="TurtleState.adjustSelectedSlotCount(1, true)" class="py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition" title="Set count to 1">=1</button>
+                                <button onclick="TurtleState.adjustSelectedSlotCount(1, false)" class="py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700/80 transition" title="Add 1 item">+1</button>
+                                <button onclick="TurtleState.adjustSelectedSlotCount(16, false)" class="py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700/80 transition" title="Add 16 items">+16</button>
+                                <button onclick="TurtleState.adjustSelectedSlotCount(64, true)" class="py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-semibold transition" title="Fill slot to 64">64</button>
+                                <button onclick="TurtleState.openInventoryEditorModal()" class="py-1 rounded bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 font-semibold transition" title="Visual Grid & Custom ID">Grid</button>
                             </div>
                         </div>
                     </div>
@@ -441,6 +462,84 @@
             </div>
         </section>
     </main>
+
+    <!-- VISUAL INVENTORY ITEM PICKER & CUSTOM ID MODAL -->
+    <div id="inv-editor-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-3 sm:p-4">
+        <div class="bg-[#131722] border border-slate-700 rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="px-4 py-3 bg-[#181d2b] border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <h2 class="font-bold text-sm text-white">Turtle Inventory Item Spawner</h2>
+                    <span id="modal-slot-badge" class="text-xs font-mono-code px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold">Slot #1</span>
+                </div>
+                <button onclick="TurtleState.closeInventoryEditorModal()" class="text-slate-400 hover:text-white px-2 text-sm">✕</button>
+            </div>
+
+            <div class="p-4 overflow-y-auto space-y-3.5 text-xs">
+                <!-- Slot Selector Strip (1-16) -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-slate-400 font-medium text-[11px]">Target Inventory Slot (Tap to switch):</span>
+                        <span id="modal-current-slot-info" class="font-mono-code text-[11px] text-amber-300">Empty</span>
+                    </div>
+                    <div id="modal-slot-strip" class="grid grid-cols-8 gap-1"></div>
+                </div>
+
+                <!-- Visual 16x16 Block & Item Grid -->
+                <div>
+                    <label class="block text-slate-300 font-medium mb-1.5 text-[11px]">1. Tap a Minecraft Block / Fuel Item:</label>
+                    <div id="modal-item-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-1.5 max-h-48 overflow-y-auto pr-1"></div>
+                </div>
+
+                <!-- Custom Item ID & Stack Count -->
+                <div class="bg-[#0d1017] border border-slate-800 rounded-xl p-3 space-y-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div class="sm:col-span-2">
+                            <label class="block text-slate-400 text-[11px] mb-1">Item ID (or enter custom mod ID):</label>
+                            <input id="modal-custom-name" type="text" placeholder="e.g. minecraft:cobblestone"
+                                class="w-full bg-[#161b28] border border-slate-700 focus:border-amber-400 rounded-lg px-2.5 py-1.5 text-white font-mono-code text-xs focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 text-[11px] mb-1">Stack Count (1–64):</label>
+                            <input id="modal-custom-count" type="number" min="1" max="64" value="64"
+                                class="w-full bg-[#161b28] border border-slate-700 focus:border-amber-400 rounded-lg px-2.5 py-1.5 text-amber-300 font-mono-code text-xs font-bold text-center focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Quick Count Presets -->
+                    <div class="flex flex-wrap items-center justify-between gap-1.5 pt-1">
+                        <div class="flex items-center gap-1">
+                            <span class="text-[10px] text-slate-500 mr-1">Count:</span>
+                            <button onclick="TurtleState.setModalCount(1)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono-code text-[11px]">1</button>
+                            <button onclick="TurtleState.setModalCount(16)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono-code text-[11px]">16</button>
+                            <button onclick="TurtleState.setModalCount(32)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono-code text-[11px]">32</button>
+                            <button onclick="TurtleState.setModalCount(64)" class="px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-mono-code text-[11px] font-semibold">64 (Max)</button>
+                        </div>
+                        <button onclick="TurtleState.applyModalItemToSlot()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow transition">
+                            Set in Slot
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bulk Inventory Actions -->
+                <div class="pt-1 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="TurtleState.loadStarterKit()" class="px-2.5 py-1.5 rounded-lg bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 font-medium text-[11px] transition">
+                            Fill Starter Kit
+                        </button>
+                        <button onclick="TurtleState.clearSelectedSlot()" class="px-2.5 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 font-medium text-[11px] transition">
+                            Clear Slot
+                        </button>
+                        <button onclick="TurtleState.clearAllInventory()" class="px-2.5 py-1.5 rounded-lg bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-800/50 font-medium text-[11px] transition">
+                            Clear All 16
+                        </button>
+                    </div>
+                    <button onclick="TurtleState.closeInventoryEditorModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- API REFERENCE MODAL -->
     <div id="api-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
@@ -541,22 +640,34 @@
          ***********************************************************************/
         const BLOCK_DEFS = {
             0:  { id: 0,  name: 'minecraft:air',            label: 'Air',            solid: false },
-            1:  { id: 1,  name: 'minecraft:grass_block',    label: 'Grass Block',    solid: true, drop: 2,  fuel: 0 },
-            2:  { id: 2,  name: 'minecraft:dirt',           label: 'Dirt',           solid: true, drop: 2,  fuel: 0 },
-            3:  { id: 3,  name: 'minecraft:stone',          label: 'Stone',          solid: true, drop: 4,  fuel: 0 },
-            4:  { id: 4,  name: 'minecraft:cobblestone',    label: 'Cobblestone',    solid: true, drop: 4,  fuel: 0 },
-            5:  { id: 5,  name: 'minecraft:coal_ore',       label: 'Coal Ore',       solid: true, drop: 13, fuel: 80,  isOre: true },
-            6:  { id: 6,  name: 'minecraft:iron_ore',       label: 'Iron Ore',       solid: true, drop: 6,  fuel: 0,   isOre: true },
-            7:  { id: 7,  name: 'minecraft:diamond_ore',    label: 'Diamond Ore',    solid: true, drop: 7,  fuel: 0,   isOre: true },
-            8:  { id: 8,  name: 'minecraft:oak_log',        label: 'Oak Log',        solid: true, drop: 8,  fuel: 15 },
-            9:  { id: 9,  name: 'minecraft:oak_leaves',     label: 'Oak Leaves',     solid: true, drop: 14, fuel: 5,   transparent: true },
-            10: { id: 10, name: 'minecraft:glass',          label: 'Glass',          solid: true, drop: 10, fuel: 0,   transparent: true },
-            11: { id: 11, name: 'minecraft:chest',          label: 'Chest',          solid: true, drop: 11, fuel: 15 },
-            12: { id: 12, name: 'minecraft:bedrock',        label: 'Bedrock',        solid: true, unbreakable: true },
-            13: { id: 13, name: 'minecraft:coal',           label: 'Coal (Fuel)',    solid: true, drop: 13, fuel: 80 },
-            14: { id: 14, name: 'minecraft:oak_sapling',    label: 'Oak Sapling',    solid: true, drop: 14, fuel: 5,   transparent: true },
-            15: { id: 15, name: 'minecraft:oak_planks',     label: 'Oak Planks',     solid: true, drop: 15, fuel: 15 }
+            1:  { id: 1,  name: 'minecraft:grass_block',    label: 'Grass Block',    solid: true,  placeable: true, drop: 2,  fuel: 0 },
+            2:  { id: 2,  name: 'minecraft:dirt',           label: 'Dirt',           solid: true,  placeable: true, drop: 2,  fuel: 0 },
+            3:  { id: 3,  name: 'minecraft:stone',          label: 'Stone',          solid: true,  placeable: true, drop: 4,  fuel: 0 },
+            4:  { id: 4,  name: 'minecraft:cobblestone',    label: 'Cobblestone',    solid: true,  placeable: true, drop: 4,  fuel: 0 },
+            5:  { id: 5,  name: 'minecraft:coal_ore',       label: 'Coal Ore',       solid: true,  placeable: true, drop: 13, fuel: 80,   isOre: true },
+            6:  { id: 6,  name: 'minecraft:iron_ore',       label: 'Iron Ore',       solid: true,  placeable: true, drop: 6,  fuel: 0,    isOre: true },
+            7:  { id: 7,  name: 'minecraft:diamond_ore',    label: 'Diamond Ore',    solid: true,  placeable: true, drop: 7,  fuel: 0,    isOre: true },
+            8:  { id: 8,  name: 'minecraft:oak_log',        label: 'Oak Log',        solid: true,  placeable: true, drop: 8,  fuel: 15 },
+            9:  { id: 9,  name: 'minecraft:oak_leaves',     label: 'Oak Leaves',     solid: true,  placeable: true, drop: 14, fuel: 5,    transparent: true },
+            10: { id: 10, name: 'minecraft:glass',          label: 'Glass',          solid: true,  placeable: true, drop: 10, fuel: 0,    transparent: true },
+            11: { id: 11, name: 'minecraft:chest',          label: 'Chest',          solid: true,  placeable: true, drop: 11, fuel: 15 },
+            12: { id: 12, name: 'minecraft:bedrock',        label: 'Bedrock',        solid: true,  placeable: true, unbreakable: true },
+            13: { id: 13, name: 'minecraft:coal',           label: 'Coal (80 Fuel)', solid: true,  placeable: false, drop: 13, fuel: 80 },
+            14: { id: 14, name: 'minecraft:oak_sapling',    label: 'Oak Sapling',    solid: true,  placeable: true, drop: 14, fuel: 5,    transparent: true },
+            15: { id: 15, name: 'minecraft:oak_planks',     label: 'Oak Planks',     solid: true,  placeable: true, drop: 15, fuel: 15 },
+            16: { id: 16, name: 'minecraft:torch',          label: 'Torch',          solid: false, placeable: true, drop: 16, fuel: 0,    transparent: true },
+            17: { id: 17, name: 'minecraft:lava_bucket',    label: 'Lava Bucket (1000 Fuel)', solid: false, placeable: false, drop: 17, fuel: 1000 },
+            18: { id: 18, name: 'minecraft:charcoal',       label: 'Charcoal (80 Fuel)',      solid: false, placeable: false, drop: 18, fuel: 80 },
+            19: { id: 19, name: 'minecraft:redstone',       label: 'Redstone Dust',  solid: false, placeable: true, drop: 19, fuel: 0,    transparent: true }
         };
+
+        const NAME_TO_BLOCK_ID = {};
+        Object.values(BLOCK_DEFS).forEach(def => {
+            NAME_TO_BLOCK_ID[def.name] = def.id;
+            NAME_TO_BLOCK_ID[def.name.replace('minecraft:', '')] = def.id;
+        });
+        NAME_TO_BLOCK_ID['minecraft:sapling'] = 14;
+        NAME_TO_BLOCK_ID['sapling'] = 14;
 
         const TextureFactory = {
             materials: {},
@@ -706,6 +817,42 @@
                     ctx.fillRect(0, 11, 16, 1);
                     ctx.fillRect(0, 15, 16, 1);
                 });
+                const torchCanvas = this.createCanvas(ctx => {
+                    ctx.clearRect(0, 0, 16, 16);
+                    ctx.fillStyle = '#785127';
+                    ctx.fillRect(7, 6, 2, 8);
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.fillRect(6, 3, 4, 3);
+                    ctx.fillStyle = '#fef08a';
+                    ctx.fillRect(7, 4, 2, 2);
+                });
+                const lavaBucketCanvas = this.createCanvas(ctx => {
+                    ctx.clearRect(0, 0, 16, 16);
+                    ctx.fillStyle = '#64748b';
+                    ctx.fillRect(3, 5, 10, 8);
+                    ctx.fillRect(5, 13, 6, 2);
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillRect(4, 6, 2, 6);
+                    ctx.fillStyle = '#ea580c';
+                    ctx.fillRect(4, 4, 8, 3);
+                    ctx.fillStyle = '#facc15';
+                    ctx.fillRect(5, 4, 4, 2);
+                });
+                const charcoalCanvas = this.createCanvas(ctx => {
+                    this.fillNoise(ctx, '#29221e', 24, 18);
+                    ctx.fillStyle = '#473c35';
+                    ctx.fillRect(4, 5, 3, 3);
+                    ctx.fillRect(8, 9, 3, 2);
+                });
+                const redstoneCanvas = this.createCanvas(ctx => {
+                    ctx.clearRect(0, 0, 16, 16);
+                    ctx.fillStyle = '#dc2626';
+                    ctx.fillRect(5, 5, 6, 6);
+                    ctx.fillRect(4, 7, 8, 3);
+                    ctx.fillRect(6, 4, 4, 8);
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillRect(6, 6, 4, 4);
+                });
 
                 const makeMat = (canvas, opts = {}) => new THREE.MeshLambertMaterial({
                     map: this.canvasToTexture(canvas),
@@ -738,12 +885,17 @@
                 this.materials[13] = makeMat(coalCanvas);
                 this.materials[14] = makeMat(saplingCanvas, { transparent: true, opacity: 0.9 });
                 this.materials[15] = makeMat(planksCanvas);
+                this.materials[16] = makeMat(torchCanvas, { transparent: true, opacity: 0.95 });
+                this.materials[17] = makeMat(lavaBucketCanvas, { transparent: true, opacity: 0.95 });
+                this.materials[18] = makeMat(charcoalCanvas);
+                this.materials[19] = makeMat(redstoneCanvas, { transparent: true, opacity: 0.95 });
 
                 const iconMap = {
                     1: grassSideCanvas, 2: dirtCanvas, 3: stoneCanvas, 4: cobbleCanvas,
                     5: coalOreCanvas, 6: ironOreCanvas, 7: diamondOreCanvas, 8: logSideCanvas,
                     9: leavesCanvas, 10: glassCanvas, 11: chestFrontCanvas, 12: bedrockCanvas,
-                    13: coalCanvas, 14: saplingCanvas, 15: planksCanvas
+                    13: coalCanvas, 14: saplingCanvas, 15: planksCanvas,
+                    16: torchCanvas, 17: lavaBucketCanvas, 18: charcoalCanvas, 19: redstoneCanvas
                 };
                 Object.keys(iconMap).forEach(id => {
                     this.icons[id] = iconMap[id].toDataURL();
@@ -1307,7 +1459,7 @@
             fuelLimit: 20000,
             infiniteFuel: false,
             selectedSlot: 1,
-            inventory: Array.from({ length: 16 }, () => ({ id: 0, count: 0 })),
+            inventory: Array.from({ length: 16 }, () => ({ id: 0, count: 0, customName: null })),
 
             reset(x, y, z, dir) {
                 this.x = x;
@@ -1317,15 +1469,26 @@
                 this.fuel = 1000;
                 this.selectedSlot = 1;
 
-                this.inventory = Array.from({ length: 16 }, () => ({ id: 0, count: 0 }));
-                this.inventory[0] = { id: 4,  count: 64 };
-                this.inventory[1] = { id: 15, count: 64 };
-                this.inventory[2] = { id: 13, count: 16 };
-                this.inventory[3] = { id: 14, count: 8  };
-
+                this.loadStarterKit(false);
                 Viewport.syncTurtleTarget(true);
                 this.renderInventoryUI();
                 this.updateHUD();
+            },
+
+            loadStarterKit(notify = true) {
+                this.inventory = Array.from({ length: 16 }, () => ({ id: 0, count: 0, customName: null }));
+                this.inventory[0] = { id: 4,  count: 64, customName: null }; // Cobblestone
+                this.inventory[1] = { id: 15, count: 64, customName: null }; // Oak Planks
+                this.inventory[2] = { id: 13, count: 16, customName: null }; // Coal
+                this.inventory[3] = { id: 14, count: 8,  customName: null }; // Oak Sapling
+                this.renderInventoryUI();
+                if (notify) Terminal.println("[Inventory] Loaded starter kit into slots 1–4.", "#4ade80");
+            },
+
+            getSlotItemName(slotObj) {
+                if (!slotObj || slotObj.count <= 0 || (slotObj.id === 0 && !slotObj.customName)) return null;
+                if (slotObj.customName) return slotObj.customName;
+                return BLOCK_DEFS[slotObj.id]?.name || 'minecraft:unknown';
             },
 
             frontCoords(offsetY = 0, step = 1) {
@@ -1348,7 +1511,7 @@
                 for (let i = 0; i < 16; i++) {
                     const idx = (this.selectedSlot - 1 + i) % 16;
                     const slot = this.inventory[idx];
-                    if (slot.id === blockId && slot.count < 64) {
+                    if (slot.id === blockId && !slot.customName && slot.count < 64) {
                         const add = Math.min(64 - slot.count, amount);
                         slot.count += add;
                         amount -= add;
@@ -1361,8 +1524,9 @@
                 for (let i = 0; i < 16; i++) {
                     const idx = (this.selectedSlot - 1 + i) % 16;
                     const slot = this.inventory[idx];
-                    if (slot.id === 0 || slot.count === 0) {
+                    if ((slot.id === 0 && !slot.customName) || slot.count === 0) {
                         slot.id = blockId;
+                        slot.customName = null;
                         slot.count = Math.min(64, amount);
                         this.renderInventoryUI();
                         return true;
@@ -1415,8 +1579,12 @@
 
             place(offsetY = 0) {
                 const slot = this.inventory[this.selectedSlot - 1];
-                if (!slot || slot.id === 0 || slot.count <= 0) {
+                if (!slot || slot.count <= 0 || (slot.id === 0 && !slot.customName)) {
                     return [false, "No items to place"];
+                }
+                const def = BLOCK_DEFS[slot.id];
+                if (!def || def.placeable === false || slot.id === 0) {
+                    return [false, "Cannot place this item as a block"];
                 }
                 const target = this.frontCoords(offsetY, 1);
                 if (!World.inBounds(target.x, target.y, target.z)) {
@@ -1427,7 +1595,10 @@
                 }
                 World.setBlock(target.x, target.y, target.z, slot.id);
                 slot.count--;
-                if (slot.count <= 0) slot.id = 0;
+                if (slot.count <= 0) {
+                    slot.id = 0;
+                    slot.customName = null;
+                }
                 this.renderInventoryUI();
                 this.updateHUD();
                 return [true, null];
@@ -1465,7 +1636,7 @@
 
             refuel(count = 64) {
                 const slot = this.inventory[this.selectedSlot - 1];
-                if (!slot || slot.id === 0 || slot.count <= 0) return [false, "No items to combust"];
+                if (!slot || slot.count <= 0 || (slot.id === 0 && !slot.customName)) return [false, "No items to combust"];
                 const def = BLOCK_DEFS[slot.id];
                 if (!def || !def.fuel || def.fuel <= 0) return [false, "Items not combustible"];
                 if (count === 0) return [true, null];
@@ -1473,7 +1644,10 @@
                 const useCount = Math.min(slot.count, Math.max(1, Math.floor(count)));
                 this.fuel = Math.min(this.fuelLimit, this.fuel + useCount * def.fuel);
                 slot.count -= useCount;
-                if (slot.count <= 0) slot.id = 0;
+                if (slot.count <= 0) {
+                    slot.id = 0;
+                    slot.customName = null;
+                }
                 this.renderInventoryUI();
                 this.updateHUD();
                 return [true, null];
@@ -1484,23 +1658,31 @@
                 if (destIdx < 0 || destIdx >= 16) return false;
                 const src = this.inventory[this.selectedSlot - 1];
                 const dst = this.inventory[destIdx];
-                if (!src || src.id === 0 || src.count <= 0) return true;
+                if (!src || src.count <= 0 || (src.id === 0 && !src.customName)) return true;
                 if (destIdx === this.selectedSlot - 1) return true;
 
                 const moveAmt = Math.min(src.count, Math.max(1, Math.floor(count)));
-                if (dst.id === 0 || dst.count === 0) {
+                const sameItem = (dst.id === src.id && (dst.customName || null) === (src.customName || null));
+                if ((dst.id === 0 && !dst.customName) || dst.count === 0) {
                     dst.id = src.id;
+                    dst.customName = src.customName || null;
                     dst.count = moveAmt;
                     src.count -= moveAmt;
-                    if (src.count <= 0) src.id = 0;
+                    if (src.count <= 0) {
+                        src.id = 0;
+                        src.customName = null;
+                    }
                     this.renderInventoryUI();
                     return true;
-                } else if (dst.id === src.id && dst.count < 64) {
+                } else if (sameItem && dst.count < 64) {
                     const space = 64 - dst.count;
                     const actual = Math.min(space, moveAmt);
                     dst.count += actual;
                     src.count -= actual;
-                    if (src.count <= 0) src.id = 0;
+                    if (src.count <= 0) {
+                        src.id = 0;
+                        src.customName = null;
+                    }
                     this.renderInventoryUI();
                     return true;
                 }
@@ -1509,10 +1691,13 @@
 
             drop(count = 64) {
                 const slot = this.inventory[this.selectedSlot - 1];
-                if (!slot || slot.id === 0 || slot.count <= 0) return false;
+                if (!slot || slot.count <= 0 || (slot.id === 0 && !slot.customName)) return false;
                 const dropAmt = Math.min(slot.count, Math.max(1, Math.floor(count)));
                 slot.count -= dropAmt;
-                if (slot.count <= 0) slot.id = 0;
+                if (slot.count <= 0) {
+                    slot.id = 0;
+                    slot.customName = null;
+                }
                 this.renderInventoryUI();
                 return true;
             },
@@ -1525,13 +1710,22 @@
                 for (let i = 0; i < 16; i++) {
                     const slot = this.inventory[i];
                     const isSelected = (i + 1 === this.selectedSlot);
+                    const hasItem = slot.count > 0 && (slot.id !== 0 || !!slot.customName);
                     const btn = document.createElement('button');
                     btn.className = `relative h-10 rounded-lg bg-[#181d2c] border ${
                         isSelected ? 'slot-selected' : 'border-slate-800 hover:border-slate-600'
                     } flex items-center justify-center transition`;
+                    btn.title = hasItem
+                        ? `Slot #${i + 1}: ${this.getSlotItemName(slot)} (x${slot.count}) — Double-tap to edit`
+                        : `Slot #${i + 1}: Empty — Tap to select, Double-tap to add item`;
                     btn.onclick = () => {
                         this.selectedSlot = i + 1;
+                        this.syncQuickControlsWithSelectedSlot();
                         this.renderInventoryUI();
+                    };
+                    btn.ondblclick = () => {
+                        this.selectedSlot = i + 1;
+                        this.openInventoryEditorModal();
                     };
 
                     const numSpan = document.createElement('span');
@@ -1539,11 +1733,19 @@
                     numSpan.textContent = i + 1;
                     btn.appendChild(numSpan);
 
-                    if (slot.id !== 0 && slot.count > 0) {
-                        const img = document.createElement('img');
-                        img.src = TextureFactory.icons[slot.id];
-                        img.className = 'w-6 h-6 pixelated rounded-sm';
-                        btn.appendChild(img);
+                    if (hasItem) {
+                        if (slot.id !== 0 && TextureFactory.icons[slot.id]) {
+                            const img = document.createElement('img');
+                            img.src = TextureFactory.icons[slot.id];
+                            img.className = 'w-6 h-6 pixelated rounded-sm';
+                            btn.appendChild(img);
+                        } else {
+                            const badge = document.createElement('span');
+                            badge.className = 'px-1 py-0.5 rounded bg-purple-500/30 border border-purple-400/50 text-[8px] font-mono-code text-purple-200 uppercase';
+                            const shortId = (slot.customName || 'item').split(':').pop().slice(0, 4);
+                            badge.textContent = shortId;
+                            btn.appendChild(badge);
+                        }
 
                         const cnt = document.createElement('span');
                         cnt.className = 'absolute bottom-0 right-1 text-[10px] font-mono-code font-bold text-white drop-shadow';
@@ -1558,33 +1760,263 @@
                 if (selLabel) selLabel.textContent = `Slot #${this.selectedSlot}`;
                 const activeSlot = this.inventory[this.selectedSlot - 1];
                 const nameEl = document.getElementById('slot-item-name');
+                const hasActive = activeSlot && activeSlot.count > 0 && (activeSlot.id !== 0 || !!activeSlot.customName);
                 if (nameEl) {
-                    if (activeSlot && activeSlot.id !== 0 && activeSlot.count > 0) {
-                        nameEl.textContent = `${BLOCK_DEFS[activeSlot.id].name} (x${activeSlot.count})`;
+                    if (hasActive) {
+                        const itemName = this.getSlotItemName(activeSlot);
+                        nameEl.textContent = `${itemName} (x${activeSlot.count})`;
                         nameEl.className = 'text-amber-300 font-mono-code truncate';
                     } else {
                         nameEl.textContent = 'Empty Slot';
                         nameEl.className = 'text-slate-500 font-mono-code truncate';
                     }
                 }
+
+                this.renderModalSlotStrip();
+            },
+
+            syncQuickControlsWithSelectedSlot() {
+                const slot = this.inventory[this.selectedSlot - 1];
+                const selectEl = document.getElementById('spawn-item-select');
+                const countEl = document.getElementById('spawn-item-count');
+                if (slot && slot.count > 0 && slot.id !== 0) {
+                    if (selectEl) selectEl.value = String(slot.id);
+                    if (countEl) countEl.value = String(slot.count);
+                }
+            },
+
+            onQuickItemSelectChange(val) {
+                const countEl = document.getElementById('spawn-item-count');
+                if (countEl && (!countEl.value || parseInt(countEl.value, 10) <= 0)) {
+                    countEl.value = 64;
+                }
+            },
+
+            setSlotItem(slotIndex1Based, itemNameOrId, count = 64) {
+                const idx = Math.max(0, Math.min(15, Math.floor(slotIndex1Based) - 1));
+                const cleanCount = Math.max(1, Math.min(64, Math.floor(Number(count) || 1)));
+
+                let blockId = 0;
+                let customName = null;
+
+                if (typeof itemNameOrId === 'number' || /^\d+$/.test(String(itemNameOrId))) {
+                    const parsedId = parseInt(itemNameOrId, 10);
+                    if (BLOCK_DEFS[parsedId] && parsedId !== 0) {
+                        blockId = parsedId;
+                    }
+                } else {
+                    let raw = String(itemNameOrId || '').trim().toLowerCase();
+                    if (!raw) raw = 'minecraft:cobblestone';
+                    if (!raw.includes(':')) raw = 'minecraft:' + raw;
+                    if (NAME_TO_BLOCK_ID[raw]) {
+                        blockId = NAME_TO_BLOCK_ID[raw];
+                    } else {
+                        blockId = 0;
+                        customName = raw;
+                    }
+                }
+
+                this.inventory[idx] = {
+                    id: blockId,
+                    count: cleanCount,
+                    customName: customName
+                };
+                this.renderInventoryUI();
+            },
+
+            setSlotFromQuickBar() {
+                const selectEl = document.getElementById('spawn-item-select');
+                const countEl = document.getElementById('spawn-item-count');
+                const blockId = parseInt(selectEl?.value, 10) || 4;
+                const count = Math.max(1, Math.min(64, parseInt(countEl?.value, 10) || 64));
+                this.setSlotItem(this.selectedSlot, blockId, count);
+            },
+
+            adjustSelectedSlotCount(amount, isAbsolute = false) {
+                const slot = this.inventory[this.selectedSlot - 1];
+                const selectEl = document.getElementById('spawn-item-select');
+                const fallbackId = parseInt(selectEl?.value, 10) || 4;
+                const hasItem = slot && slot.count > 0 && (slot.id !== 0 || !!slot.customName);
+
+                if (!hasItem) {
+                    const initialCount = isAbsolute ? amount : Math.min(64, amount);
+                    this.setSlotItem(this.selectedSlot, fallbackId, initialCount);
+                } else {
+                    if (isAbsolute) {
+                        slot.count = Math.max(1, Math.min(64, amount));
+                    } else {
+                        slot.count = Math.max(1, Math.min(64, slot.count + amount));
+                    }
+                    const countEl = document.getElementById('spawn-item-count');
+                    if (countEl) countEl.value = slot.count;
+                    this.renderInventoryUI();
+                }
+            },
+
+            refuelFromSelectedSlot() {
+                const [ok, err] = this.refuel(64);
+                if (ok) {
+                    Terminal.println(`[Refuel] Fuel is now ${this.fuel} / ${this.fuelLimit}`, "#4ade80");
+                } else {
+                    Terminal.println(`[Refuel] ${err}`, "#f87171");
+                }
             },
 
             clearSelectedSlot() {
-                this.inventory[this.selectedSlot - 1] = { id: 0, count: 0 };
+                this.inventory[this.selectedSlot - 1] = { id: 0, count: 0, customName: null };
                 this.renderInventoryUI();
             },
 
-            fillSelectedSlot() {
-                const selectEl = document.getElementById('spawn-item-select');
-                const blockId = parseInt(selectEl.value, 10) || 4;
-                const slot = this.inventory[this.selectedSlot - 1];
-                if (slot.id === blockId) {
-                    slot.count = Math.min(64, slot.count + 16);
-                } else {
-                    slot.id = blockId;
-                    slot.count = 16;
-                }
+            clearAllInventory() {
+                this.inventory = Array.from({ length: 16 }, () => ({ id: 0, count: 0, customName: null }));
                 this.renderInventoryUI();
+                Terminal.println("[Inventory] Cleared all 16 turtle slots.", "#f87171");
+            },
+
+            fillSelectedSlot() {
+                this.adjustSelectedSlotCount(16, false);
+            },
+
+            openInventoryEditorModal() {
+                const modal = document.getElementById('inv-editor-modal');
+                if (!modal) return;
+                this.renderModalItemGrid();
+                this.syncModalInputsWithSlot();
+                this.renderModalSlotStrip();
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            },
+
+            closeInventoryEditorModal() {
+                const modal = document.getElementById('inv-editor-modal');
+                if (!modal) return;
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            },
+
+            syncModalInputsWithSlot() {
+                const slot = this.inventory[this.selectedSlot - 1];
+                const badge = document.getElementById('modal-slot-badge');
+                const info = document.getElementById('modal-current-slot-info');
+                const nameInput = document.getElementById('modal-custom-name');
+                const countInput = document.getElementById('modal-custom-count');
+
+                if (badge) badge.textContent = `Slot #${this.selectedSlot}`;
+                const hasItem = slot && slot.count > 0 && (slot.id !== 0 || !!slot.customName);
+
+                if (hasItem) {
+                    const itemName = this.getSlotItemName(slot);
+                    if (info) info.textContent = `${itemName} (x${slot.count})`;
+                    if (nameInput) nameInput.value = itemName;
+                    if (countInput) countInput.value = slot.count;
+                } else {
+                    if (info) info.textContent = 'Empty Slot';
+                    const selectEl = document.getElementById('spawn-item-select');
+                    const defaultId = parseInt(selectEl?.value, 10) || 4;
+                    if (nameInput) nameInput.value = BLOCK_DEFS[defaultId]?.name || 'minecraft:cobblestone';
+                    if (countInput) countInput.value = 64;
+                }
+            },
+
+            renderModalSlotStrip() {
+                const strip = document.getElementById('modal-slot-strip');
+                if (!strip) return;
+                strip.innerHTML = '';
+
+                for (let i = 0; i < 16; i++) {
+                    const slot = this.inventory[i];
+                    const isSelected = (i + 1 === this.selectedSlot);
+                    const hasItem = slot.count > 0 && (slot.id !== 0 || !!slot.customName);
+                    const btn = document.createElement('button');
+                    btn.className = `relative h-8 rounded bg-[#181d2c] border ${
+                        isSelected ? 'border-amber-400 bg-amber-500/15' : 'border-slate-800 hover:border-slate-600'
+                    } flex items-center justify-center transition`;
+                    btn.onclick = () => {
+                        this.selectedSlot = i + 1;
+                        this.syncModalInputsWithSlot();
+                        this.renderInventoryUI();
+                    };
+
+                    const num = document.createElement('span');
+                    num.className = 'absolute top-0 left-1 text-[8px] font-mono-code text-slate-400';
+                    num.textContent = i + 1;
+                    btn.appendChild(num);
+
+                    if (hasItem && slot.id !== 0 && TextureFactory.icons[slot.id]) {
+                        const img = document.createElement('img');
+                        img.src = TextureFactory.icons[slot.id];
+                        img.className = 'w-4 h-4 pixelated';
+                        btn.appendChild(img);
+                    } else if (hasItem) {
+                        const dot = document.createElement('span');
+                        dot.className = 'w-2 h-2 rounded-full bg-purple-400';
+                        btn.appendChild(dot);
+                    }
+
+                    strip.appendChild(btn);
+                }
+
+                const badge = document.getElementById('modal-slot-badge');
+                const info = document.getElementById('modal-current-slot-info');
+                const cur = this.inventory[this.selectedSlot - 1];
+                if (badge) badge.textContent = `Slot #${this.selectedSlot}`;
+                if (info) {
+                    const hasCur = cur && cur.count > 0 && (cur.id !== 0 || !!cur.customName);
+                    info.textContent = hasCur ? `${this.getSlotItemName(cur)} (x${cur.count})` : 'Empty Slot';
+                }
+            },
+
+            renderModalItemGrid() {
+                const grid = document.getElementById('modal-item-grid');
+                if (!grid || grid.children.length > 0) return;
+
+                Object.values(BLOCK_DEFS).forEach(def => {
+                    if (def.id === 0) return;
+                    const btn = document.createElement('button');
+                    btn.className = 'flex items-center gap-2 p-1.5 rounded-lg bg-[#181d2c] hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 text-left transition group';
+                    btn.onclick = () => {
+                        const nameInput = document.getElementById('modal-custom-name');
+                        const countInput = document.getElementById('modal-custom-count');
+                        if (nameInput) nameInput.value = def.name;
+                        const cnt = Math.max(1, Math.min(64, parseInt(countInput?.value, 10) || 64));
+                        this.setSlotItem(this.selectedSlot, def.id, cnt);
+                        this.syncModalInputsWithSlot();
+                    };
+
+                    const img = document.createElement('img');
+                    img.src = TextureFactory.icons[def.id];
+                    img.className = 'w-6 h-6 pixelated rounded-sm shrink-0';
+                    btn.appendChild(img);
+
+                    const textWrap = document.createElement('div');
+                    textWrap.className = 'min-w-0 flex-1';
+                    const title = document.createElement('div');
+                    title.className = 'text-[11px] font-medium text-slate-200 group-hover:text-amber-300 truncate';
+                    title.textContent = def.label;
+                    const sub = document.createElement('div');
+                    sub.className = 'text-[9px] font-mono-code text-slate-500 truncate';
+                    sub.textContent = def.fuel > 0 ? `🔥 ${def.fuel} fuel` : def.name.replace('minecraft:', '');
+                    textWrap.appendChild(title);
+                    textWrap.appendChild(sub);
+                    btn.appendChild(textWrap);
+
+                    grid.appendChild(btn);
+                });
+            },
+
+            setModalCount(cnt) {
+                const countInput = document.getElementById('modal-custom-count');
+                if (countInput) countInput.value = cnt;
+                this.applyModalItemToSlot();
+            },
+
+            applyModalItemToSlot() {
+                const nameInput = document.getElementById('modal-custom-name');
+                const countInput = document.getElementById('modal-custom-count');
+                const rawName = (nameInput?.value || 'minecraft:cobblestone').trim();
+                const cnt = Math.max(1, Math.min(64, parseInt(countInput?.value, 10) || 64));
+                this.setSlotItem(this.selectedSlot, rawName, cnt);
+                this.syncModalInputsWithSlot();
             },
 
             updateHUD() {
@@ -1783,18 +2215,21 @@
                     case 'getItemCount': {
                         const s = arg1 ? Math.floor(Number(arg1)) : TurtleState.selectedSlot;
                         const slot = TurtleState.inventory[s - 1];
-                        return { val: (slot && slot.id !== 0) ? slot.count : 0 };
+                        const has = slot && slot.count > 0 && (slot.id !== 0 || !!slot.customName);
+                        return { val: has ? slot.count : 0 };
                     }
                     case 'getItemSpace': {
                         const s = arg1 ? Math.floor(Number(arg1)) : TurtleState.selectedSlot;
                         const slot = TurtleState.inventory[s - 1];
-                        return { val: (slot && slot.id !== 0) ? (64 - slot.count) : 64 };
+                        const has = slot && slot.count > 0 && (slot.id !== 0 || !!slot.customName);
+                        return { val: has ? (64 - slot.count) : 64 };
                     }
                     case 'getItemDetail': {
                         const s = arg1 ? Math.floor(Number(arg1)) : TurtleState.selectedSlot;
                         const slot = TurtleState.inventory[s - 1];
-                        if (!slot || slot.id === 0 || slot.count <= 0) return { ok: false };
-                        return { ok: true, name: BLOCK_DEFS[slot.id].name, count: slot.count };
+                        const has = slot && slot.count > 0 && (slot.id !== 0 || !!slot.customName);
+                        if (!has) return { ok: false };
+                        return { ok: true, name: TurtleState.getSlotItemName(slot), count: slot.count };
                     }
                     case 'transferTo':
                         return { ok: TurtleState.transferTo(arg1, arg2 ?? 64) };
@@ -3095,13 +3530,18 @@ end`
 
                 Object.values(BLOCK_DEFS).forEach(def => {
                     if (def.id === 0) return;
-                    const opt1 = document.createElement('option');
-                    opt1.value = def.id;
-                    opt1.textContent = `${def.label} (${def.name.replace('minecraft:', '')})`;
-                    if (def.id === 4) opt1.selected = true;
-                    brushSelect.appendChild(opt1);
 
-                    const opt2 = opt1.cloneNode(true);
+                    if (def.placeable !== false) {
+                        const opt1 = document.createElement('option');
+                        opt1.value = def.id;
+                        opt1.textContent = `${def.label} (${def.name.replace('minecraft:', '')})`;
+                        if (def.id === 4) opt1.selected = true;
+                        brushSelect.appendChild(opt1);
+                    }
+
+                    const opt2 = document.createElement('option');
+                    opt2.value = def.id;
+                    opt2.textContent = `${def.label} (${def.name.replace('minecraft:', '')})`;
                     if (def.id === 4) opt2.selected = true;
                     spawnSelect.appendChild(opt2);
                 });
